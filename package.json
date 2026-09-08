@@ -1,0 +1,11 @@
+{
+  "name": "vinh-long-trail",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vinh Long - Cham van hoa, noi hanh trinh: prototype web tinh (Trail / Studio / Cong quan ly / Cong van hanh).",
+  "scripts": {
+    "dev": "npx --yes serve . -l 5500",
+    "start": "npx --yes serve . -l 5500"
+  },
+  "license": "UNLICENSED"
+}
