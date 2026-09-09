@@ -47,6 +47,10 @@ function transformDestination(d) {
     contactStatus: (d.contact && d.contact.status) || 'missing',
     imagePath: (d.imageRef && d.imageRef.localPath) || null,
     imageRef: d.imageRef || null,
+    // Ảnh đầu (imageRef) luôn là ảnh đại diện; đây là các ảnh BỔ SUNG (nếu có) hiển thị dạng
+    // gallery trên trang chi tiết — cấu trúc sẵn sàng dùng dù dữ liệu hiện tại mỗi địa danh
+    // mới có tối đa 1 ảnh thật.
+    galleryImages: Array.isArray(d.gallery) ? d.gallery.map((g) => g && g.localPath).filter(Boolean) : [],
     sources: d.sources || [],
     notes: d.notes || [],
     recognized: !!(d.badge && d.badge.recognized),

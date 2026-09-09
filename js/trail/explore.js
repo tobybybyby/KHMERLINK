@@ -438,10 +438,21 @@ function highlightCard(container, id) {
   });
 }
 
+function popupSummary(text) {
+  if (!text) return '';
+  const trimmed = text.trim();
+  return trimmed.length > 90 ? `${trimmed.slice(0, 90)}…` : trimmed;
+}
+
 function buildPopupHtml(d) {
+  const priceText = d.priceDisplay ? `${escapeHtml(d.priceDisplay)}${d.priceStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giá</span>';
+  const hoursText = d.openingHours ? `${escapeHtml(d.openingHours)}${d.openingHoursStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giờ mở cửa</span>';
   return `
     <div class="popup-title">${escapeHtml(d.name)}</div>
     <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ⭐ ${d.rating.toFixed(1)}</div>
+    ${d.summary ? `<p class="text-sm" style="margin:4px 0;">${escapeHtml(popupSummary(d.summary))}</p>` : ''}
+    <div class="text-sm" style="margin:2px 0;">💰 ${priceText}</div>
+    <div class="text-sm" style="margin:2px 0 6px;">🕒 ${hoursText}</div>
     <div class="popup-actions">
       <button type="button" class="btn btn-primary btn-sm" data-action="view-detail">Xem chi tiết</button>
     </div>

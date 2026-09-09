@@ -12,11 +12,19 @@ Chùa Hang (KomPong Chray) · Chùa Ông Mẹt · Phước Minh Cung · Chùa N�
 
 14 địa danh còn lại (7 trùng với Phase 1 + 7 legacy khác + 2 hộ demo) giữ toạ độ **ước lượng** từ Phase 1 (đánh dấu rõ `estimated`, chưa khảo sát thực địa) để bản đồ vẫn trình diễn được các điểm nổi bật.
 
-## 2. Địa danh thiếu ảnh thật
+## 2. Ảnh địa danh (cập nhật ở Phase tích hợp ảnh — sau Phase 2)
 
-Toàn bộ 37 địa danh hiện dùng **ảnh placeholder tự sinh** (SVG theo danh mục) theo đúng yêu cầu "chưa tìm/tải ảnh trong phase này". Trong đó:
-- 30 địa danh có **link ảnh/trang nguồn tham khảo** do người dùng cung cấp — lưu ở trường `imageRef.url`, trạng thái `external-not-downloaded` (chưa tải về, chưa xác nhận quyền dùng lại). Xem link trong mục "Nguồn dữ liệu" ở trang chi tiết từng địa danh.
-- 7 địa danh legacy (Miếu Công Thần, Vương quốc gạch gốm Mang Thít, Cù lao An Bình, Cồn Phụng, Làng nghề kẹo dừa Mỏ Cày, 2 hộ demo) **không có bất kỳ link ảnh tham khảo nào**.
+**17/37 địa danh đã có ảnh thật** tải về từ nguồn công khai (báo chí/cổng du lịch), ghép đúng theo `destinationId` (không suy đoán theo tên gần giống): Ao Bà Om · Chùa Âng · Bảo tàng Văn hóa dân tộc Khmer Trà Vinh · Chùa Hang (KomPong Chray) · Chùa Vàm Ray · Chùa Nôdol · Du lịch cộng đồng Cồn Chim · Văn Thánh Miếu Vĩnh Long · Bảo tàng Vĩnh Long · Khu tưởng niệm Phạm Hùng · Khu tưởng niệm Võ Văn Kiệt · Chùa Tiên Châu · Chùa Phước Hậu · Nhà cổ Cai Cường · Nhà dừa CocoHome · Làng gốm Tư Buôi · Khu du lịch Vinh Sang.
+
+Ảnh hiển thị trên site đã được **nén sang WebP** (giảm ~78% dung lượng, tổng 17 ảnh từ 9,4MB còn ~2,1MB — xem `scripts/optimize-images.js`); **bản gốc chưa nén được giữ lại** ở `assets/images/destinations/originals/` và tham chiếu qua `imageRef.originalLocalPath` trong `data/destinations.json`, phòng khi cần chất lượng cao hơn sau này. Tên file đã chuẩn hoá không dấu/không khoảng trắng (vd `ao-ba-om.webp`).
+
+**⚠️ Cần xin phép trước khi dùng thương mại**: các ảnh này lấy từ nguồn công khai (báo chí/cổng du lịch) để dùng trong bản demo phi thương mại — xem `imageRef.note` từng địa danh. Chưa liên hệ đơn vị giữ bản quyền.
+
+**20/37 địa danh còn lại** chưa có ảnh thật, đang dùng **ảnh placeholder tự sinh** (SVG theo danh mục): Chùa Ông Mẹt · Phước Minh Cung · Biển Ba Động · Đền thờ Bác Hồ tại Long Đức · Du lịch cộng đồng Cồn Hô · Nhà cổ Huỳnh Kỳ · Khu tưởng niệm Nguyễn Thị Út · Sokfarm · Khu du lịch Huỳnh Kha · Bảo tàng Dừa Sáp Trà Vinh · Chùa Giác Linh · Khu lưu niệm Trần Đại Nghĩa · Chùa Phật Ngọc Xá Lợi Vĩnh Long · Miếu Công Thần Vĩnh Long · Vương quốc gạch gốm Mang Thít · Cù lao An Bình · Cồn Phụng · Làng nghề kẹo dừa Mỏ Cày · Nhà vườn Cô Ba (demo) · Xưởng đan lát Chú Sáu (demo). Trong đó phần lớn vẫn có link ảnh/trang nguồn tham khảo ở `imageRef.url` (trạng thái `external-not-downloaded`) — chưa tải vì chưa xác nhận quyền dùng lại; 7 mục legacy hoàn toàn không có link tham khảo nào.
+
+**Gallery nhiều ảnh**: kiến trúc dữ liệu đã hỗ trợ trường `gallery` (mảng ảnh bổ sung, hiển thị ở trang chi tiết ngay sau ảnh đại diện) cho từng địa danh trong `data/destinations.json`, nhưng **hiện chưa có địa danh nào có quá 1 ảnh thật** nên trường này để trống ở tất cả 37 mục — không bịa thêm ảnh phụ khi chưa có nguồn.
+
+Không có trường hợp nào ảnh bị ghép nhầm địa danh cần đưa vào mục này — toàn bộ 17 ảnh đã tải đều được ghép trực tiếp theo `destinationId` lúc tải (không qua dò tên gần giống), nên không có ca "chưa chắc chắn" nào tồn đọng.
 
 ## 3. Địa danh thiếu giờ hoạt động đã xác minh (30/37 chỉ có ước lượng hoặc thiếu)
 

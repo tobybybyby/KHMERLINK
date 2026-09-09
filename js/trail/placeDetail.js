@@ -236,6 +236,19 @@ export function renderPlaceDetail(container, id) {
           ${quickFact('Đánh giá', `⭐ ${dest.rating.toFixed(1)} (${dest.ratingCount} lượt)${statusSuffix(dest.ratingStatus)}`)}
         </div>
 
+        ${dest.galleryImages && dest.galleryImages.length ? `
+          <section>
+            <div class="section-title"><h2>Thư viện ảnh</h2></div>
+            <div class="gallery-strip">
+              ${dest.galleryImages.map((src, i) => `
+                <a href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer">
+                  <img class="gallery-strip__img" src="${escapeHtml(src)}" alt="Ảnh ${i + 2} — ${escapeHtml(dest.name)}" loading="lazy" />
+                </a>
+              `).join('')}
+            </div>
+          </section>
+        ` : ''}
+
         <div class="cta-row">
           ${dir ? `<a class="btn btn-secondary" href="${escapeHtml(dir.url)}" target="_blank" rel="noopener noreferrer">${dir.label}</a>` : ''}
           <button type="button" class="btn btn-primary" id="add-itinerary-btn">➕ Thêm vào hành trình</button>

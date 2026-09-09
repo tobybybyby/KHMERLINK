@@ -291,6 +291,16 @@
 /* ---------- Place detail ---------- */
 .place-detail { padding-bottom: var(--space-7); }
 .place-hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--color-primary-soft); }
+
+.gallery-strip { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: 4px; }
+.gallery-strip__img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  flex-shrink: 0;
+}
 .place-detail__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4); max-width: 900px; margin: 0 auto; width: 100%; }
 
 .quick-facts {

@@ -21,7 +21,7 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 4 | Studio 5 tab | `js/studio/shell.js` | Hoạt động (demo) — sidebar desktop / bottom-nav mobile |
 | 4 | Cổng quản lý 4 tab | — | Giai đoạn sau (Phase 7) |
 | 4 | Cổng vận hành 4 khu | — | Giai đoạn sau (Phase 8) |
-| 5.1 | Bản đồ tương tác, pan/zoom/marker/cluster/vị trí của tôi | `trail/explore.js`, `services/mapService.js` | Hoạt động (demo) |
+| 5.1 | Bản đồ tương tác, pan/zoom/marker/cluster/vị trí của tôi | `trail/explore.js`, `services/mapService.js` | Hoạt động (demo) — popup marker đã bổ sung đủ mô tả ngắn/giá/giờ mở cửa (trước chỉ có tên/loại hình) |
 | 5.1 | Thống kê nhỏ, không giả số liệu tỉnh thật | Khám phá | Hoạt động (demo) |
 | 5.1 | Danh sách/marker đồng bộ, bottom sheet/panel | Khám phá | Hoạt động (demo) |
 | 5.1 | Tìm kiếm không dấu, các bộ lọc | Khám phá | Hoạt động (demo) |
@@ -43,6 +43,7 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 12 | Cổng vận hành & cố vấn cộng đồng | `js/ops/*.js` | Hoạt động (demo) — chi tiết ở bảng Phase 6 bên dưới |
 | 13 | Quy tắc dữ liệu dùng chung, trạng thái nhất quán | `js/storage.js`, `js/data.js` | Hoạt động (demo) — đã kiểm thử thật cho booking (Trail↔Studio) và đề án/ngoại lệ CPS/kiểm duyệt (Studio↔Admin/Ops), cùng dữ liệu `state.*`. Phát hiện và sửa lỗi nghiêm trọng ở Phase 6: schema version bị ghi sai khiến dữ liệu người dùng mất khi tải lại trang thật — xem PROGRESS.md |
 | 13 | Dữ liệu minh hoạ có nhãn, không bịa giá/lịch/nhận xét | `data/destinations.json`, `DATA_ISSUES.md` | Hoạt động (demo) — Phase 2: 37 địa danh, mỗi trường gắn trạng thái verified/estimated/missing, mâu thuẫn được ghi nhận công khai thay vì che giấu |
+| — | Ảnh địa danh: ghép theo destinationId, tối ưu WebP, giữ bản gốc, gallery, placeholder, không ghép nhầm | `data/destinations.json` (`imageRef`/`gallery`), `js/trail/placeDetail.js`, `js/utils.js`, `scripts/optimize-images.js` | Hoạt động (demo) — 17/37 ảnh thật đã nén WebP (~78% nhẹ hơn), bản gốc lưu ở `originals/`; kiến trúc gallery sẵn sàng (`gallery` field) nhưng chưa có ảnh phụ thật; 20/37 còn placeholder |
 | 14 | Yêu thích/nháp/lịch sử, tìm kiếm không dấu, tiếp cận đúng ngữ cảnh | Khám phá + Hồ sơ | Hoạt động (demo) một phần — chia sẻ/in hành trình chờ phase sau |
 | 14 | Trang "Về bản demo" | Tab Cá nhân | Hoạt động (demo) |
 | 15 | 12 kịch bản nghiệm thu | — | Hoàn thành — 12/12 Pass, kết quả đầy đủ trong PROGRESS.md mục "Phase cuối" |

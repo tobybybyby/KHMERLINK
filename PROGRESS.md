@@ -1,6 +1,6 @@
 # PROGRESS — Vĩnh Long Trail & Studio
 
-Cập nhật lần cuối: Phase cuối (kiểm tra & chuẩn bị deploy) — 2026-09-09
+Cập nhật lần cuối: Kiểm tra & bổ sung Bản đồ/Ảnh địa danh — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -299,3 +299,22 @@ Rà soát toàn bộ dự án theo checklist bàn giao: chức năng, lỗi JS/l
 
 ### Còn lại
 Không còn mục nào theo roadmap — đã triển khai đủ toàn bộ 16 mục spec (một số ở mức mô phỏng có nhãn rõ theo đúng yêu cầu, xem README mục "Đối chiếu specification"). Việc còn lại là thao tác deploy thật (git push, bật GitHub Pages) do người dùng thực hiện theo hướng dẫn trong README.
+
+## Kiểm tra & bổ sung — Bản đồ khám phá + Tích hợp ảnh địa danh
+
+Trước khi coi 2 tính năng này là "Phase 3" và "Phase 7" riêng, đã audit lại toàn bộ so với yêu cầu chi tiết vì phần lõi đã được xây từ Phase 1/2 — tránh làm lại từ đầu. Kết quả: cả hai đã hoạt động ~90–95%, chỉ có 4 khoảng trống thật sự, đã bổ sung đủ (không xây lại, không đổi thiết kế).
+
+### Đã có sẵn từ trước (xác nhận qua code, không cần làm lại)
+- Bản đồ: Leaflet + OSM không cần API key, marker sinh từ `data/destinations.json`, đồng bộ marker/danh sách/lọc/tìm kiếm, tự `fitBounds`, địa danh thiếu toạ độ vẫn ở danh sách không tạo marker, danh sách dự phòng khi bản đồ lỗi (`#map-fallback`), lớp mật độ mô phỏng có nhãn rõ ("🌡️ Mật độ (mô phỏng)"), không có đường dẫn tuyệt đối nên chạy đúng dưới repo con GitHub Pages.
+- Ảnh: ghép theo `destinationId` (không suy đoán theo tên), tên file không dấu/không khoảng trắng, đường dẫn ảnh đọc từ dữ liệu (`destinationImageSrc()`) không hard-code trong HTML, placeholder SVG tự sinh cho địa danh chưa có ảnh, lazy loading (`loading="lazy"`) trên hầu hết card ảnh.
+
+### 4 khoảng trống đã bổ sung
+1. **Popup marker thiếu trường** — `buildPopupHtml()` (`js/trail/explore.js`) trước đây chỉ hiện tên/loại hình/đánh giá, thiếu mô tả ngắn, giá và giờ mở cửa theo đúng yêu cầu. Đã thêm cả 3 trường (mô tả rút gọn ≤90 ký tự, giá có nhãn ước lượng, giờ mở cửa có nhãn ước lượng) — đã kiểm thử qua UI thật.
+2. **Ảnh chưa tối ưu dung lượng, chưa dùng WebP** — 17 ảnh đã tải nặng tổng 9,4MB (có file tới 1,6MB, một số PNG dùng cho ảnh chụp). Viết `scripts/optimize-images.js` (dùng `sharp`, cài tạm bằng `npm install --no-save sharp`, không thêm vào `package.json` — site vẫn không cần build step) để nén toàn bộ 17 ảnh sang WebP (resize tối đa 1200px, chất lượng 80), giữ bản gốc ở `assets/images/destinations/originals/`. Kết quả: 9,4MB → ~2,1MB (giảm ~78%). Cập nhật `imageRef.localPath` sang `.webp` và thêm `imageRef.originalLocalPath` trỏ về bản gốc trong `data/destinations.json`. Đã kiểm thử: 0 ảnh vỡ trên toàn site sau khi đổi định dạng.
+3. **Chưa có kiến trúc gallery nhiều ảnh** — `imageRef` trong dữ liệu chỉ là 1 object, không hỗ trợ nhiều ảnh/địa danh. Thêm trường `gallery` (mảng, mỗi phần tử cùng cấu trúc `imageRef`) trong schema `data/destinations.json`, map sang `galleryImages` trong `destinationsService.js`; `placeDetail.js` render khối "Thư viện ảnh" (ảnh đầu = hero đã có sẵn, các ảnh trong `gallery` hiện dạng dải thumbnail cuộn ngang, click mở ảnh gốc tab mới, `loading="lazy"`) — chỉ hiện khi có dữ liệu, không đổi giao diện các trang khác. Đã kiểm thử bằng dữ liệu giả lập tạm thời (2 ảnh) trên desktop + mobile, xác nhận hoạt động đúng rồi khôi phục `data/destinations.json` về đúng dữ liệu thật (không có địa danh nào thật sự có >1 ảnh ở thời điểm này nên `gallery` để trống ở cả 37 mục).
+4. **`DATA_ISSUES.md` mục ảnh bị lỗi thời** — vẫn ghi "toàn bộ 37 địa danh dùng placeholder" dù đã tải thật 17/37 từ trước. Viết lại mục 2 cho đúng thực tế: danh sách 17 địa danh có ảnh thật, đã nén WebP, lưu bản gốc ở đâu, cảnh báo bản quyền (ảnh nguồn công khai, cần xin phép trước khi dùng thương mại), danh sách 20 địa danh còn placeholder, và xác nhận không có ca ghép ảnh không chắc chắn nào cần liệt kê (toàn bộ ghép theo id lúc tải, không suy đoán).
+
+### Giới hạn đã biết (không giấu)
+- `scripts/optimize-images.js` là script chạy một lần thủ công (không tự động hoá trong pipeline vì site không có build step) — cần `npm install --no-save sharp` trước khi chạy, đã gỡ `sharp` khỏi `node_modules` sau khi dùng xong.
+- Gallery đã sẵn kiến trúc nhưng chưa có dữ liệu ảnh phụ thật nào — chỉ phát huy tác dụng khi có thêm ảnh được thêm vào trường `gallery` của địa danh tương ứng sau này.
+- 20/37 địa danh vẫn chưa có ảnh thật (đúng như Phase 2 — chưa xin phép nguồn để tải), không nằm trong phạm vi lần bổ sung này.
