@@ -1,6 +1,7 @@
 import { getState } from '../storage.js';
 import { escapeHtml, formatCurrency, formatMoney, formatDateShort, categoryEmoji, destinationImageSrc, qs } from '../utils.js';
 import { reapExpiredHolds } from '../services/bookingService.js';
+import { computeLiveCurrentMonth } from './reports.js';
 
 function hostExperiences(state, hostId) {
   return state.experiences.filter((e) => e.hostId === hostId);
@@ -17,8 +18,21 @@ export function renderOverview(container, hostId) {
   const completed = items.filter((bi) => bi.status === 'completed');
   const accepted = items.filter((bi) => bi.status === 'accepted');
   const pending = items.filter((bi) => bi.status === 'pending');
-  const grossRevenue = [...completed, ...accepted].reduce((sum, bi) => sum + bi.subtotal, 0);
-  const guestsServed = completed.reduce((sum, bi) => sum + bi.quantity, 0);
+
+  // Số liệu 11 tháng trước lấy từ cùng nguồn minh hoạ với biểu đồ ở Báo cáo (state.metrics.monthlyByHost) —
+  // không phát sinh dữ liệu mới, chỉ cộng thêm phần booking thật của phiên demo hiện tại lên trên nền đó
+  // để "Tổng quan" không hiện 0đ/0 khách khi chưa có ai đặt trải nghiệm thật.
+  const monthly = (state.metrics.monthlyByHost && state.metrics.monthlyByHost[hostId]) || [];
+  const historicalMonths = monthly.slice(0, -1);
+  const historicalRevenue = historicalMonths.reduce((sum, m) => sum + m.revenue, 0);
+  const historicalVisitors = historicalMonths.reduce((sum, m) => sum + m.visitors, 0);
+
+  const grossRevenue = historicalRevenue + [...completed, ...accepted].reduce((sum, bi) => sum + bi.subtotal, 0);
+  const guestsServed = historicalVisitors + completed.reduce((sum, bi) => sum + bi.quantity, 0);
+
+  const live = computeLiveCurrentMonth(state, hostId);
+  const displayMonths = monthly.map((m, i) => (i === monthly.length - 1 && live.hasRealData ? { ...m, revenue: live.revenue, visitors: live.visitors } : m));
+  const maxRevenue = Math.max(1, ...displayMonths.map((m) => m.revenue));
 
   const destIds = Array.from(new Set(exps.map((e) => e.destinationId)));
   const allReviews = [...state.reviews, ...state.userReviews].filter((r) => destIds.includes(r.destinationId));
@@ -42,11 +56,27 @@ export function renderOverview(container, hostId) {
       <div class="quick-fact"><span class="quick-fact__label">Điểm sao</span><span class="quick-fact__value">⭐ ${avgRating}</span></div>
       <div class="quick-fact"><span class="quick-fact__label">Booking cần phản hồi</span><span class="quick-fact__value">${pending.length}</span></div>
     </div>
+    <p class="text-sm text-faint" style="margin-top:-6px;">Doanh thu và khách đã phục vụ gồm 11 tháng số liệu minh hoạ (như biểu đồ ở Báo cáo) cộng dồn với booking thật phát sinh trong phiên demo này.</p>
 
     <div class="quick-facts">
       <div class="quick-fact"><span class="quick-fact__label">Tiền chờ nhận (đang giữ)</span><span class="quick-fact__value">${formatMoney(holdingAmount)}</span></div>
       <div class="quick-fact"><span class="quick-fact__label">Đã nhận (đã giải ngân)</span><span class="quick-fact__value">${formatMoney(releasedAmount)}</span></div>
     </div>
+
+    <section class="card" style="padding:20px;">
+      <div class="flex justify-between items-center gap-2 wrap">
+        <h3 style="margin:0;">Doanh thu 12 tháng gần nhất</h3>
+        <a class="btn btn-secondary btn-sm" href="#/studio/reports">Xem báo cáo đầy đủ →</a>
+      </div>
+      <div class="flex items-end gap-1" style="margin-top:14px;height:120px;">
+        ${displayMonths.map((m) => `
+          <div class="flex-col items-center gap-1" style="flex:1;height:100%;justify-content:flex-end;" title="${escapeHtml(m.label)}: ${formatMoney(m.revenue)}">
+            <div style="width:100%;max-width:22px;background:var(--color-primary,#1e5b3a);border-radius:3px 3px 0 0;height:${Math.max(4, Math.round((m.revenue / maxRevenue) * 100))}%;"></div>
+            <span class="text-sm text-faint" style="font-size:11px;">${escapeHtml(m.label)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </section>
 
     <section class="card" style="padding:20px;">
       <div class="flex justify-between items-center gap-2 wrap">

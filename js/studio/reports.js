@@ -22,7 +22,7 @@ function loadChartJs() {
   return chartJsPromise;
 }
 
-function computeLiveCurrentMonth(state, hostId) {
+export function computeLiveCurrentMonth(state, hostId) {
   const expIds = new Set(state.experiences.filter((e) => e.hostId === hostId).map((e) => e.id));
   const now = new Date();
   const items = state.bookingItems.filter((bi) => {
