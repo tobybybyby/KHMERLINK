@@ -1,6 +1,6 @@
 # Bảng đối chiếu yêu cầu → màn hình/chức năng → trạng thái
 
-> Sản phẩm đã đổi tên thương hiệu thành **Khmer Linh** (trước đây "Vĩnh Long Trail/Studio") — xem `PROGRESS.md` mục "Đổi thương hiệu & thiết kế lại giao diện". Bảng dưới đây giữ nguyên cách gọi theo từng phase gốc.
+> Sản phẩm đã đổi tên thương hiệu thành **Khmer Link** (trước đây "Vĩnh Long Trail/Studio") — xem `PROGRESS.md` mục "Đổi thương hiệu & thiết kế lại giao diện". Bảng dưới đây giữ nguyên cách gọi theo từng phase gốc.
 
 Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt động (demo)** = thao tác được thật với dữ liệu mẫu · **Mô phỏng** = có luồng nhưng kết quả giả lập rõ nhãn · **Giai đoạn sau** = chưa xây, có trong roadmap.
 

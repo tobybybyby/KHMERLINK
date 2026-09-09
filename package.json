@@ -1,8 +1,8 @@
 {
-  "name": "khmer-linh",
+  "name": "khmer-link",
   "version": "0.1.0",
   "private": true,
-  "description": "Khmer Linh - Cham van hoa, noi hanh trinh: prototype web tinh du lich cong dong Vinh Long (Trail / Studio / Cong quan ly / Cong van hanh).",
+  "description": "Khmer Link - Cham van hoa, noi hanh trinh: prototype web tinh du lich cong dong Vinh Long (Trail / Studio / Cong quan ly / Cong van hanh).",
   "scripts": {
     "dev": "npx --yes serve . -l 5500",
     "start": "npx --yes serve . -l 5500"

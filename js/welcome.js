@@ -13,7 +13,7 @@ export function renderWelcome(container) {
       <div>
         ${FLOURISH_SVG}
         <div style="font-size:2.4rem;margin:var(--space-3) 0;">🪷</div>
-        <h1 class="welcome-title">Khmer Linh</h1>
+        <h1 class="welcome-title">Khmer Link</h1>
         <p class="welcome-subtitle">Chạm văn hóa, nối hành trình</p>
         <p style="opacity:0.85;max-width:480px;margin:var(--space-3) auto 0;">Khám phá, kết nối và trải nghiệm cùng cộng đồng du lịch địa phương. Bản demo trình diễn — dữ liệu lưu trên trình duyệt của bạn.</p>
         ${FLOURISH_SVG}

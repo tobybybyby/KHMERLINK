@@ -1,8 +1,8 @@
-# PROGRESS — Khmer Linh (trước đây: Vĩnh Long Trail & Studio)
+# PROGRESS — Khmer Link (trước đây: Vĩnh Long Trail & Studio)
 
-> Đã đổi tên thương hiệu thành **Khmer Linh** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
+> Đã đổi tên thương hiệu thành **Khmer Link** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
 
-Cập nhật lần cuối: Đổi thương hiệu Khmer Linh + thiết kế lại giao diện — 2026-09-09
+Cập nhật lần cuối: Đổi thương hiệu Khmer Link + thiết kế lại giao diện — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -361,7 +361,7 @@ Theo yêu cầu bổ sung: phía trên trang tổng kết hiện lời chúc m�
 
 ## Đổi thương hiệu & thiết kế lại giao diện
 
-Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Linh** (trước đây "Vĩnh Long — Chạm văn hóa, nối hành trình"), thiết kế lại giao diện theo phong cách "văn hiến" tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long* — giấy cũ + mực đồng/vàng cổ thay vì tông xanh lá hiện đại ban đầu.
+Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Link** (trước đây "Vĩnh Long — Chạm văn hóa, nối hành trình"), thiết kế lại giao diện theo phong cách "văn hiến" tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long* — giấy cũ + mực đồng/vàng cổ thay vì tông xanh lá hiện đại ban đầu.
 
 ### Đổi tên (chỉ đổi thương hiệu, không đổi dữ liệu địa danh thật)
 `index.html` (title/meta), `js/welcome.js` (tiêu đề trang chào), `js/trail/shell.js` + `js/studio/shell.js` (brand Trail/Studio), `package.json` (name/description), `README.md` (tiêu đề + đoạn giới thiệu). `PROGRESS.md`/`REQUIREMENTS_MATRIX.md` giữ nguyên tên cũ ở các mục log trước thời điểm đổi tên (đã thêm ghi chú đầu file), không viết lại lịch sử. Các chỗ "Vĩnh Long" mang nghĩa địa danh thật (địa chỉ, dữ liệu 37 địa danh, tên tỉnh) **giữ nguyên**, không đổi — chỉ đổi tên thương hiệu sản phẩm.
@@ -383,7 +383,7 @@ Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Linh** (trước
 - Xác nhận hệ màu chức năng (loại hình địa điểm, mức mật độ khách) không bị ảnh hưởng — badge/marker vẫn đúng màu cũ theo danh mục.
 
 ### Giới hạn đã biết (không giấu)
-- Tên "Khmer Linh" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
+- Tên "Khmer Link" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
 - Chưa tích hợp ảnh/hoạ tiết trang trí thật từ nguồn ngoài — mới dùng SVG tự vẽ đơn giản (sóng, hoa sen). Nếu người dùng cung cấp ảnh cụ thể, có thể tích hợp thêm ở phần nền trang chào hoặc header mà không cần đổi lại kiến trúc.
 - Bản đồ Leaflet/OpenStreetMap vẫn dùng tile gốc (không có tuỳ chọn theme màu cho tile bản đồ) — chỉ marker/polyline đổi màu theo bảng mới.
 
