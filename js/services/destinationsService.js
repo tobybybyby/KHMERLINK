@@ -45,6 +45,7 @@ function transformDestination(d) {
     tips: d.tips || '',
     contact: (d.contact && d.contact.value) || null,
     contactStatus: (d.contact && d.contact.status) || 'missing',
+    imagePath: (d.imageRef && d.imageRef.localPath) || null,
     imageRef: d.imageRef || null,
     sources: d.sources || [],
     notes: d.notes || [],

@@ -1,7 +1,7 @@
 import { getState, toggleFavorite, isFavorite, addDraftItineraryItem } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDateShort, categoryEmoji, deriveCategoryVisual,
-  placeholderImageDataUri, renderStars, qs, qsa,
+  destinationImageSrc, renderStars, qs, qsa,
 } from '../utils.js';
 import { NotificationService } from '../services/notificationService.js';
 import { initAccordion, renderEmptyState } from '../ui.js';
@@ -82,7 +82,7 @@ function reviewItemHtml(rv) {
 function miniCardHtml(d) {
   return `
     <button type="button" class="mini-card" data-id="${d.id}">
-      <img class="mini-card__img" src="${placeholderImageDataUri(d.category, d.name)}" alt="" />
+      <img class="mini-card__img" src="${destinationImageSrc(d)}" alt="" loading="lazy" />
       <span class="mini-card__title">${escapeHtml(d.name)}</span>
       <span class="text-sm text-muted">⭐ ${d.rating.toFixed(1)}</span>
     </button>
@@ -114,6 +114,9 @@ function sourcesSectionHtml(dest) {
       ${hasSources ? `<ul style="padding-left:18px;font-size:0.85rem;color:var(--color-text-muted);">
         ${dest.sources.map((s) => `<li><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.label)}</a></li>`).join('')}
       </ul>` : ''}
+      ${dest.imageRef && dest.imageRef.url && dest.imageRef.status === 'downloaded-demo-use' ? `
+        <p class="text-sm text-faint">Ảnh dùng cho bản demo phi thương mại, tải từ nguồn công khai (<a href="${escapeHtml(dest.imageRef.url)}" target="_blank" rel="noopener noreferrer">xem nguồn gốc</a>) — cần xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại.</p>
+      ` : ''}
       ${dest.imageRef && dest.imageRef.url && dest.imageRef.status === 'external-not-downloaded' ? `
         <p class="text-sm text-faint">Ảnh minh hoạ hiện dùng placeholder — có link ảnh/trang nguồn tham khảo (<a href="${escapeHtml(dest.imageRef.url)}" target="_blank" rel="noopener noreferrer">xem</a>), chưa tải về/chưa xác nhận quyền dùng lại.</p>
       ` : ''}
@@ -147,7 +150,7 @@ export function renderPlaceDetail(container, id) {
 
   container.innerHTML = `
     <div class="place-detail">
-      <img class="place-hero" src="${placeholderImageDataUri(dest.category, dest.name)}" alt="Ảnh minh hoạ ${escapeHtml(dest.name)}" />
+      <img class="place-hero" src="${destinationImageSrc(dest)}" alt="Ảnh ${dest.imagePath ? '' : 'minh hoạ '}${escapeHtml(dest.name)}" />
       <div class="place-detail__body">
         <div>
           <a href="#/trail/explore" class="text-sm">← Về Khám phá</a>

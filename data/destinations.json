@@ -67,8 +67,9 @@
       },
       "imageRef": {
         "url": "https://images.baodantoc.vn/uploads/2024/Thang-9/Ngay-19/Anh/ao-ba-om.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về/chưa có quyền dùng lại cho app trong phase này."
+        "localPath": "./assets/images/destinations/ao-ba-om.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -145,8 +146,9 @@
       },
       "imageRef": {
         "url": "https://static-images.vnncdn.net/files/publish/2023/10/30/w-chua-ang-34-2-257.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-ang.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -227,8 +229,9 @@
       },
       "imageRef": {
         "url": "https://afamilycdn.com/150157425591193600/2024/8/30/nhabaotang-1724920850499-17249208507381251495120-1724991034220-17249910346791070697589.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/bao-tang-khmer-tra-vinh.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -307,8 +310,9 @@
       },
       "imageRef": {
         "url": "https://mia.vn/media/uploads/blog-du-lich/kien-truc-co-kinh-1706425957.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-hang-kompong-chray.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -543,8 +547,9 @@
       },
       "imageRef": {
         "url": "https://i.ex-cdn.com/phatgiao.org.vn/files/huongmi/2018/12/04/tuong-phat-nam-lon-nhat-viet-nam-o-chua-vam-ray-6-0640.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-vam-ray.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -623,8 +628,9 @@
       },
       "imageRef": {
         "url": "https://vietnamtourism.vn/imguploads/tourist/old/5399.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-nodol-chua-co.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -851,8 +857,9 @@
       },
       "imageRef": {
         "url": "https://image.sggp.org.vn/w1000/Uploaded/2026/zotnae/2025_02_03/du-lich-con-chim-3593-6471.jpg.webp",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/con-chim.webp",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -1493,8 +1500,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/L%C6%B0u%20tr%C3%BA/10.%20V%C4%83n%20Th%C3%A1nh%20Mi%E1%BA%BFu%20V%C4%A9nh%20Long/636533514444702043_panel.png",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/van-thanh-mieu.png",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -1569,8 +1577,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/19.%20B%E1%BA%A3o%20t%C3%A0ng%20VL/636556865806908362_1.JPG",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/bao-tang-vinh-long.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -1645,8 +1654,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/1.%20Khu%20t%C6%B0%E1%BB%9Fng%20ni%E1%BB%87m%20c%E1%BB%91%20Ch%E1%BB%A7%20t%E1%BB%8Bch%20H%C4%90BT%20Ph%E1%BA%A1m%20H%C3%B9ng/636528327474054864_images1925966_phung_1.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/khu-tuong-niem-pham-hung.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -1721,8 +1731,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/2.Khu%20TN%20CCT%20V%C3%B5%20V%C4%83n%20Ki%E1%BB%87t/636528361291743385_Capture.PNG",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/khu-tuong-niem-vo-van-kiet.png",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -1881,8 +1892,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/12.%20Ch%C3%B9a%20Ti%C3%AAn%20ch%C3%A2u/636533527491727993_panel.png",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-tien-chau.png",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -2037,8 +2049,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/13.%20Ch%C3%B9a%20Ph%C6%B0%E1%BB%9Bc%20H%E1%BA%ADu/636533531001669378_panel.png",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/chua-phuoc-hau.png",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -2117,8 +2130,9 @@
       },
       "imageRef": {
         "url": "https://thamhiemmekong.com/wp-content/uploads/2020/04/nhacocaicuong1.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/nha-co-cai-cuong.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -2197,8 +2211,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/adminportal_vlg/dia_diem/nha_dua_cocohome/z1975117437418_3746f337069ffde95799e16bd81e929b_637315445056494777_23792555.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/nha-dua-cocohome.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -2281,8 +2296,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal/Images/VLG/adminportal_vlg/yem/2026/t2/25_2/1_18225227.jpg",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/lang-gom-tu-buoi.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {
@@ -2363,8 +2379,9 @@
       },
       "imageRef": {
         "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/5.%20KDL%20Vinh%20Sang/636557553590112041_DSC_7186.JPG",
-        "status": "external-not-downloaded",
-        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+        "localPath": "./assets/images/destinations/khu-du-lich-vinh-sang.jpg",
+        "status": "downloaded-demo-use",
+        "note": "Đã tải về để dùng trong bản demo phi thương mại. Ảnh từ nguồn công khai (báo chí/cổng du lịch); CẦN xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại."
       },
       "sources": [
         {

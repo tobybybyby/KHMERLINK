@@ -160,6 +160,11 @@ export function placeholderImageDataUri(category, label) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+export function destinationImageSrc(dest) {
+  if (dest && dest.imagePath) return dest.imagePath;
+  return placeholderImageDataUri(dest ? dest.category : null, dest ? dest.name : '');
+}
+
 export function renderStars(rating) {
   const r = Math.round(clamp(rating || 0, 0, 5));
   return '★'.repeat(r) + '☆'.repeat(5 - r);

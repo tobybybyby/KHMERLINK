@@ -2,7 +2,7 @@ import { getState } from '../storage.js';
 import {
   escapeHtml, matchesQuery, haversineKm,
   categoryEmoji, deriveCategoryVisual, debounce, qs, qsa,
-  placeholderImageDataUri,
+  destinationImageSrc,
 } from '../utils.js';
 import { INTEREST_OPTIONS, PAIR_SUGGESTIONS } from '../data.js';
 import { MapService } from '../services/mapService.js';
@@ -149,11 +149,11 @@ function priceBadge(d) {
 }
 
 function cardHtml(d) {
-  const img = placeholderImageDataUri(d.category, d.name);
+  const img = destinationImageSrc(d);
   const noCoords = d.lat === null || d.lng === null;
   return `
     <button type="button" class="place-card" data-id="${d.id}" data-selected="${d.id === selectedId}">
-      <img class="place-card__img" src="${img}" alt="" />
+      <img class="place-card__img" src="${img}" alt="" loading="lazy" />
       <span class="place-card__body">
         <span class="place-card__title">${escapeHtml(d.name)}</span>
         <span class="place-card__meta">
@@ -226,7 +226,7 @@ function renderCategoryChips(container) {
 function miniCardHtml(d) {
   return `
     <button type="button" class="mini-card" data-id="${d.id}">
-      <img class="mini-card__img" src="${placeholderImageDataUri(d.category, d.name)}" alt="" />
+      <img class="mini-card__img" src="${destinationImageSrc(d)}" alt="" loading="lazy" />
       <span class="mini-card__title">${escapeHtml(d.name)}</span>
       <span class="text-sm text-muted">⭐ ${d.rating.toFixed(1)}</span>
     </button>
