@@ -14,10 +14,15 @@ let state = null;
 
 function defaultUserData() {
   const seed = createSeedState();
-  const userData = { schemaVersion: SCHEMA_VERSION };
+  const userData = {};
   Object.keys(seed).forEach((key) => {
     if (!CONTENT_KEYS.includes(key)) userData[key] = seed[key];
   });
+  // Đặt sau vòng lặp — seed.schemaVersion là giá trị nội bộ cũ của data.js (không phải version
+  // schema lưu trữ thật), nếu gán trước sẽ bị vòng lặp ở trên ghi đè nhầm và làm hỏng lưu trữ
+  // (mỗi lần tải lại trang, kiểm tra version ở loadUserData() sẽ luôn thấy lệch và xoá sạch
+  // dữ liệu người dùng — lỗi thật đã phát hiện khi kiểm thử Phase 6).
+  userData.schemaVersion = SCHEMA_VERSION;
   return userData;
 }
 
@@ -52,6 +57,18 @@ export async function init() {
     const idx = state.experiences.findIndex((e) => e.id === hostExp.id);
     if (idx >= 0) state.experiences[idx] = hostExp;
     else state.experiences.push(hostExp);
+  });
+
+  // Huy hiệu "Được ghi nhận" do Cổng vận hành cấp/thu hồi (có lý do) được lưu riêng ở
+  // hostRecognitionOverrides (persist) và đè lên cờ tĩnh trong destinations.json — giống
+  // cơ chế hostExperiences ở trên. Chỉ áp dụng cho địa điểm có hộ gắn với (destinationId).
+  Object.entries(state.hostRecognitionOverrides || {}).forEach(([hostId, override]) => {
+    const host = state.hosts.find((h) => h.id === hostId);
+    const dest = host && state.destinations.find((d) => d.id === host.destinationId);
+    if (dest) {
+      dest.recognized = override.recognized;
+      dest.recognizedReason = override.reason || '';
+    }
   });
 
   persist();
@@ -367,6 +384,79 @@ export function decideCpsException(id, status, note) {
   exc.history.push({ status, at: new Date().toISOString(), note });
   persist();
   return exc;
+}
+
+// ---------- Cổng vận hành: kiểm duyệt nội dung ----------
+/** Duyệt hoặc yêu cầu chỉnh sửa một trải nghiệm đang chờ duyệt (decision: 'approved'|'needs_changes'). */
+export function reviewExperience(experienceId, decision, note) {
+  const s = getState();
+  const exp = s.experiences.find((e) => e.id === experienceId);
+  if (!exp) return null;
+  exp.status = decision === 'approved' ? 'published' : 'draft';
+  const record = {
+    id: uidLocal('mod'),
+    targetType: 'experience',
+    targetId: experienceId,
+    action: decision,
+    note: note || '',
+    by: 'ops',
+    at: new Date().toISOString(),
+  };
+  s.moderationRecords.push(record);
+  persist();
+  return { exp, record };
+}
+
+// ---------- Cổng vận hành: điều phối booking thủ công ----------
+/** Ghi một ghi chú điều phối nội bộ vào lịch sử booking (không tự đổi giờ/điểm — cần khách đồng ý qua Trail). */
+export function addOpsDispatchNote(bookingId, note) {
+  const s = getState();
+  const booking = s.bookings.find((b) => b.id === bookingId);
+  if (!booking) return null;
+  booking.statusHistory.push({ status: booking.status, at: new Date().toISOString(), note: `[Vận hành] ${note}` });
+  persist();
+  return booking;
+}
+
+// ---------- Cổng vận hành: xử lý ticket sự cố ----------
+export function assignSupportTicket(ticketId, handlerName) {
+  const s = getState();
+  const t = s.supportTickets.find((x) => x.id === ticketId);
+  if (!t) return null;
+  t.assignedTo = handlerName;
+  t.timeline.push({ status: t.status, at: new Date().toISOString(), note: `Đã gán cho ${handlerName} xử lý.` });
+  persist();
+  return t;
+}
+
+export function updateSupportTicketStatus(ticketId, status, note) {
+  const s = getState();
+  const t = s.supportTickets.find((x) => x.id === ticketId);
+  if (!t) return null;
+  t.status = status;
+  t.timeline.push({ status, at: new Date().toISOString(), note: note || '' });
+  persist();
+  return t;
+}
+
+// ---------- Cổng vận hành: huy hiệu chất lượng "Được ghi nhận" ----------
+/** Cấp/thu hồi huy hiệu cho địa điểm gắn với một hộ, có lý do — ghi đè cờ tĩnh trong destinations.json. */
+export function setHostRecognition(hostId, recognized, reason) {
+  const s = getState();
+  const host = s.hosts.find((h) => h.id === hostId);
+  if (!host) return null;
+  s.hostRecognitionOverrides[hostId] = { recognized, reason: reason || '', at: new Date().toISOString() };
+  const dest = s.destinations.find((d) => d.id === host.destinationId);
+  if (dest) {
+    dest.recognized = recognized;
+    dest.recognizedReason = reason || '';
+  }
+  persist();
+  return s.hostRecognitionOverrides[hostId];
+}
+
+export function getHostRecognitionOverride(hostId) {
+  return getState().hostRecognitionOverrides[hostId] || null;
 }
 
 function uidLocal(prefix) {

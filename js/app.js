@@ -1,7 +1,6 @@
 import * as Storage from './storage.js';
 import { renderErrorState } from './ui.js';
 import { renderWelcome, renderGateway } from './welcome.js';
-import { renderComingSoon } from './comingSoon.js';
 import { renderTrailShell } from './trail/shell.js';
 import { renderExplore } from './trail/explore.js';
 import { renderPlaceDetail } from './trail/placeDetail.js';
@@ -15,6 +14,18 @@ import { renderExperiences } from './studio/experiences.js';
 import { renderBookings } from './studio/bookings.js';
 import { renderReports } from './studio/reports.js';
 import { renderSupport } from './studio/support.js';
+import { renderAdminShell } from './admin/shell.js';
+import { renderAdminOverview } from './admin/overview.js';
+import { renderAdminFlow } from './admin/flow.js';
+import { renderAdminDemand } from './admin/demand.js';
+import { renderAdminProposals } from './admin/proposals.js';
+import { renderAdminReports } from './admin/reports.js';
+import { renderOpsShell } from './ops/shell.js';
+import { renderOpsBookings } from './ops/bookings.js';
+import { renderOpsContent } from './ops/content.js';
+import { renderOpsTickets } from './ops/tickets.js';
+import { renderOpsQuality } from './ops/quality.js';
+import { renderCommunityAdvisor } from './ops/community.js';
 
 const appRoot = document.getElementById('app');
 
@@ -27,6 +38,18 @@ function mountTrailPage(tabKey, pageRenderFn) {
 function mountStudioPage(tabKey, pageRenderFn, params) {
   const { content, hostId } = renderStudioShell(appRoot, tabKey);
   pageRenderFn(content, hostId, params);
+  content.focus({ preventScroll: true });
+}
+
+function mountAdminPage(tabKey, pageRenderFn) {
+  const content = renderAdminShell(appRoot, tabKey);
+  pageRenderFn(content);
+  content.focus({ preventScroll: true });
+}
+
+function mountOpsPage(tabKey, pageRenderFn) {
+  const content = renderOpsShell(appRoot, tabKey);
+  pageRenderFn(content);
   content.focus({ preventScroll: true });
 }
 
@@ -51,24 +74,19 @@ const ROUTES = [
   { pattern: /^#\/studio\/support$/, handler: () => mountStudioPage('support', renderSupport) },
   { pattern: /^#\/studio\/overview$/, handler: () => mountStudioPage('overview', renderOverview) },
   { pattern: /^#\/studio\/?$/, handler: () => { window.location.hash = '#/studio/overview'; } },
-  { pattern: /^#\/admin.*$/, handler: () => renderComingSoon(appRoot, {
-    title: 'Cổng dữ liệu quản lý',
-    description: 'Dashboard tổng hợp booking, luồng khách, nhu cầu & cơ hội, đề án, báo cáo sẽ có ở Phase 7.',
-    phase: 7,
-    backHref: '#/gateway',
-  }) },
-  { pattern: /^#\/ops\/community$/, handler: () => renderComingSoon(appRoot, {
-    title: 'Cố vấn cộng đồng',
-    description: 'Hàng chờ duyệt văn hoá và xem xét ngoại lệ sẽ có ở Phase 8.',
-    phase: 8,
-    backHref: '#/gateway',
-  }) },
-  { pattern: /^#\/ops.*$/, handler: () => renderComingSoon(appRoot, {
-    title: 'Cổng vận hành',
-    description: 'Booking & giao dịch, nội dung, sự cố, chất lượng & hỗ trợ hộ sẽ có ở Phase 8.',
-    phase: 8,
-    backHref: '#/gateway',
-  }) },
+  { pattern: /^#\/admin\/overview$/, handler: () => mountAdminPage('overview', renderAdminOverview) },
+  { pattern: /^#\/admin\/flow$/, handler: () => mountAdminPage('flow', renderAdminFlow) },
+  { pattern: /^#\/admin\/demand$/, handler: () => mountAdminPage('demand', renderAdminDemand) },
+  { pattern: /^#\/admin\/proposals$/, handler: () => mountAdminPage('proposals', renderAdminProposals) },
+  { pattern: /^#\/admin\/reports$/, handler: () => mountAdminPage('reports', renderAdminReports) },
+  { pattern: /^#\/admin\/?$/, handler: () => { window.location.hash = '#/admin/overview'; } },
+
+  { pattern: /^#\/ops\/community$/, handler: () => renderCommunityAdvisor(appRoot) },
+  { pattern: /^#\/ops\/bookings$/, handler: () => mountOpsPage('bookings', renderOpsBookings) },
+  { pattern: /^#\/ops\/content$/, handler: () => mountOpsPage('content', renderOpsContent) },
+  { pattern: /^#\/ops\/tickets$/, handler: () => mountOpsPage('tickets', renderOpsTickets) },
+  { pattern: /^#\/ops\/quality$/, handler: () => mountOpsPage('quality', renderOpsQuality) },
+  { pattern: /^#\/ops\/?$/, handler: () => { window.location.hash = '#/ops/bookings'; } },
 ];
 
 function render() {

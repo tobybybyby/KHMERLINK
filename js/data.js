@@ -197,7 +197,8 @@ function buildMonthlyMetrics(hostIds) {
 
 export function createSeedState() {
   return {
-    schemaVersion: 1,
+    // Không đặt schemaVersion ở đây — đó là version của lưu trữ (xem SCHEMA_VERSION trong
+    // storage.js), không phải một phần nội dung/dữ liệu mẫu.
     // destinations được nạp riêng từ data/destinations.json qua destinationsService — xem js/storage.js.
     destinations: [],
     hosts: JSON.parse(JSON.stringify(HOSTS)),
@@ -220,6 +221,7 @@ export function createSeedState() {
     proposals: [],
     cpsExceptions: [],
     moderationRecords: [],
+    hostRecognitionOverrides: {},
     metrics: { monthlyByHost: buildMonthlyMetrics(HOSTS.map((h) => h.id)) },
     favorites: [],
     viewCounts: {},

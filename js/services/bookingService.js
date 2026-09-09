@@ -204,7 +204,11 @@ export function computeRefundAmount(booking) {
   items.forEach((bi) => {
     const { slot } = findExperienceAndSlot(bi.experienceId, bi.slotId);
     if (slot) {
-      const dt = new Date(`${slot.date.slice(0, 10)}T${slot.startTime}:00`);
+      // Dùng getter theo giờ địa phương (không cắt chuỗi ISO — slot.date lưu dạng UTC nên
+      // cắt chuỗi có thể lệch ngày ở múi giờ Việt Nam) để ghép đúng ngày + giờ hẹn địa phương.
+      const slotDay = new Date(slot.date);
+      const [h, m] = slot.startTime.split(':').map(Number);
+      const dt = new Date(slotDay.getFullYear(), slotDay.getMonth(), slotDay.getDate(), h, m);
       if (!earliest || dt < earliest) earliest = dt;
     }
   });

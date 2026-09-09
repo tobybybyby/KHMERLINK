@@ -64,8 +64,8 @@ function formHtml(exp, destName) {
     <div class="cta-row">
       <button type="button" class="btn btn-secondary" id="save-draft-btn">Lưu nháp</button>
       ${exp.status !== 'published' ? '<button type="button" class="btn btn-primary" id="submit-review-btn">Gửi duyệt</button>' : ''}
-      ${exp.status === 'pending_review' ? '<button type="button" class="btn btn-accent" id="simulate-approve-btn">🎭 Mô phỏng: cộng đồng/vận hành duyệt</button>' : ''}
     </div>
+    ${exp.status === 'pending_review' ? '<p class="text-sm text-faint">Đang chờ cộng đồng/vận hành duyệt trong Cổng vận hành — nội dung công bố cũ (nếu có) vẫn hiển thị cho khách cho tới khi bản mới được duyệt.</p>' : ''}
   `;
 }
 
@@ -137,13 +137,6 @@ function renderForm(container, hostId, existingExp) {
       exp.status = 'pending_review';
       upsertHostExperience(exp);
       NotificationService.notify('Đã gửi duyệt — nội dung công bố cũ (nếu có) vẫn hiển thị cho khách cho tới khi bản mới được duyệt.', 'success');
-      window.location.hash = '#/studio/experiences';
-    });
-
-    qs('#simulate-approve-btn', container)?.addEventListener('click', () => {
-      exp.status = 'published';
-      upsertHostExperience(exp);
-      NotificationService.notify('Đã duyệt (mô phỏng) — nội dung hiện công bố cho khách.', 'success');
       window.location.hash = '#/studio/experiences';
     });
   }

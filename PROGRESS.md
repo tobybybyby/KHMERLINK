@@ -1,6 +1,6 @@
 # PROGRESS — Vĩnh Long Trail & Studio
 
-Cập nhật lần cuối: Phase 5 — 2026-09-09
+Cập nhật lần cuối: Phase 6 — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -22,7 +22,10 @@ Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm 
 | 4 | Đánh giá, Traveller Passport, điểm thưởng, voucher | Done | |
 | 5 | Studio — Tổng quan, Trải nghiệm, Lịch & Booking, Báo cáo, Hỗ trợ & Đề án | Done | Xem chi tiết bên dưới |
 | 5 | Booking từ Trail xuất hiện trong Studio bằng dữ liệu dùng chung | Done | Đã kiểm thử trực tiếp — xem chi tiết bên dưới |
-| 6–8 | Cổng dữ liệu quản lý, Cổng vận hành | Later | Route đã có, hiện placeholder |
+| 6 | Cổng dữ liệu quản lý — Tổng quan/Luồng khách/Nhu cầu & Cơ hội/Đề án/Báo cáo | Done | Xem chi tiết bên dưới |
+| 6 | Cổng vận hành — Booking & Giao dịch/Nội dung/Sự cố/Chất lượng & Hỗ trợ hộ | Done | Xem chi tiết bên dưới |
+| 6 | Cố vấn cộng đồng (vai trò quyền hạn chế trong Cổng vận hành) | Done | Chỉ xem hàng chờ duyệt văn hoá + ngoại lệ CPS "nghi lễ", không xem booking/giao dịch |
+| 6 | Kiểm tra phân quyền hiển thị dữ liệu giữa các vai trò | Done | Đã kiểm thử trực tiếp — xem chi tiết bên dưới |
 | — | Hoàn thiện, nghiệm thu đủ 12 kịch bản, deploy GitHub Pages + Hostinger | Later | Thực hiện ở phase cuối cùng |
 
 ## Chi tiết Phase 1
@@ -197,4 +200,58 @@ Toàn bộ mục 10 của spec gốc. Thay đổi kiến trúc quan trọng: tr�
 - Trải nghiệm do hộ tạo có khung giờ với ngày giờ cố định tại thời điểm lưu; nếu để rất lâu không chỉnh sửa, ngày có thể trở thành quá khứ (khác với trải nghiệm mẫu vốn luôn tự tính lại theo "hôm nay" mỗi phiên).
 
 ### Còn lại (không phải bỏ sót, đúng roadmap)
-Cổng dữ liệu quản lý (Phase 6), Cổng vận hành & cố vấn cộng đồng (Phase 7), và hoàn thiện deploy GitHub Pages/Hostinger — thực hiện ở các phase tiếp theo.
+Hoàn thiện deploy GitHub Pages/Hostinger và chạy đủ 12 kịch bản nghiệm thu cuối cùng — thực hiện ở phase cuối.
+
+## Chi tiết Phase 6 — Cổng dữ liệu quản lý và Cổng vận hành
+
+Toàn bộ mục 11 và 12 của spec gốc, gộp làm một phase theo yêu cầu người dùng. Nguyên tắc bắt buộc theo yêu cầu: **không tạo số ngẫu nhiên riêng cho dashboard này** — mọi KPI/biểu đồ/bảng đều tính trực tiếp từ `state.bookingItems`, `state.reviews/userReviews`, `state.proposals`, `state.cpsExceptions`... (dữ liệu dùng chung với Trail/Studio), chỉ tái sử dụng đúng nguồn minh hoạ 12 tháng đã có sẵn ở Studio (`state.metrics.monthlyByHost`) cho phần xu hướng theo tháng thay vì bịa thêm một bộ số khác.
+
+### File mới — Cổng dữ liệu quản lý (`#/admin/*`)
+- `js/admin/shell.js` — khung 5 tab: Tổng quan/Luồng khách/Nhu cầu & Cơ hội/Đề án/Báo cáo.
+- `js/admin/filters.js` — bộ lọc dùng chung (thời gian/khu vực/loại hình/nhóm khách), áp dụng đồng bộ cho mọi trang.
+- `js/admin/metrics.js` — gộp `state.metrics.monthlyByHost` theo phạm vi lọc + ghi đè tháng hiện tại bằng dữ liệu booking thật (cùng kỹ thuật với `studio/reports.js`).
+- `js/admin/overview.js` — KPI (tổng booking, lượt tham gia hoàn thành, tỷ lệ hoàn thành, doanh thu trải nghiệm), biểu đồ 12 tháng, doanh thu theo NHÓM hoạt động (không theo từng hộ).
+- `js/admin/flow.js` — heatmap mật độ tổng hợp (dùng chung `getSimulatedCrowdLevel` với Trail, không tạo mô phỏng riêng), khung giờ cao điểm dự kiến, mùa/sự kiện cao điểm (từ `state.events` thật), phân khúc du khách (từ `state.itineraries` thật: đi một mình/nhóm, nhịp độ, ưu tiên, thời lượng trung bình, nơi đến hay chọn).
+- `js/admin/demand.js` — cầu chưa đáp ứng theo hoạt động/slot (khung giờ gần hết chỗ), mức tập trung booking giữa các hộ (hiển thị ẩn danh "Hộ #1/#2..."), cơ hội phát triển sản phẩm (lượt xem cao/0 booking), dự báo mô phỏng (ngoại suy tuyến tính 3 tháng, ghi rõ phương pháp và giới hạn).
+- `js/admin/proposals.js` — hộp thư đề án: lọc trạng thái, xem đầy đủ hồ sơ, "Đánh dấu đang xem xét"/"Yêu cầu bổ sung"/"Chấp thuận"/"Từ chối" — dùng chung `setProposalStatus` với Studio nên hộ thấy cập nhật ngay.
+- `js/admin/reports.js` — hoa hồng Network (10%, cấu hình minh hoạ) tách khỏi "chi tiêu ước tính" (ghi rõ chưa có kỳ gốc so sánh, không gọi là "mức tăng"); tổng hợp phản hồi ẩn danh theo nhóm hoạt động có ngưỡng ẩn nhóm <3 quan sát; xuất CSV (booking đang lọc + phản hồi ẩn danh) kèm dòng chú thích ngày xuất/phạm vi lọc/nhãn dữ liệu demo.
+- `js/services/csvService.js` — tiện ích xuất CSV chung (escape đúng chuẩn, BOM cho Excel đọc tiếng Việt).
+
+### File mới — Cổng vận hành (`#/ops/*`)
+- `js/ops/shell.js` — khung 4 tab: Booking & Giao dịch/Nội dung/Sự cố/Chất lượng & Hỗ trợ hộ.
+- `js/ops/bookings.js` — toàn bộ booking + giao dịch trên mạng lưới (mọi hộ), lọc trạng thái/hộ/tìm mã booking, "Ghi chú điều phối" nội bộ cho booking bị từ chối/huỷ (không tự động đổi giờ/điểm — vẫn cần khách xác nhận qua Trail, đúng quy tắc booking).
+- `js/ops/content.js` — hàng chờ kiểm duyệt trải nghiệm (`pending_review` → Duyệt & công bố / Yêu cầu chỉnh sửa), nhật ký kiểm duyệt (ai làm gì, khi nào).
+- `js/ops/tickets.js` — xử lý ticket: gán người phụ trách (demo), xử lý hoàn tiền (gọi `cancelBooking` thật, áp đúng chính sách theo mốc giờ), đánh dấu đã xử lý — cập nhật timeline khách thấy được ở Trail.
+- `js/ops/quality.js` — CPS theo hộ (hiển thị thật, chỉ ở vai trò này), cấp/thu hồi huy hiệu "Được ghi nhận" có lý do bắt buộc, duyệt/từ chối ngoại lệ CPS (toàn bộ hộ).
+- `js/ops/community.js` — Cố vấn cộng đồng: **không dùng chung OpsShell** (cố ý) — chỉ hiển thị hàng chờ duyệt văn hoá + ngoại lệ CPS danh mục "nghi lễ", có banner "Quyền hạn chế" giải thích rõ không xem được booking/giao dịch/khách.
+
+### Thay đổi kiến trúc quan trọng
+- **Loại bỏ toàn bộ nút "🎭 Mô phỏng: ... duyệt"** còn sót lại ở Studio (`experiences.js`, `support.js`) — giờ cộng đồng/vận hành duyệt trải nghiệm thật ở Cổng vận hành, quản lý xử lý đề án thật ở Cổng dữ liệu quản lý, vận hành/cố vấn duyệt ngoại lệ CPS thật — đúng mô hình đã áp dụng ở Phase 5 (Trail → Studio).
+- Thêm luồng "Cập nhật & gửi lại" đề án ở Studio khi quản lý yêu cầu bổ sung (trước đây chỉ có nút mô phỏng xoay vòng trạng thái, hộ không thực sự sửa được nội dung).
+- Huy hiệu "Được ghi nhận": thêm `hostRecognitionOverrides` (persist, giống cơ chế `hostExperiences`) để Cổng vận hành cấp/thu hồi có lý do, đè lên cờ tĩnh trong `destinations.json` — không còn là dữ liệu cố định không đổi được.
+- Xoá `js/comingSoon.js` (không còn route nào dùng tới vì Admin/Ops đã có trang thật).
+
+### Phân quyền hiển thị dữ liệu giữa vai trò (đã kiểm thử trực tiếp)
+- Cổng dữ liệu quản lý: không hiển thị CPS hoặc doanh thu từng hộ ở bất kỳ đâu (chỉ theo nhóm/cụm, hộ ẩn danh hoá "Hộ #1/#2..."), có banner nhắc rõ trên mọi trang.
+- Cổng vận hành: hiển thị CPS thật theo từng hộ và toàn bộ booking/giao dịch/khách — đúng mô tả "CPS chỉ hộ đó và vai trò vận hành có thẩm quyền xem".
+- Cố vấn cộng đồng: đã kiểm thử — trang chỉ hiện đúng 2 khối (duyệt văn hoá + ngoại lệ "nghi lễ"), không có tab Booking/Giao dịch/Sự cố nào cả, kể cả trong DOM.
+
+### Bug nghiêm trọng phát hiện và đã sửa khi kiểm thử (không chỉ khai báo suông)
+1. **Mất toàn bộ dữ liệu người dùng mỗi lần tải lại trang thật (không phải điều hướng trong SPA)**: `defaultUserData()` trong `js/storage.js` khởi tạo `schemaVersion: SCHEMA_VERSION` đúng, nhưng ngay sau đó một vòng lặp copy toàn bộ trường không phải "nội dung" từ `createSeedState()` — trong đó có trường `schemaVersion: 1` cũ sót lại từ Phase 1 trong `js/data.js` — đã **ghi đè nhầm** giá trị đúng bằng giá trị cũ sai. Hậu quả: lần lưu đầu tiên (hoặc sau "Khôi phục dữ liệu mẫu") ghi `schemaVersion: 1` vào localStorage; ngay lần tải lại tiếp theo, `loadUserData()` thấy `1 !== 2` (SCHEMA_VERSION thật) nên coi là không hợp lệ và **âm thầm xoá sạch** mọi dữ liệu người dùng (booking, đề án, ngoại lệ CPS, huy hiệu, yêu thích, điểm thưởng...) — lặp lại ở mọi lần tải sau đó. Phát hiện khi kiểm thử luồng Ops xử lý hoàn tiền (đóng/mở lại trang để xác nhận UI thật). Đã sửa: bỏ trường `schemaVersion` khỏi `createSeedState()` (không thuộc về "nội dung"), gán `schemaVersion` sau vòng lặp copy trong `defaultUserData()`. Đã kiểm thử lại: tải lại trang 3 lần liên tiếp, dữ liệu (yêu thích, booking...) và `schemaVersion: 2` đều giữ nguyên đúng. Đây là lỗi nghiêm trọng nhất từng phát hiện trong dự án — vi phạm trực tiếp yêu cầu "Không xóa dữ liệu khi reload" — may mắn là chưa từng lộ ra ở các phase trước vì kiểm thử trước đó chủ yếu điều hướng bằng hash routing trong SPA (không tải lại trang thật), tới Phase 6 mới cần tải lại trang thật để xác nhận UI Cổng vận hành nên mới phát hiện.
+2. **Chính sách hoàn tiền tính sai theo múi giờ**: `computeRefundAmount` trong `js/services/bookingService.js` cắt chuỗi ISO (`slot.date.slice(0,10)`) để lấy ngày rồi ghép với giờ hẹn — nhưng `slot.date` lưu dạng UTC trong khi múi giờ Việt Nam là UTC+7, nên cắt chuỗi có thể lùi lại một ngày (nửa đêm giờ Việt Nam ngày mai = 17h UTC ngày hôm nay). Hậu quả: một booking hẹn sáng mai (còn ~22 tiếng) bị tính nhầm là "dưới 6 giờ trước giờ hẹn" → hoàn 0đ thay vì đúng chính sách 50%. Phát hiện khi kiểm thử luồng Ops xử lý hoàn tiền cho ticket thật. Đã sửa: dùng getter giờ địa phương (`getFullYear/getMonth/getDate`) thay vì cắt chuỗi UTC để ghép đúng ngày+giờ hẹn theo giờ địa phương. Đã kiểm thử lại qua UI thật: cùng một booking, trước khi sửa hiện "0 đ", sau khi sửa hiện đúng "45.000 đ — Huỷ trong 6–24 giờ: hoàn 50%".
+
+### Kịch bản nghiệm thu đã chạy trong phase này
+- Kịch bản 9 (đề án): hộ gửi đề án → quản lý yêu cầu bổ sung → hộ cập nhật & gửi lại → quản lý chấp thuận. Đã chạy đủ qua UI thật, trạng thái/nhật ký khớp ở cả hai phía.
+- Kịch bản 10 (ngoại lệ CPS): hộ gửi yêu cầu (danh mục "nghi lễ") → cố vấn cộng đồng duyệt → trạng thái cập nhật, có nhật ký thời gian.
+- Kịch bản 7 (sự cố hoàn tiền): khách yêu cầu hoàn tiền → vận hành xử lý (`cancelBooking` thật, đúng chính sách theo mốc giờ sau khi sửa bug) → ticket chuyển "Đã xử lý", giao dịch hoàn tiền xuất hiện đúng trong "Giao dịch gần đây".
+- Kịch bản 8 (kiểm duyệt nội dung): hộ tạo nháp → gửi duyệt → vận hành/cố vấn cộng đồng duyệt thật (không còn nút mô phỏng) → khách mới thấy nội dung công bố.
+- Kiểm tra phân quyền: đã xác nhận CPS không lộ ở Cổng dữ liệu quản lý, có lộ đúng ở Cổng vận hành; Cố vấn cộng đồng không thấy booking/giao dịch.
+- Kiểm tra responsive 375px: bảng rộng (Booking & Giao dịch) cuộn ngang bên trong card riêng, trang không tràn ngang; bottom-nav 5 tab (Admin) và 4 tab (Ops) hiển thị đúng.
+
+### Giới hạn đã biết (không giấu)
+- "Điều phối booking thủ công" ở Cổng vận hành chỉ ghi chú nội bộ, chưa có engine tự động gợi ý/áp dụng đổi giờ-đổi điểm thay khách — đúng theo quy tắc booking (khách phải tự xác nhận thay đổi ảnh hưởng tới hành trình/tiền qua Trail), không giả vờ có khả năng tự động hoá chưa thật sự tồn tại.
+- Xuất CSV dùng `Blob` + link tải chuẩn của trình duyệt (hoạt động đúng trên trình duyệt thật); môi trường sandbox dùng để kiểm thử tự động có thể chặn việc tải file xuống, đã xác minh không có lỗi JS khi bấm nút và nội dung CSV sinh ra đúng qua kiểm tra trực tiếp.
+- Dự báo mô phỏng chỉ ngoại suy tuyến tính đơn giản từ 3 tháng gần nhất, không tính mùa vụ/lễ hội — đã ghi rõ giới hạn ngay trên giao diện.
+
+### Còn lại (không phải bỏ sót, đúng roadmap)
+Hoàn thiện deploy GitHub Pages/Hostinger và chạy đủ 12 kịch bản nghiệm thu cuối cùng — thực hiện ở phase cuối.

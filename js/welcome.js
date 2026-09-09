@@ -26,7 +26,7 @@ export function renderGateway(container) {
     <div class="welcome-page">
       <div>
         <h1 style="font-size:1.5rem;">Cổng quản lý (demo)</h1>
-        <p style="opacity:0.85;">Dành cho cơ quan quản lý, đội vận hành và cố vấn cộng đồng. Các vai trò dưới đây đang được xây dựng dần theo roadmap.</p>
+        <p style="opacity:0.85;">Dành cho cơ quan quản lý, đội vận hành và cố vấn cộng đồng — mỗi vai trò xem dữ liệu khác nhau theo đúng quyền hạn (vd: CPS chỉ vận hành xem được, không lộ cho cơ quan quản lý hay khách).</p>
       </div>
       <div class="gateway-list">
         <a class="gateway-item" href="#/admin">

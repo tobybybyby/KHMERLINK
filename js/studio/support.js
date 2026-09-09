@@ -1,4 +1,4 @@
-import { getState, createProposal, setProposalStatus, requestCpsException, decideCpsException } from '../storage.js';
+import { getState, createProposal, updateProposal, setProposalStatus, requestCpsException } from '../storage.js';
 import { escapeHtml, formatDateShort, qs, qsa } from '../utils.js';
 import { NotificationService } from '../services/notificationService.js';
 
@@ -32,9 +32,11 @@ function proposalCardHtml(p) {
         ${p.timeline.map((t) => `${formatDateShort(t.at)} — ${escapeHtml(t.note || t.status)}`).join('<br>')}
       </div>
       ${p.status === 'sent' || p.status === 'reviewing' ? `
+        <p class="text-sm text-faint" style="margin-top:8px;">Đang chờ Cổng dữ liệu quản lý xem xét.</p>
+      ` : ''}
+      ${p.status === 'needs_info' ? `
         <div class="cta-row" style="margin-top:8px;">
-          <button type="button" class="btn btn-accent btn-sm" data-sim-proposal="${p.id}" data-decision="approved">🎭 Mô phỏng: quản lý chấp thuận</button>
-          <button type="button" class="btn btn-secondary btn-sm" data-sim-proposal="${p.id}" data-decision="needs_info">🎭 Mô phỏng: yêu cầu bổ sung</button>
+          <button type="button" class="btn btn-primary btn-sm" data-update-proposal="${p.id}">✏️ Cập nhật & gửi lại</button>
         </div>
       ` : ''}
     </div>
@@ -52,12 +54,7 @@ function cpsExcCardHtml(e) {
       </div>
       <p class="text-sm text-muted" style="margin:0;">${escapeHtml(e.reason)}</p>
       <p class="text-sm" style="margin:0;">Khoảng thời gian: ${formatDateShort(e.startDate)} – ${formatDateShort(e.endDate)}</p>
-      ${e.status === 'pending' ? `
-        <div class="cta-row" style="margin-top:8px;">
-          <button type="button" class="btn btn-accent btn-sm" data-sim-cps="${e.id}" data-decision="approved">🎭 Mô phỏng: cố vấn/vận hành duyệt</button>
-          <button type="button" class="btn btn-danger-ghost btn-sm" data-sim-cps="${e.id}" data-decision="rejected">🎭 Mô phỏng: từ chối</button>
-        </div>
-      ` : ''}
+      ${e.status === 'pending' ? '<p class="text-sm text-faint" style="margin-top:8px;">Đang chờ Cổng vận hành/cố vấn cộng đồng xét duyệt.</p>' : ''}
     </div>
   `;
 }
@@ -70,7 +67,7 @@ export function renderSupport(container, hostId) {
   container.innerHTML = `
     <div>
       <h1 style="margin-bottom:4px;">Hỗ trợ & Đề án</h1>
-      <p class="text-sm text-muted">Cổng dữ liệu quản lý (nơi thẩm định đề án thật) và Cổng vận hành (nơi duyệt ngoại lệ CPS thật) sẽ xây ở phase sau — nút "mô phỏng" bên dưới giúp trình diễn đủ luồng ngay bây giờ.</p>
+      <p class="text-sm text-muted">Đề án được Cổng dữ liệu quản lý xem xét và ngoại lệ CPS được Cổng vận hành/cố vấn cộng đồng duyệt thật — trạng thái cập nhật ở đây ngay khi họ xử lý, dùng chung một dữ liệu.</p>
     </div>
 
     <section class="card" style="padding:20px;">
@@ -98,37 +95,30 @@ export function renderSupport(container, hostId) {
   qs('#new-proposal-btn', container).addEventListener('click', () => openProposalForm(container, hostId));
   qs('#new-cps-exc-btn', container).addEventListener('click', () => openCpsExceptionForm(container, hostId));
 
-  qsa('[data-sim-proposal]', container).forEach((btn) => {
+  qsa('[data-update-proposal]', container).forEach((btn) => {
     btn.addEventListener('click', () => {
-      setProposalStatus(btn.dataset.simProposal, btn.dataset.decision, btn.dataset.decision === 'approved' ? 'Mô phỏng: quản lý chấp thuận đề án.' : 'Mô phỏng: quản lý yêu cầu bổ sung thông tin.');
-      NotificationService.notify('Đã cập nhật trạng thái đề án.', 'success');
-      renderSupport(container, hostId);
-    });
-  });
-  qsa('[data-sim-cps]', container).forEach((btn) => {
-    btn.addEventListener('click', () => {
-      decideCpsException(btn.dataset.simCps, btn.dataset.decision, btn.dataset.decision === 'approved' ? 'Mô phỏng: đã duyệt ngoại lệ.' : 'Mô phỏng: từ chối ngoại lệ.');
-      NotificationService.notify('Đã cập nhật yêu cầu ngoại lệ CPS.', 'success');
-      renderSupport(container, hostId);
+      const proposal = state.proposals.find((p) => p.id === btn.dataset.updateProposal);
+      openProposalForm(container, hostId, proposal);
     });
   });
 }
 
-function openProposalForm(container, hostId) {
-  container.insertAdjacentHTML('beforeend', '');
+function openProposalForm(container, hostId, existing) {
+  const isEdit = !!existing;
   const formHtml = `
     <section class="card" style="padding:20px;" id="proposal-form-section">
-      <h3 style="margin-top:0;">Gửi đề án mới</h3>
+      <h3 style="margin-top:0;">${isEdit ? 'Cập nhật đề án' : 'Gửi đề án mới'}</h3>
+      ${isEdit && existing.timeline.length ? `<p class="text-sm text-muted">Phản hồi gần nhất từ quản lý: ${escapeHtml(existing.timeline[existing.timeline.length - 1].note || '')}</p>` : ''}
       <div class="flex-col gap-3">
-        <div><label class="field-label" for="pr-title">Tiêu đề</label><input type="text" class="field-input" id="pr-title"></div>
-        <div><label class="field-label" for="pr-problem">Vấn đề gặp phải</label><textarea class="field-input" id="pr-problem" rows="2"></textarea></div>
-        <div><label class="field-label" for="pr-support">Hỗ trợ mong muốn</label><textarea class="field-input" id="pr-support" rows="2"></textarea></div>
-        <div><label class="field-label" for="pr-benefit">Lợi ích dự kiến</label><textarea class="field-input" id="pr-benefit" rows="2"></textarea></div>
-        <div><label class="field-label" for="pr-evidence">Minh chứng</label><textarea class="field-input" id="pr-evidence" rows="2" placeholder="Mô tả minh chứng (ảnh đính kèm chưa hỗ trợ trong demo)"></textarea></div>
-        <div><label class="field-label" for="pr-budget">Kinh phí đề xuất (tuỳ chọn)</label><input type="text" class="field-input" id="pr-budget"></div>
+        <div><label class="field-label" for="pr-title">Tiêu đề</label><input type="text" class="field-input" id="pr-title" value="${escapeHtml(existing?.title || '')}"></div>
+        <div><label class="field-label" for="pr-problem">Vấn đề gặp phải</label><textarea class="field-input" id="pr-problem" rows="2">${escapeHtml(existing?.problem || '')}</textarea></div>
+        <div><label class="field-label" for="pr-support">Hỗ trợ mong muốn</label><textarea class="field-input" id="pr-support" rows="2">${escapeHtml(existing?.desiredSupport || '')}</textarea></div>
+        <div><label class="field-label" for="pr-benefit">Lợi ích dự kiến</label><textarea class="field-input" id="pr-benefit" rows="2">${escapeHtml(existing?.expectedBenefit || '')}</textarea></div>
+        <div><label class="field-label" for="pr-evidence">Minh chứng</label><textarea class="field-input" id="pr-evidence" rows="2" placeholder="Mô tả minh chứng (ảnh đính kèm chưa hỗ trợ trong demo)">${escapeHtml(existing?.evidence || '')}</textarea></div>
+        <div><label class="field-label" for="pr-budget">Kinh phí đề xuất (tuỳ chọn)</label><input type="text" class="field-input" id="pr-budget" value="${escapeHtml(existing?.proposedBudget || '')}"></div>
         <div class="cta-row">
-          <button type="button" class="btn btn-secondary" id="pr-save-draft">Lưu nháp</button>
-          <button type="button" class="btn btn-primary" id="pr-send">Gửi đề án</button>
+          ${isEdit ? '' : '<button type="button" class="btn btn-secondary" id="pr-save-draft">Lưu nháp</button>'}
+          <button type="button" class="btn btn-primary" id="pr-send">${isEdit ? 'Cập nhật & gửi lại' : 'Gửi đề án'}</button>
         </div>
       </div>
     </section>
@@ -150,7 +140,7 @@ function openProposalForm(container, hostId) {
     };
   }
 
-  qs('#pr-save-draft', section).addEventListener('click', () => {
+  qs('#pr-save-draft', section)?.addEventListener('click', () => {
     const data = collect();
     if (!data.title) { NotificationService.notify('Nhập tiêu đề trước khi lưu.', 'error'); return; }
     createProposal({ ...data, status: 'draft' });
@@ -160,8 +150,14 @@ function openProposalForm(container, hostId) {
   qs('#pr-send', section).addEventListener('click', () => {
     const data = collect();
     if (!data.title || !data.problem || !data.desiredSupport) { NotificationService.notify('Cần nhập tiêu đề, vấn đề và hỗ trợ mong muốn.', 'error'); return; }
-    createProposal({ ...data, status: 'sent' });
-    NotificationService.notify('Đã gửi đề án.', 'success');
+    if (isEdit) {
+      updateProposal(existing.id, data);
+      setProposalStatus(existing.id, 'sent', 'Hộ đã cập nhật và gửi lại đề án.');
+      NotificationService.notify('Đã cập nhật và gửi lại đề án.', 'success');
+    } else {
+      createProposal({ ...data, status: 'sent' });
+      NotificationService.notify('Đã gửi đề án.', 'success');
+    }
     renderSupport(container, hostId);
   });
 }
