@@ -35,9 +35,10 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 6 | Kiểm tra giờ mở/thời lượng/khoảng cách/sức chứa | `services/aiService.js`, `services/bookingService.js` | Hoạt động (demo) — chặn vượt sức chứa đã kiểm thử thật |
 | 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — hộ phản hồi thật trong Studio (`studio/bookings.js`), không còn mô phỏng ở Trail. Phase cuối: sửa lỗi combo nhiều hộ không phản hồi tiếp được sau lượt đầu — đã kiểm thử lại đúng kịch bản 3 |
 | 7 | Chính sách huỷ/hoàn tiền theo mốc thời gian | `services/bookingService.js` | Hoạt động (demo, minh hoạ) |
-| 8 | Hành trình đang diễn ra, đã ghé thăm, hỗ trợ sự cố | `trail/itineraryDetail.js`, `trail/support.js` | Hoạt động (demo) |
+| 8 | Hành trình đang diễn ra, đã ghé thăm, hỗ trợ sự cố | `trail/itineraryDetail.js`, `trail/support.js` | Hoạt động (demo) — đánh dấu đủ điểm ghé thăm nay tự chuyển hành trình sang "Đã hoàn thành" và điều hướng sang trang tổng kết (trước đây thiếu, đã sửa) |
 | 8 | Heatmap (Khám phá + trong hành trình), đề xuất đổi điểm | `trail/explore.js`, `trail/itineraryDetail.js` | Hoạt động (demo, mô phỏng) |
 | 9 | Đánh giá, Traveller Passport, điểm/voucher | `trail/passport.js` | Hoạt động (demo) |
+| — | Cảm nhận nhanh (sao + tiêu chí theo nhóm loại hình) sau khi tự đánh dấu ghé thăm điểm miễn phí | `trail/placeImpression.js`, `trail/reviewTags.js`, `trail/itinerarySummary.js` | Hoạt động (demo) — tách khỏi đánh giá booking (không tính CPS), tối đa 6 tiêu chí/địa điểm theo nhóm, rating thấp tự đổi bộ câu hỏi "cần cải thiện" |
 | 10 | Studio: tổng quan/đăng trải nghiệm/booking/báo cáo/CPS/đề án | `js/studio/*.js`, `js/services/cpsService.js` | Hoạt động (demo) — chi tiết ở bảng Phase 5 bên dưới |
 | 11 | Cổng dữ liệu quản lý | `js/admin/*.js` | Hoạt động (demo) — chi tiết ở bảng Phase 6 bên dưới |
 | 12 | Cổng vận hành & cố vấn cộng đồng | `js/ops/*.js` | Hoạt động (demo) — chi tiết ở bảng Phase 6 bên dưới |

@@ -1,6 +1,6 @@
 # PROGRESS — Vĩnh Long Trail & Studio
 
-Cập nhật lần cuối: Kiểm tra & bổ sung Bản đồ/Ảnh địa danh — 2026-09-09
+Cập nhật lần cuối: Cảm nhận sau ghé thăm + trang tổng kết hành trình — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -318,3 +318,33 @@ Trước khi coi 2 tính năng này là "Phase 3" và "Phase 7" riêng, đã aud
 - `scripts/optimize-images.js` là script chạy một lần thủ công (không tự động hoá trong pipeline vì site không có build step) — cần `npm install --no-save sharp` trước khi chạy, đã gỡ `sharp` khỏi `node_modules` sau khi dùng xong.
 - Gallery đã sẵn kiến trúc nhưng chưa có dữ liệu ảnh phụ thật nào — chỉ phát huy tác dụng khi có thêm ảnh được thêm vào trường `gallery` của địa danh tương ứng sau này.
 - 20/37 địa danh vẫn chưa có ảnh thật (đúng như Phase 2 — chưa xin phép nguồn để tải), không nằm trong phạm vi lần bổ sung này.
+
+## Sửa lỗi + tính năng mới — Cảm nhận sau khi tự ghé thăm + trang tổng kết hành trình
+
+Người dùng tự kiểm thử app phát hiện: sau khi đánh dấu "Đã ghé thăm" hết các điểm trong hành trình gợi ý, màn hình không điều hướng sang trang tổng kết/đánh giá. Đồng thời đề xuất mô hình đánh giá kết hợp sao + tag theo từng nhóm loại hình (tương tự Grab) thay vì một bộ câu hỏi chung cho mọi địa điểm.
+
+### Nguyên nhân lỗi
+`itinerary.status` chỉ có đường chuyển `selected → active` (bấm "Bắt đầu hành trình") — chưa từng có chỗ nào gán `status = 'completed'`, dù `statusBadge()` và trang danh sách hành trình đã sẵn nhãn "Đã hoàn thành" từ trước (chờ sẵn nhưng chưa có gì kích hoạt).
+
+### Đã xây dựng
+- `js/trail/reviewTags.js` — bộ tiêu chí đánh giá nhanh theo nhóm loại hình (dùng chung `categoryGroup()` đã có), tối đa 6 tiêu chí/địa điểm: Thiên nhiên, Tôn giáo, Làng nghề & cộng đồng, Trải nghiệm tại hộ dân, Bảo tàng/Di tích, Khu tưởng niệm, Nhà cổ, Ẩm thực, và bộ chung (fallback). Rating ≤3 sao tự đổi sang bộ tiêu chí "cần cải thiện" (Vệ sinh, Biển chỉ dẫn, Chất lượng dịch vụ...).
+- `js/trail/placeImpression.js` — modal "Cảm nhận chuyến ghé thăm": chọn sao → hiện tiêu chí phù hợp (chọn nhiều, không chấm điểm từng câu) → góp ý tuỳ chọn → hỏi có giới thiệu cho người khác không → Gửi/Bỏ qua. Không bắt buộc, không chặn tiến trình.
+- `addPlaceImpression()` (`js/storage.js`) — lưu vào mảng mới `placeImpressions`, **tách khỏi** `userReviews` (vốn gắn với booking, dùng cho CPS/host) vì đây là tín hiệu tự khai báo cho điểm miễn phí — không tính vào CPS.
+- Sửa `js/trail/itineraryDetail.js`: bấm "Đã ghé thăm" giờ mở modal cảm nhận ngay sau khi đánh dấu; đóng modal (dù gửi hay bỏ qua) sẽ kiểm tra — nếu **tất cả** điểm đã tự đánh dấu ghé thăm thì gán `itinerary.status = 'completed'` và điều hướng sang `#/trail/itinerary/:id/summary`; nếu chưa, vẽ lại trang hành trình như cũ.
+- `js/trail/itinerarySummary.js` (trang mới) — tổng kết hành trình: số điểm đã ghé/tổng thời gian/số cảm nhận đã gửi, danh sách từng điểm kèm sao+tiêu chí+góp ý đã cho (hoặc nút "Gửi cảm nhận" bù nếu bỏ qua lúc trước), gộp luôn nút "Đánh giá hoạt động trả phí" cho các booking đã hoàn thành chưa được viết đánh giá (dùng lại `openReviewModal` có sẵn) — một nơi xử lý hết việc còn thiếu sau chuyến đi.
+
+### Đã kiểm thử qua DOM thật (không suy đoán)
+- Hành trình 2 điểm (Ao Bà Om – Thiên nhiên, Chùa Âng – Tôn giáo): đánh dấu ghé thăm điểm 1 → modal đúng tên địa điểm → chọn 4 sao → đúng 6 tiêu chí nhóm "Thiên nhiên" hiện ra → chọn 2 tiêu chí + viết góp ý + chọn "Giới thiệu: Có" → Gửi → lưu đúng vào `placeImpressions` với đủ trường, không điều hướng (chưa xong điểm 2).
+- Điểm 2: chọn 2 sao → tiêu chí tự đổi sang bộ "Điều gì cần được cải thiện?" (Vệ sinh, Biển chỉ dẫn...) → Gửi → `itinerary.status` chuyển `completed`, tự điều hướng sang trang tổng kết, hiện đúng 2 sao/4 sao và tiêu chí/góp ý đã chọn cho từng điểm.
+- Hành trình khác: bấm "Bỏ qua" ở cả 2 điểm — vẫn hoàn thành hành trình đúng (không bắt buộc phải đánh giá), trang tổng kết hiện "0/2" + nút "Gửi cảm nhận" bù cho từng điểm; bấm nút đó mở lại đúng modal, gửi thành công cập nhật "1/2" ngay không cần tải lại trang.
+- Tiêu chí đúng theo nhóm loại hình cho cả 3 nhóm đã thử (Thiên nhiên, Tôn giáo, Bảo tàng/Di tích) — khớp đúng danh sách đã định nghĩa.
+- Danh sách hành trình (`#/trail/itinerary`) và trang chi tiết hành trình đã hoàn thành đều hiện đúng nhãn "Đã hoàn thành" có sẵn từ trước; mở lại hành trình đã hoàn thành không còn nút "Đã ghé thăm"/banner live (đúng — chỉ xem lại).
+- Test fresh state (xoá localStorage) toàn bộ site: 0 lỗi console, 0 ảnh vỡ.
+
+### Lỗi phát hiện và đã sửa khi kiểm thử
+Card địa điểm trong trang tổng kết tràn ra ngoài màn hình mobile — dùng nhầm class `.mini-card__img` (width:100%, thiết kế cho ảnh full-width trong grid) thay vì `.itin-stop__img` (72×72px cố định, đúng cho layout ảnh nhỏ + text bên cạnh). Đã sửa bằng cách dùng lại cấu trúc `.itin-stop`/`.itin-stop__body` có sẵn (cùng pattern itineraryDetail.js đang dùng) — xác nhận lại đúng trên mobile 375px, không tràn ngang.
+
+### Giới hạn đã biết (không giấu)
+- Cảm nhận tự khai báo (`placeImpressions`) không cộng điểm thưởng — khác với trải nghiệm trả phí hoàn thành qua Studio (đúng chủ đích, tránh trộn lẫn hai cơ chế: tự báo cáo cho điểm miễn phí vs. xác nhận qua booking cho điểm thưởng).
+- Hoàn thành hành trình hiện chỉ dựa vào "tất cả điểm đã tự đánh dấu ghé thăm" (không phụ thuộc trạng thái booking) — khớp đúng hành động người dùng vừa bấm, nhưng có nghĩa một hành trình có thể "hoàn thành" dù một hoạt động trả phí trong đó chưa được hộ xác nhận xong; đây là tín hiệu tiến trình cá nhân của khách, tách bạch với xác nhận booking (đúng nguyên tắc đã áp dụng xuyên suốt dự án).
+- Tổng hợp tiêu chí (vd "Ao Bà Om được khen nhiều về cảnh quan nhưng hay bị phàn nàn vệ sinh") chưa hiển thị ở trang chi tiết địa điểm — mới dừng ở mức thu thập dữ liệu có cấu trúc; hiển thị tổng hợp để lại cho lần sau nếu cần.

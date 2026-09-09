@@ -11,6 +11,7 @@ import { openModal, confirmDialog, renderEmptyState } from '../ui.js';
 import { openBookingFlow } from './booking.js';
 import { openSupportModal } from './support.js';
 import { openReviewModal } from './passport.js';
+import { openPlaceImpressionModal } from './placeImpression.js';
 
 let mapInstance = null;
 
@@ -274,6 +275,22 @@ function applyAddOrReplace(container, itinerary, destinationId, replaceIndex) {
   render(container, itinerary.id);
 }
 
+/** Gọi sau khi đóng modal cảm nhận (dù gửi hay bỏ qua) — nếu tất cả điểm đã tự đánh dấu ghé
+ * thăm thì đánh dấu hành trình hoàn tất và điều hướng sang trang tổng kết; nếu chưa, vẽ lại
+ * trang hành trình như bình thường. */
+function finishVisitStep(container, itineraryId) {
+  const itinerary = getItinerary(itineraryId);
+  if (!itinerary) return;
+  const allVisited = itinerary.stops.length > 0 && itinerary.stops.every((s) => s.selfVisitedAt);
+  if (allVisited && itinerary.status !== 'completed') {
+    itinerary.status = 'completed';
+    saveItinerary(itinerary);
+    window.location.hash = `#/trail/itinerary/${itineraryId}/summary`;
+    return;
+  }
+  render(container, itineraryId);
+}
+
 function wireStopActions(container, itinerary) {
   qsa('[data-act]', container).forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -297,11 +314,16 @@ function wireStopActions(container, itinerary) {
       } else if (act === 'replace') {
         openAddStopModal(container, itinerary, index);
       } else if (act === 'visited') {
-        itinerary.stops[index].selfVisitedAt = new Date().toISOString();
+        const stop = itinerary.stops[index];
+        stop.selfVisitedAt = new Date().toISOString();
         saveItinerary(itinerary);
-        addPassportStamp({ destinationId: itinerary.stops[index].destinationId, type: 'visited-self' });
+        addPassportStamp({ destinationId: stop.destinationId, type: 'visited-self' });
         NotificationService.notify('Đã đánh dấu ghé thăm (tự đánh dấu, khác với xác nhận booking).', 'success');
         render(container, itinerary.id);
+        openPlaceImpressionModal(
+          { destinationId: stop.destinationId, itineraryId: itinerary.id, stopKey: `${itinerary.id}:${stop.destinationId}` },
+          () => finishVisitStep(container, itinerary.id),
+        );
       } else if (act === 'review') {
         openReviewModal(btn.dataset.dest, btn.dataset.bi, () => render(container, itinerary.id));
       } else if (act === 'crowd-suggest') {

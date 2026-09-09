@@ -212,6 +212,7 @@ export function createSeedState() {
     payments: [],
     reviews: buildReviews(),
     userReviews: [],
+    placeImpressions: [],
     travellerReviews: [],
     passportStamps: [],
     pointsLedger: [],

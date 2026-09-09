@@ -7,6 +7,7 @@ import { renderPlaceDetail } from './trail/placeDetail.js';
 import { renderProfile } from './trail/profile.js';
 import { renderItineraryHome, renderItineraryWizard } from './trail/itinerary.js';
 import { renderItineraryDetail } from './trail/itineraryDetail.js';
+import { renderItinerarySummary } from './trail/itinerarySummary.js';
 import { renderPassport } from './trail/passport.js';
 import { renderStudioShell } from './studio/shell.js';
 import { renderOverview } from './studio/overview.js';
@@ -60,6 +61,7 @@ const ROUTES = [
   { pattern: /^#\/trail\/explore$/, handler: () => mountTrailPage('explore', renderExplore) },
   { pattern: /^#\/trail\/place\/([\w-]+)$/, handler: (m) => mountTrailPage('explore', (el) => renderPlaceDetail(el, m[1])) },
   { pattern: /^#\/trail\/itinerary\/new$/, handler: () => mountTrailPage('itinerary', renderItineraryWizard) },
+  { pattern: /^#\/trail\/itinerary\/([\w-]+)\/summary$/, handler: (m) => mountTrailPage('itinerary', (el) => renderItinerarySummary(el, m[1])) },
   { pattern: /^#\/trail\/itinerary\/([\w-]+)$/, handler: (m) => mountTrailPage('itinerary', (el) => renderItineraryDetail(el, m[1])) },
   { pattern: /^#\/trail\/itinerary$/, handler: () => mountTrailPage('itinerary', renderItineraryHome) },
   { pattern: /^#\/trail\/passport$/, handler: () => mountTrailPage('passport', renderPassport) },

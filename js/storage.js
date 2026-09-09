@@ -269,6 +269,32 @@ export function addUserReview({ destinationId, bookingItemId, rating, comment, c
   return { ok: true, review };
 }
 
+// ---------- Cảm nhận nhanh sau khi tự đánh dấu "Đã ghé thăm" (không cần booking) ----------
+// Tách khỏi userReviews (vốn yêu cầu bookingItemId, dùng cho CPS/host) vì đây là tín hiệu tự
+// khai báo cho các điểm miễn phí — không tính vào CPS, không thay thế đánh giá booking chính
+// thức. Chống trùng theo stopKey (một lượt "đã ghé thăm" chỉ tạo được một cảm nhận).
+export function addPlaceImpression({ destinationId, itineraryId = null, stopKey = null, rating, tags = [], comment = '', recommend = null }) {
+  const s = getState();
+  if (stopKey && s.placeImpressions.some((i) => i.stopKey === stopKey)) {
+    return { ok: false, reason: 'Điểm dừng này đã có cảm nhận.' };
+  }
+  const impression = {
+    id: uidLocal('imp'),
+    destinationId,
+    itineraryId,
+    stopKey,
+    author: 'Bạn',
+    rating,
+    tags,
+    comment: comment || '',
+    recommend,
+    createdAt: new Date().toISOString(),
+  };
+  s.placeImpressions.push(impression);
+  persist();
+  return { ok: true, impression };
+}
+
 // ---------- Ticket hỗ trợ / sự cố ----------
 export function createSupportTicket({ category, description, bookingId = null, destinationId = null, desiredResolution = null }) {
   const s = getState();
