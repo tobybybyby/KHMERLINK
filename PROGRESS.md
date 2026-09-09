@@ -409,3 +409,13 @@ Kiểm tra tiếp các trang khác trong Cổng quản lý phát hiện lỗi n�
 **Đã sửa**: đổi wrapper của trang từ `.page-generic` sang `.trail-shell` (class flex-column full-page đã dùng đúng cho mọi shell khác có topbar — Trail/Studio/Ops/Admin) — chỉ đổi 1 class, không đổi cấu trúc HTML hay CSS khác.
 
 **Đã kiểm thử qua trình duyệt thật**: `#/ops/community` desktop và mobile 375px — topbar hiển thị đúng 1 hàng ngang, không còn vỡ chữ/đè chồng, không có khoảng trắng thừa.
+
+### Lỗi thứ 3: thanh topbar cắt chữ ở các trang có tên dài trên di động (375px)
+
+Rà soát toàn bộ 26 route của app (script tự động kiểm tra `scrollWidth`/`clientWidth` và vị trí các phần tử con trong topbar so với khung topbar, cả desktop lẫn mobile 375px) phát hiện thêm: `#/admin/*` (brand "📊 Cổng dữ liệu quản lý" + nút "← Cổng quản lý" đều dài) bị tràn nhẹ — nút "← Cổng quản lý" khi xuống 2 dòng cao 64px nhưng khung topbar cố định `height: 60px`, khiến nút bị cắt mất 2px ở mép trên và mép dưới, đè nhẹ lên thanh "Demo vai trò" bên dưới.
+
+**Nguyên nhân gốc**: `.trail-topbar` (dùng chung cho MỌI shell: Trail/Studio/Admin/Ops/Cố vấn cộng đồng) đặt `height` cố định thay vì `min-height` — bất kỳ trang nào có brand hoặc nút quá dài, xuống 2 dòng trên màn hẹp, đều có nguy cơ bị cắt tương tự (không riêng gì Admin, do brand/nút mỗi shell dài ngắn khác nhau).
+
+**Đã sửa tận gốc** (thay vì vá riêng từng trang): `css/layout.css`, đổi `.trail-topbar` từ `height: var(--topbar-height)` sang `min-height: var(--topbar-height)` kèm padding dọc `var(--space-2)` thay vì `0` — topbar giờ tự giãn cao khi nội dung xuống dòng, không còn giới hạn cứng.
+
+**Đã kiểm thử qua trình duyệt thật**: quét lại toàn bộ 26 route (script tự động, cả desktop và mobile 375px) — không còn route nào bị tràn ngang (`scrollWidth`) hoặc có phần tử con lồi ra ngoài khung topbar. Kiểm tra mắt thường `#/admin/flow` trên mobile — nút "← Cổng quản lý" 2 dòng giờ nằm gọn trong khung, không đè lên thanh dưới.
