@@ -122,12 +122,12 @@ export function renderReports(container, hostId) {
     const labels = displayMonths.map((m) => m.label);
     new Chart(qs('#revenue-chart', container), {
       type: 'bar',
-      data: { labels, datasets: [{ label: 'Doanh thu (đ)', data: displayMonths.map((m) => m.revenue), backgroundColor: '#1e5b3a' }] },
+      data: { labels, datasets: [{ label: 'Doanh thu (đ)', data: displayMonths.map((m) => m.revenue), backgroundColor: '#6b4423' }] },
       options: { responsive: true, plugins: { legend: { display: false } } },
     });
     new Chart(qs('#visitors-chart', container), {
       type: 'line',
-      data: { labels, datasets: [{ label: 'Khách', data: displayMonths.map((m) => m.visitors), borderColor: '#c8862e', backgroundColor: '#c8862e33', fill: true, tension: 0.3 }] },
+      data: { labels, datasets: [{ label: 'Khách', data: displayMonths.map((m) => m.visitors), borderColor: '#b8862e', backgroundColor: '#b8862e33', fill: true, tension: 0.3 }] },
       options: { responsive: true, plugins: { legend: { display: false } } },
     });
   }).catch(() => {

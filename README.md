@@ -1,4 +1,6 @@
-# Vĩnh Long — Chạm văn hóa, nối hành trình
+# Khmer Linh — Chạm văn hóa, nối hành trình
+
+> Đổi tên thương hiệu từ "Vĩnh Long — Chạm văn hóa, nối hành trình" sang **Khmer Linh** — xem mục [Đổi thương hiệu & thiết kế lại giao diện](#đổi-thương-hiệu--thiết-kế-lại-giao-diện) bên dưới. `PROGRESS.md`/`REQUIREMENTS_MATRIX.md`/`DATA_ISSUES.md` vẫn giữ nguyên tên cũ ở các mục ghi trước thời điểm đổi tên (không viết lại lịch sử).
 
 Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thái du lịch cộng đồng Vĩnh Long: **Trail** (du khách), **Studio** (hộ dân/nghệ nhân), **Cổng dữ liệu quản lý** và **Cổng vận hành** (kèm vai trò **Cố vấn cộng đồng** quyền hạn chế). Toàn bộ yêu cầu gốc nằm trong `Prompt-Claude-Vinh-Long.md`.
 
@@ -7,6 +9,18 @@ Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thá
 ## Trạng thái dự án
 
 Đã hoàn thành toàn bộ 6 phase tính năng (nền tảng, dữ liệu địa danh, cá nhân hóa/booking/hậu chuyến đi, Studio, Cổng dữ liệu quản lý + Cổng vận hành) và đang ở phase cuối — chuẩn bị deploy. Xem `PROGRESS.md` (nhật ký chi tiết từng phase, các lỗi đã phát hiện và sửa khi kiểm thử) và `REQUIREMENTS_MATRIX.md` (đối chiếu từng yêu cầu spec → màn hình → trạng thái). Tóm tắt đối chiếu nhanh ở mục [Đối chiếu specification](#đối-chiếu-specification) bên dưới.
+
+## Đổi thương hiệu & thiết kế lại giao diện
+
+Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Linh** và thiết kế lại giao diện theo phong cách "văn hiến" (giấy cũ + mực đồng/vàng cổ, chữ serif trang trọng) thay vì tông xanh lá hiện đại ban đầu — tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long*.
+
+- **Đổi tên**: tiêu đề trang, brand Trail/Studio, `package.json`, README — chỉ đổi tên thương hiệu, **không đổi** các chỗ "Vĩnh Long" mang nghĩa địa danh thật (địa chỉ, tên tỉnh trong dữ liệu địa danh, các mục lịch sử phase cũ) để không làm sai dữ liệu.
+- **Màu sắc**: đổi toàn bộ 27 biến màu trong `css/tokens.css` (nâu đồng làm màu chính thay xanh lá, giữ nền kem/vàng cổ) — vì mọi nơi trong site đều tham chiếu biến CSS này (không hard-code hex), đổi một chỗ là đổi toàn site, không phải sửa từng file.
+- **Chữ**: thêm phông serif trang trọng **Cormorant Garamond** (Google Fonts, có bộ dấu tiếng Việt đầy đủ) cho tiêu đề `h1`/`h2` và tên thương hiệu — giữ phông sans-serif hiện tại cho phần thân/UI dày đặc để đảm bảo dễ đọc trên di động.
+- **Trang chào**: thêm hoạ tiết trang trí dạng sóng/mây (SVG tự vẽ, không dùng ảnh ngoài để tránh vướng bản quyền) phía trên/dưới tên thương hiệu, đổi biểu tượng sang hoa sen 🪷.
+- **Favicon**: vẽ lại thành hoa sen cách điệu trên nền nâu đồng, khớp bảng màu mới.
+- Toàn bộ hệ thống màu theo danh mục địa điểm (`categoryEmoji`/`categoryColor` trong `js/utils.js`) **không đổi** — đây là mã màu chức năng (phân biệt loại hình trên bản đồ/badge), tách biệt khỏi màu thương hiệu nên không bị ảnh hưởng.
+- Chưa dùng ảnh/hoạ tiết trang trí lấy từ nguồn ngoài (dù được đề nghị) — ưu tiên tự vẽ SVG để không phát sinh rủi ro bản quyền như đã lưu ý với ảnh địa danh (`DATA_ISSUES.md`). Nếu bạn có ảnh/hoạ tiết cụ thể muốn dùng, gửi để tích hợp thêm.
 
 ## Chạy thử ở máy local
 

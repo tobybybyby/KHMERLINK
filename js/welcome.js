@@ -1,10 +1,22 @@
+const FLOURISH_SVG = `
+  <svg class="welcome-flourish" viewBox="0 0 400 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M0 16 Q 25 4, 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16 T 350 16 T 400 16" fill="none" stroke="currentColor" stroke-width="1.2"/>
+    <circle cx="200" cy="16" r="3.5" fill="currentColor"/>
+    <circle cx="150" cy="16" r="1.6" fill="currentColor" opacity="0.7"/>
+    <circle cx="250" cy="16" r="1.6" fill="currentColor" opacity="0.7"/>
+  </svg>
+`;
+
 export function renderWelcome(container) {
   container.innerHTML = `
     <div class="welcome-page">
       <div>
-        <div style="font-size:2.6rem;">🌾</div>
-        <h1>Vĩnh Long — Chạm văn hóa, nối hành trình</h1>
-        <p style="opacity:0.85;max-width:480px;margin:0 auto;">Khám phá, kết nối và trải nghiệm cùng cộng đồng du lịch địa phương. Bản demo trình diễn — dữ liệu lưu trên trình duyệt của bạn.</p>
+        ${FLOURISH_SVG}
+        <div style="font-size:2.4rem;margin:var(--space-3) 0;">🪷</div>
+        <h1 class="welcome-title">Khmer Linh</h1>
+        <p class="welcome-subtitle">Chạm văn hóa, nối hành trình</p>
+        <p style="opacity:0.85;max-width:480px;margin:var(--space-3) auto 0;">Khám phá, kết nối và trải nghiệm cùng cộng đồng du lịch địa phương. Bản demo trình diễn — dữ liệu lưu trên trình duyệt của bạn.</p>
+        ${FLOURISH_SVG}
       </div>
       <div class="welcome-choices">
         <a class="welcome-choice" href="#/trail/explore">

@@ -147,7 +147,7 @@ function initMiniMap(container, itinerary) {
     mapInstance = L.map(mapEl, { zoomControl: true, scrollWheelZoom: false }).setView([pts[0].lat, pts[0].lng], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 18 }).addTo(mapInstance);
     const latlngs = pts.map((d) => [d.lat, d.lng]);
-    L.polyline(latlngs, { color: '#1e5b3a', weight: 3, dashArray: '6 6' }).addTo(mapInstance);
+    L.polyline(latlngs, { color: '#6b4423', weight: 3, dashArray: '6 6' }).addTo(mapInstance);
     pts.forEach((d, i) => {
       L.marker([d.lat, d.lng], { icon: MapService.categoryDivIcon(L, d.category) })
         .addTo(mapInstance)

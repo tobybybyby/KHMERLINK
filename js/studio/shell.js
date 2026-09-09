@@ -28,7 +28,7 @@ export function renderStudioShell(root, activeKey) {
   root.innerHTML = `
     <div class="studio-shell">
       <header class="trail-topbar">
-        <a class="trail-topbar__brand" href="#/">🏡 Vĩnh Long Studio</a>
+        <a class="trail-topbar__brand" href="#/">🏡 Khmer Linh Studio</a>
         <div class="trail-topbar__spacer"></div>
         <select class="host-switcher" id="studio-host-switcher" aria-label="Chọn hộ để xem demo">
           ${hostOptionsHtml(state, currentHostId)}

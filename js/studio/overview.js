@@ -71,7 +71,7 @@ export function renderOverview(container, hostId) {
       <div class="flex items-end gap-1" style="margin-top:14px;height:120px;">
         ${displayMonths.map((m) => `
           <div class="flex-col items-center gap-1" style="flex:1;height:100%;justify-content:flex-end;" title="${escapeHtml(m.label)}: ${formatMoney(m.revenue)}">
-            <div style="width:100%;max-width:22px;background:var(--color-primary,#1e5b3a);border-radius:3px 3px 0 0;height:${Math.max(4, Math.round((m.revenue / maxRevenue) * 100))}%;"></div>
+            <div style="width:100%;max-width:22px;background:var(--color-primary,#6b4423);border-radius:3px 3px 0 0;height:${Math.max(4, Math.round((m.revenue / maxRevenue) * 100))}%;"></div>
             <span class="text-sm text-faint" style="font-size:11px;">${escapeHtml(m.label)}</span>
           </div>
         `).join('')}

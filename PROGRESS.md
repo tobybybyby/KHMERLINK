@@ -1,6 +1,8 @@
-# PROGRESS — Vĩnh Long Trail & Studio
+# PROGRESS — Khmer Linh (trước đây: Vĩnh Long Trail & Studio)
 
-Cập nhật lần cuối: Cảm nhận sau ghé thăm + trang tổng kết hành trình — 2026-09-09
+> Đã đổi tên thương hiệu thành **Khmer Linh** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
+
+Cập nhật lần cuối: Đổi thương hiệu Khmer Linh + thiết kế lại giao diện — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -356,3 +358,31 @@ Theo yêu cầu bổ sung: phía trên trang tổng kết hiện lời chúc m�
 - Thêm điểm thưởng cho **hoàn thành cả hành trình** (khác với điểm thưởng theo từng trải nghiệm trả phí đã có) — `POINTS_PER_STOP_ON_ITINERARY_COMPLETE = 5` điểm/điểm đã ghé thăm (`js/trail/itineraryDetail.js`), cộng đúng một lần nhờ `addPoints()` đã chống lặp sẵn theo `reason = itinerary-complete-<id>` (an toàn dù tải lại trang hay xem lại trang tổng kết nhiều lần).
 - `js/trail/itinerarySummary.js`: đổi tiêu đề thành "Chúc mừng bạn đã hoàn thành chuyến đi!", thêm khối nổi bật "Số điểm bạn nhận được: +X điểm" (đọc từ `pointsLedger` theo đúng hành trình, không suy đoán) và "Tổng điểm hiện có", ngay bên dưới là mục "Đổi điểm lấy voucher" dùng lại đúng danh sách/nút đổi voucher đã có ở Hộ chiếu (`voucherCatalogHtml()` — export từ `passport.js` để dùng chung, không viết lại).
 - Đã kiểm thử qua DOM thật: hành trình 2 điểm → hiện đúng "+10 điểm" (2×5) và tổng điểm cập nhật đúng; nút đổi voucher tự khoá khi chưa đủ điểm, cộng thêm 100 điểm rồi đổi voucher 100 điểm ngay trên trang tổng kết → đúng trừ điểm, tạo voucher, cập nhật số dư hiển thị ngay không cần tải lại trang. Trang Hộ chiếu vẫn hoạt động đúng sau khi tách `voucherCatalogHtml()` ra dùng chung. Kiểm tra mobile 375px: khối điểm thưởng và danh sách voucher hiển thị gọn, không tràn ngang.
+
+## Đổi thương hiệu & thiết kế lại giao diện
+
+Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Linh** (trước đây "Vĩnh Long — Chạm văn hóa, nối hành trình"), thiết kế lại giao diện theo phong cách "văn hiến" tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long* — giấy cũ + mực đồng/vàng cổ thay vì tông xanh lá hiện đại ban đầu.
+
+### Đổi tên (chỉ đổi thương hiệu, không đổi dữ liệu địa danh thật)
+`index.html` (title/meta), `js/welcome.js` (tiêu đề trang chào), `js/trail/shell.js` + `js/studio/shell.js` (brand Trail/Studio), `package.json` (name/description), `README.md` (tiêu đề + đoạn giới thiệu). `PROGRESS.md`/`REQUIREMENTS_MATRIX.md` giữ nguyên tên cũ ở các mục log trước thời điểm đổi tên (đã thêm ghi chú đầu file), không viết lại lịch sử. Các chỗ "Vĩnh Long" mang nghĩa địa danh thật (địa chỉ, dữ liệu 37 địa danh, tên tỉnh) **giữ nguyên**, không đổi — chỉ đổi tên thương hiệu sản phẩm.
+
+### Thiết kế lại (toàn bộ qua design token, không sửa từng file)
+- `css/tokens.css`: đổi cả bộ 27 biến màu — nâu đồng (`#6b4423`) làm màu chính thay xanh lá đậm cũ, nền kem/giấy cũ ấm hơn, vàng đồng cổ (`#b8862e`) làm điểm nhấn (gần với `--color-accent` gốc nên không lệch quá xa bảng màu spec ban đầu). Thêm biến `--font-display: "Cormorant Garamond"` (phông serif trang trọng).
+- `index.html`: nạp phông Cormorant Garamond từ Google Fonts (có bộ dấu tiếng Việt đầy đủ, đã kiểm thử không vỡ dấu ở chế độ in đậm/thường).
+- `css/base.css`: áp `--font-display` cho `h1`, `h2` toàn site — phần thân/UI dày đặc vẫn giữ phông sans-serif cũ để dễ đọc trên di động (đúng nguyên tắc "chữ tiếng Việt dễ đọc" trong spec gốc).
+- `css/layout.css`: viết lại `.welcome-page` — thêm hoạ tiết trang trí dạng sóng (SVG tự vẽ inline, không dùng ảnh ngoài để tránh vướng bản quyền như đã lưu ý ở ảnh địa danh), tên thương hiệu chữ hoa cỡ lớn kiểu bìa sách, tagline in nghiêng. Brand trên thanh top bar (`.trail-topbar__brand`) cũng đổi sang phông display.
+- `assets/icons/favicon.svg`: vẽ lại thành hoa sen cách điệu trên nền nâu đồng.
+- Cập nhật thêm vài màu **hard-code** (không đi qua biến CSS, cần sửa tay): đường vẽ hành trình trên bản đồ (`itineraryDetail.js`), 2 biểu đồ Chart.js doanh thu/khách (`studio/reports.js`) — đổi từ xanh lá/vàng cũ sang nâu đồng/vàng cổ mới để nhất quán với bảng màu.
+- **Không đổi**: toàn bộ mã màu theo danh mục địa điểm (`categoryEmoji`/`categoryColor`/`CATEGORY_GROUPS` trong `js/utils.js`) và mức mật độ khách (`CROWD_LEVELS`) — đây là hệ màu **chức năng** (phân biệt loại hình trên bản đồ/badge, phân biệt mức đông/vắng), tách biệt hoàn toàn khỏi màu thương hiệu nên giữ nguyên, không bị ảnh hưởng bởi việc đổi tokens.
+- Không dùng ảnh/hoạ tiết trang trí lấy từ nguồn ngoài dù được đề nghị tự do tìm kiếm — ưu tiên tự vẽ SVG để tránh rủi ro bản quyền (nhất quán với cách xử lý ảnh địa danh ở `DATA_ISSUES.md`). Người dùng có thể cung cấp ảnh/hoạ tiết cụ thể để tích hợp thêm nếu muốn.
+
+### Đã kiểm thử qua trình duyệt thật
+- Trang chào, hồ sơ địa điểm (Chùa Âng), Khám phá, Studio Tổng quan, Cổng dữ liệu quản lý, Hộ chiếu — cả desktop và mobile 375px: giao diện lên đúng bảng màu mới, không tràn ngang, không lỗi console.
+- Phát hiện và sửa 1 lỗi: gradient nền trang chào có một điểm dừng màu **hard-code xanh lá cũ** (`#0e2c1c`) sót lại thay vì dùng biến — khiến đáy trang vẫn ánh xanh dù đã đổi token. Đã sửa sang tông nâu đồng đậm khớp bảng màu mới.
+- Kiểm tra riêng phông chữ tiếng Việt: các từ có dấu tổ hợp (vd "chạm", "hóa", "nối", "trình", "Chùa Âng") hiển thị đúng dấu ở cả chữ đậm/thường/nghiêng trong Cormorant Garamond, không vỡ ký tự — xác nhận qua `document.fonts` (font đã tải đúng bộ ký tự tiếng Việt cần dùng).
+- Xác nhận hệ màu chức năng (loại hình địa điểm, mức mật độ khách) không bị ảnh hưởng — badge/marker vẫn đúng màu cũ theo danh mục.
+
+### Giới hạn đã biết (không giấu)
+- Tên "Khmer Linh" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
+- Chưa tích hợp ảnh/hoạ tiết trang trí thật từ nguồn ngoài — mới dùng SVG tự vẽ đơn giản (sóng, hoa sen). Nếu người dùng cung cấp ảnh cụ thể, có thể tích hợp thêm ở phần nền trang chào hoặc header mà không cần đổi lại kiến trúc.
+- Bản đồ Leaflet/OpenStreetMap vẫn dùng tile gốc (không có tuỳ chọn theme màu cho tile bản đồ) — chỉ marker/polyline đổi màu theo bảng mới.
