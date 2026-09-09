@@ -33,7 +33,7 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 6 | Kết quả 2–3 phương án, thuật toán rule-based | `services/aiService.js` | Hoạt động (demo) — chỉ hiện phương án khác biệt thật, không fake |
 | 6 | Thêm/xoá/thay thế/sắp xếp điểm, tính lại giờ/giá | `trail/itineraryDetail.js` | Hoạt động (demo) |
 | 6 | Kiểm tra giờ mở/thời lượng/khoảng cách/sức chứa | `services/aiService.js`, `services/bookingService.js` | Hoạt động (demo) — chặn vượt sức chứa đã kiểm thử thật |
-| 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — hộ phản hồi thật trong Studio (`studio/bookings.js`), không còn mô phỏng ở Trail |
+| 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — hộ phản hồi thật trong Studio (`studio/bookings.js`), không còn mô phỏng ở Trail. Phase cuối: sửa lỗi combo nhiều hộ không phản hồi tiếp được sau lượt đầu — đã kiểm thử lại đúng kịch bản 3 |
 | 7 | Chính sách huỷ/hoàn tiền theo mốc thời gian | `services/bookingService.js` | Hoạt động (demo, minh hoạ) |
 | 8 | Hành trình đang diễn ra, đã ghé thăm, hỗ trợ sự cố | `trail/itineraryDetail.js`, `trail/support.js` | Hoạt động (demo) |
 | 8 | Heatmap (Khám phá + trong hành trình), đề xuất đổi điểm | `trail/explore.js`, `trail/itineraryDetail.js` | Hoạt động (demo, mô phỏng) |
@@ -45,8 +45,8 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 13 | Dữ liệu minh hoạ có nhãn, không bịa giá/lịch/nhận xét | `data/destinations.json`, `DATA_ISSUES.md` | Hoạt động (demo) — Phase 2: 37 địa danh, mỗi trường gắn trạng thái verified/estimated/missing, mâu thuẫn được ghi nhận công khai thay vì che giấu |
 | 14 | Yêu thích/nháp/lịch sử, tìm kiếm không dấu, tiếp cận đúng ngữ cảnh | Khám phá + Hồ sơ | Hoạt động (demo) một phần — chia sẻ/in hành trình chờ phase sau |
 | 14 | Trang "Về bản demo" | Tab Cá nhân | Hoạt động (demo) |
-| 15 | 12 kịch bản nghiệm thu | — | Chạy đủ và ghi kết quả ở phase cuối; Phase 1-2 chỉ tự kiểm tra phần liên quan (kịch bản 1, 12 một phần) |
-| 16 | README, bảng đối chiếu, deploy GitHub Pages/Hostinger | `README.md`, tài liệu này | README hoàn thiện dần; hướng dẫn deploy đầy đủ ở phase cuối |
+| 15 | 12 kịch bản nghiệm thu | — | Hoàn thành — 12/12 Pass, kết quả đầy đủ trong PROGRESS.md mục "Phase cuối" |
+| 16 | README, bảng đối chiếu, deploy GitHub Pages/Hostinger | `README.md`, tài liệu này | Hoàn thành — README có hướng dẫn deploy GitHub Pages + Hostinger đầy đủ, đối chiếu spec tóm tắt, tích hợp production còn thiếu |
 
 ## Phase 2 — Tích hợp dữ liệu địa danh (theo yêu cầu riêng của người dùng)
 

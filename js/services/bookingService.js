@@ -121,9 +121,15 @@ export function createBooking({ itineraryId = null, partySize, items }) {
 export function respondToBooking(bookingId, decisions) {
   const s = getState();
   const booking = s.bookings.find((b) => b.id === bookingId);
-  if (!booking || booking.status !== 'pending_host') return { ok: false, reason: 'Booking không ở trạng thái chờ xác nhận.' };
+  if (!booking) return { ok: false, reason: 'Không tìm thấy booking.' };
   const now = new Date().toISOString();
   const items = s.bookingItems.filter((bi) => bi.bookingId === bookingId);
+  // Chặn theo từng mục còn "pending" thay vì trạng thái tổng của booking — combo nhiều hộ
+  // thường phản hồi lệch thời điểm nhau; sau lần phản hồi đầu tiên booking chuyển
+  // "partially_confirmed" nhưng các mục còn lại vẫn phải xử lý được tiếp.
+  if (!items.some((bi) => bi.status === 'pending')) {
+    return { ok: false, reason: 'Booking không còn mục nào đang chờ xác nhận.' };
+  }
 
   decisions.forEach(({ bookingItemId, decision, reason }) => {
     const bi = items.find((x) => x.id === bookingItemId);

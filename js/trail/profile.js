@@ -34,7 +34,7 @@ export function renderProfile(container) {
         <ul style="padding-left:18px;color:var(--color-text-muted);font-size:0.9rem;">
           <li>Dữ liệu lưu trong trình duyệt này (localStorage), không đồng bộ nhiều người dùng hay nhiều thiết bị.</li>
           <li>Gợi ý hành trình dùng thuật toán rule-based minh bạch (không gọi AI thật); thanh toán, mật độ khách, phản hồi của hộ đều là mô phỏng, gắn nhãn rõ khi xuất hiện.</li>
-          <li>Studio (kênh dành cho hộ), Cổng quản lý, Cổng vận hành sẽ hoàn thiện ở các phase tiếp theo (xem PROGRESS.md).</li>
+          <li>Ngoài Trail (bạn đang xem) còn có Studio (kênh dành cho hộ), Cổng dữ liệu quản lý và Cổng vận hành — mở qua liên kết "Cổng quản lý" ở trang chào, xem chi tiết ở PROGRESS.md.</li>
         </ul>
       </section>
 

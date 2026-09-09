@@ -1,6 +1,6 @@
 # PROGRESS — Vĩnh Long Trail & Studio
 
-Cập nhật lần cuối: Phase 6 — 2026-09-09
+Cập nhật lần cuối: Phase cuối (kiểm tra & chuẩn bị deploy) — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -26,7 +26,8 @@ Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm 
 | 6 | Cổng vận hành — Booking & Giao dịch/Nội dung/Sự cố/Chất lượng & Hỗ trợ hộ | Done | Xem chi tiết bên dưới |
 | 6 | Cố vấn cộng đồng (vai trò quyền hạn chế trong Cổng vận hành) | Done | Chỉ xem hàng chờ duyệt văn hoá + ngoại lệ CPS "nghi lễ", không xem booking/giao dịch |
 | 6 | Kiểm tra phân quyền hiển thị dữ liệu giữa các vai trò | Done | Đã kiểm thử trực tiếp — xem chi tiết bên dưới |
-| — | Hoàn thiện, nghiệm thu đủ 12 kịch bản, deploy GitHub Pages + Hostinger | Later | Thực hiện ở phase cuối cùng |
+| — | Hoàn thiện, nghiệm thu đủ 12 kịch bản, kiểm tra trước deploy | Done | Xem "Phase cuối" bên dưới — 1 lỗi nghiêm trọng phát hiện và đã sửa (booking combo phản hồi từng phần) |
+| — | Deploy GitHub Pages + Hostinger | In progress | Hướng dẫn đầy đủ trong README; thao tác `git push`/bật Pages do người dùng thực hiện |
 
 ## Chi tiết Phase 1
 
@@ -255,3 +256,46 @@ Toàn bộ mục 11 và 12 của spec gốc, gộp làm một phase theo yêu c�
 
 ### Còn lại (không phải bỏ sót, đúng roadmap)
 Hoàn thiện deploy GitHub Pages/Hostinger và chạy đủ 12 kịch bản nghiệm thu cuối cùng — thực hiện ở phase cuối.
+
+## Phase cuối — Kiểm tra và chuẩn bị deploy
+
+Rà soát toàn bộ dự án theo checklist bàn giao: chức năng, lỗi JS/link/ảnh/responsive, đường dẫn dưới repo con GitHub Pages, tải lại trang ở các route hash, rò rỉ dữ liệu nhạy cảm, README, đối chiếu spec, chạy đủ 12 kịch bản nghiệm thu.
+
+### Kiểm tra thực hiện
+- Quét console lỗi trên toàn bộ route tĩnh của Trail/Studio/Cổng dữ liệu quản lý/Cổng vận hành (kể cả `#/studio/experiences/new`, `#/studio/experiences/:id`, `#/ops/community`) — không có lỗi JS nào.
+- Rà soát toàn bộ `js/` và CSS: không có đường dẫn tuyệt đối (`/...`), không có `location.pathname`/`location.origin` giả định domain gốc — chạy đúng dưới repo con GitHub Pages.
+- Rà soát `js/`, `data/`, file cấu hình: không có API key/secret/token nào bị commit.
+- Tải lại trang thật (`location.reload()`, không phải điều hướng SPA) trực tiếp ở nhiều route sâu (hồ sơ địa điểm, Studio → Báo cáo, Cổng dữ liệu quản lý → Nhu cầu & Cơ hội) — tất cả tải đúng, không lỗi, không 404.
+- Kiểm tra dữ liệu localStorage bị hỏng (ghi JSON không hợp lệ trực tiếp) → app không crash, tự phục hồi về dữ liệu mặc định thay vì màn trắng.
+- Responsive 375/768/1440px cho toàn bộ trang mới (Cổng dữ liệu quản lý, Cổng vận hành) — không tràn ngang, bảng rộng cuộn trong khung riêng.
+- Ảnh: xác nhận toàn bộ ảnh địa danh tải qua đường dẫn nội bộ (`assets/images/destinations/`) hoặc placeholder tự sinh — không hotlink ảnh ngoài nên không thể vỡ ảnh khi deploy.
+- Chạy đủ 12 kịch bản nghiệm thu bắt buộc (mục 15 spec) qua UI thật — xem bảng bên dưới.
+
+### Lỗi phát hiện và đã sửa
+1. **Nội dung "Về bản demo" (Trail → Cá nhân) lỗi thời** — vẫn ghi "Studio, Cổng quản lý, Cổng vận hành sẽ hoàn thiện ở các phase tiếp theo" dù cả ba đã xây xong từ Phase 5–6. Đã sửa thành mô tả đúng thực tế, có hướng dẫn vào "Cổng quản lý" từ trang chào.
+2. **Bug nghiêm trọng: không thể xử lý tiếp các mục còn lại của booking combo sau lần phản hồi đầu tiên** — `respondToBooking()` (`js/services/bookingService.js`) chặn mọi lệnh gọi tiếp theo bằng điều kiện `booking.status !== 'pending_host'`. Ngay sau khi một hộ phản hồi (chấp nhận HOẶC từ chối) một phần của booking combo, `booking.status` chuyển thành `partially_confirmed` — khiến các hộ còn lại (hoặc chính hộ đó với mục khác) **không thể chấp nhận/từ chối phần của mình nữa**, nút bấm trong Studio không báo lỗi rõ ràng nhưng hành động bị âm thầm từ chối (`ok: false`). Đây chính là lỗi chặn đứng **Kịch bản nghiệm thu 3** ("Đặt combo → chuyển Studio → chấp nhận một phần, từ chối một phần"). Phát hiện khi dựng kịch bản combo 2 hộ để chạy đủ 12 kịch bản nghiệm thu bắt buộc. Đã sửa: đổi điều kiện chặn sang kiểm tra còn mục nào ở trạng thái `pending` hay không (bất kể trạng thái tổng của booking), thay vì so sánh chuỗi trạng thái cố định. Đã kiểm thử lại qua UI thật: tạo booking combo 2 hoạt động (2 hộ khác nhau) → hộ 1 chấp nhận → hộ 2 từ chối thành công (trước khi sửa bị chặn) → Trail hiện đúng "Đã xác nhận" / "Bị từ chối" cho từng chặng, tổng tiền booking tự điều chỉnh đúng còn 180.000đ (loại phần bị từ chối).
+3. Copy `Prompt-Claude-Vinh-Long.md` (đặc tả gốc) vào thư mục dự án — trước đó README/PROGRESS.md/REQUIREMENTS_MATRIX.md đều trích dẫn file này nhưng file nằm ngoài thư mục dự án (không được commit), khiến liên kết vô nghĩa với bất kỳ ai clone repo từ GitHub.
+
+### Kịch bản nghiệm thu bắt buộc (mục 15 spec) — kết quả cuối cùng
+
+| # | Kịch bản | Kết quả |
+|---|---|---|
+| 1 | Chọn du khách → lọc bản đồ → mở chi tiết → thêm yêu thích → reload vẫn còn | ✅ Pass |
+| 2 | Nhập đoàn/giờ/sở thích → tạo lịch hợp lệ → thay/xoá điểm → thời gian và giá cập nhật | ✅ Pass |
+| 3 | Đặt combo → chuyển Studio → chấp nhận một phần, từ chối một phần → Trail thể hiện đúng và cho xử lý phần từ chối | ✅ Pass (sau khi sửa lỗi #2 ở trên) |
+| 4 | Thử đặt vượt sức chứa hoặc ngoài giờ → bị chặn với thông báo cụ thể | ✅ Pass |
+| 5 | Hoàn thành trải nghiệm đúng luồng → đánh giá → Passport/điểm tăng đúng một lần → đổi voucher không dùng lặp trái điều kiện | ✅ Pass |
+| 6 | Bật heatmap → chọn yên tĩnh/náo nhiệt → xem đề xuất đổi lịch, không tự thay booking | ✅ Pass |
+| 7 | Gửi sự cố yêu cầu hoàn tiền → vận hành xử lý → khách thấy tiến trình; khoản đang tranh chấp chưa giải ngân | ✅ Pass |
+| 8 | Hộ tạo nháp bằng gõ tay → gửi duyệt → cộng đồng/vận hành duyệt → khách mới thấy nội dung công bố | ✅ Pass |
+| 9 | Hộ gửi đề án → cổng quản lý yêu cầu bổ sung → hộ cập nhật → quản lý phản hồi | ✅ Pass |
+| 10 | Hộ gửi ngoại lệ CPS → người có quyền duyệt → kỳ đánh giá cập nhật và có nhật ký | ✅ Pass |
+| 11 | Dashboard lọc thời gian/nhóm → KPI, biểu đồ, bảng và CSV khớp nhau; không lộ CPS cho khách/Sở | ✅ Pass |
+| 12 | Mobile không tràn, modal đóng được, nút hỗ trợ dễ tìm; từ chối GPS/camera hoặc tải bản đồ lỗi vẫn có cách tiếp tục | ✅ Pass |
+
+### Giới hạn đã biết (không giấu)
+- Giữ chỗ (hold TTL 15 phút) của các mục còn `pending` trong một booking combo **không tự hết hạn** nếu booking đã chuyển `partially_confirmed` (do một mục khác đã được phản hồi) — `reapExpiredHolds()` hiện chỉ quét booking còn ở trạng thái `pending_host`. Trường hợp hiếm (combo nhiều hộ, một hộ phản hồi trước khi hộ kia phản hồi trong khi giữ chỗ vẫn còn hạn) — ghi nhận để hoàn thiện nếu cần, không chặn luồng demo chính.
+- Chưa có cơ chế cache-busting cho tên file JS/CSS tĩnh khi deploy bản cập nhật — người dùng có thể cần tải lại cứng (Ctrl+Shift+R) để thấy thay đổi mới nhất, đặc biệt rõ khi kiểm thử cục bộ với static server cache mạnh (đã gặp trong lúc kiểm thử phase này).
+
+### Còn lại
+Không còn mục nào theo roadmap — đã triển khai đủ toàn bộ 16 mục spec (một số ở mức mô phỏng có nhãn rõ theo đúng yêu cầu, xem README mục "Đối chiếu specification"). Việc còn lại là thao tác deploy thật (git push, bật GitHub Pages) do người dùng thực hiện theo hướng dẫn trong README.
