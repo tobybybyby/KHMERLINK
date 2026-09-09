@@ -399,3 +399,13 @@ Người dùng báo "phần cổng quản lý hơi lỗi" sau khi đổi giao di
 ```
 
 **Đã kiểm thử qua trình duyệt thật**: trang chào (`#/`) và Cổng quản lý (`#/gateway`) ở cả desktop và mobile 375px — chữ xuống dòng đúng, không còn bị cắt; xác nhận qua JS `document.documentElement.scrollWidth === clientWidth` (không tràn ngang). Kiểm tra thêm Cổng dữ liệu quản lý (`#/admin/overview`, dùng `.studio-shell` khác layout) — không bị ảnh hưởng, hiển thị bình thường.
+
+### Lỗi thứ 2 cùng khu vực: trang Cố vấn cộng đồng vỡ layout hoàn toàn
+
+Kiểm tra tiếp các trang khác trong Cổng quản lý phát hiện lỗi nặng hơn ở `#/ops/community` (Cố vấn cộng đồng): thanh tiêu đề (topbar) và nút "← Cổng quản lý" bị vỡ chữ từng chữ chồng lên thẻ nội dung, phía trên có một khoảng trắng lớn bất thường.
+
+**Nguyên nhân**: `js/ops/community.js` là trang DUY NHẤT tự dựng `<header class="trail-topbar">` rồi đặt nó làm **con cùng cấp** với card nội dung bên trong `.page-generic` — nhưng class `.page-generic` (`css/layout.css`) được thiết kế riêng cho khối "coming soon"/"đang tải" đơn giản: `display:flex; align-items:center; justify-content:center` (canh giữa MỘT khối duy nhất theo cả hai chiều). Khi có 2 phần tử con (header + card), flexbox coi cả hai là item hàng ngang canh giữa — header bị co lại theo nội dung (shrink-to-fit) thay vì chiếm trọn chiều ngang, khiến chữ trong đó vỡ dòng từng từ và đè lên card. Toàn bộ các trang khác dùng `.page-generic` (lỗi hệ thống ở `app.js`, màn đang tải, khối "sắp có" trong `explore.js`) đều chỉ có đúng 1 con nên không gặp lỗi này.
+
+**Đã sửa**: đổi wrapper của trang từ `.page-generic` sang `.trail-shell` (class flex-column full-page đã dùng đúng cho mọi shell khác có topbar — Trail/Studio/Ops/Admin) — chỉ đổi 1 class, không đổi cấu trúc HTML hay CSS khác.
+
+**Đã kiểm thử qua trình duyệt thật**: `#/ops/community` desktop và mobile 375px — topbar hiển thị đúng 1 hàng ngang, không còn vỡ chữ/đè chồng, không có khoảng trắng thừa.

@@ -12,7 +12,7 @@ export function renderCommunityAdvisor(root) {
   const culturalExceptions = state.cpsExceptions.filter((e) => e.category === 'nghi-le').slice().reverse();
 
   root.innerHTML = `
-    <div class="page-generic">
+    <div class="trail-shell">
       <header class="trail-topbar">
         <a class="trail-topbar__brand" href="#/">🤝 Cố vấn cộng đồng</a>
         <div class="trail-topbar__spacer"></div>
