@@ -1,6 +1,6 @@
 import { getState } from '../storage.js';
-import { escapeHtml, formatCurrency, formatDateShort, qs, qsa } from '../utils.js';
-import { createBooking, respondToBooking, findExperienceAndSlot } from '../services/bookingService.js';
+import { escapeHtml, formatCurrency, formatDateShort, qs } from '../utils.js';
+import { createBooking, findExperienceAndSlot } from '../services/bookingService.js';
 import { payBooking } from '../services/paymentService.js';
 import { NotificationService } from '../services/notificationService.js';
 import { openModal } from '../ui.js';
@@ -36,7 +36,7 @@ function cartStepHtml(items, partySize) {
         <span class="quick-fact__label">Tổng tiền tạm tính</span>
         <span class="quick-fact__value">${formatCurrency(total)}</span>
       </div>
-      <p class="demo-note">Đây là bản demo: chỗ được giữ tạm trong 15 phút chờ hộ xác nhận (mô phỏng). Chưa thu tiền thật, chưa lưu thông tin thẻ.</p>
+      <p class="demo-note">Đây là bản demo: chỗ được giữ tạm trong 15 phút chờ hộ xác nhận. Chưa thu tiền thật, chưa lưu thông tin thẻ.</p>
       <div class="modal__actions">
         <button type="button" class="btn btn-primary btn-block" id="bk-confirm-cart">Giữ chỗ & tiếp tục</button>
       </div>
@@ -65,38 +65,15 @@ function paymentStepHtml(booking) {
   `;
 }
 
-function hostSimStepHtml(bookingItems) {
-  return `
-    <p class="demo-note">Studio (kênh dành cho hộ) sẽ xây ở phase sau. Để trình diễn đầy đủ luồng, bạn tạm đóng vai hộ để xác nhận/từ chối từng mục bên dưới.</p>
-    <div class="flex-col gap-3" id="bk-host-items">
-      ${bookingItems.map((bi) => `
-        <div class="activity-card" data-bi="${bi.id}">
-          <strong>${escapeHtml(bi.title)}</strong>
-          <p class="text-sm text-muted" style="margin:4px 0;">${bi.quantity} khách · ${formatCurrency(bi.subtotal)}</p>
-          <div class="chip-row">
-            <button type="button" class="chip" data-decision="accept" aria-pressed="true">✓ Chấp nhận</button>
-            <button type="button" class="chip" data-decision="reject" aria-pressed="false">✕ Từ chối</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div class="modal__actions">
-      <button type="button" class="btn btn-primary" id="bk-submit-host-sim">🎭 Xác nhận phản hồi (demo)</button>
-    </div>
-  `;
-}
-
-function resultStepHtml(booking, items) {
-  const accepted = items.filter((i) => i.status === 'accepted');
-  const rejected = items.filter((i) => i.status === 'rejected');
+function pendingResultHtml(booking) {
   return `
     <div class="flex-col gap-3">
-      <p class="badge ${booking.status === 'confirmed' ? 'badge-free' : booking.status === 'rejected' ? 'badge-recognized' : 'badge-type'}">
-        ${booking.status === 'confirmed' ? 'Đã xác nhận toàn bộ' : booking.status === 'rejected' ? 'Bị từ chối toàn bộ' : 'Xác nhận một phần'}
-      </p>
-      ${accepted.length ? `<p>✓ Đã xác nhận: ${accepted.map((i) => escapeHtml(i.title)).join(', ')}</p>` : ''}
-      ${rejected.length ? `<p>✕ Bị từ chối: ${rejected.map((i) => escapeHtml(i.title)).join(', ')} — hoạt động tương ứng sẽ không tính phí, có thể chọn lại khung giờ khác trong hành trình.</p>` : ''}
-      <p>Tổng tiền sau điều chỉnh: <strong>${formatCurrency(booking.totalAmount)}</strong></p>
+      <p class="badge badge-demo">Chờ hộ xác nhận</p>
+      <p>Đã giữ chỗ và ghi nhận thanh toán. Hộ sẽ chấp nhận hoặc từ chối từng hoạt động trong Studio — bạn sẽ thấy cập nhật ở Hộ chiếu/Hành trình khi hộ phản hồi.</p>
+      <div class="quick-fact">
+        <span class="quick-fact__label">Mã booking</span>
+        <span class="quick-fact__value">${escapeHtml(booking.code)}</span>
+      </div>
       <div class="modal__actions">
         <button type="button" class="btn btn-primary" id="bk-close-result">Xong</button>
       </div>
@@ -133,36 +110,14 @@ export function openBookingFlow({ items, itineraryId = null, partySize, onDone }
           const r = payBooking(currentBooking.id, kind);
           if (!r.ok) { NotificationService.notify(r.reason, 'error'); return; }
           NotificationService.notify(`Đã thanh toán demo ${formatCurrency(r.amount)}.`, 'success');
-          setBody(hostSimStepHtml(currentItems));
-          wireHostSim();
+          setBody(pendingResultHtml(currentBooking));
+          qs('#bk-close-result', modalEl).addEventListener('click', () => {
+            closeFn();
+            if (onDone) onDone(currentBooking, currentItems);
+          });
         };
         qs('#bk-pay-deposit', modalEl).addEventListener('click', () => pay('deposit'));
         qs('#bk-pay-full', modalEl).addEventListener('click', () => pay('full'));
-      }
-
-      function wireHostSim() {
-        qsa('[data-bi]', modalEl).forEach((row) => {
-          qsa('.chip', row).forEach((chip) => {
-            chip.addEventListener('click', () => {
-              qsa('.chip', row).forEach((c) => c.setAttribute('aria-pressed', 'false'));
-              chip.setAttribute('aria-pressed', 'true');
-            });
-          });
-        });
-        qs('#bk-submit-host-sim', modalEl).addEventListener('click', () => {
-          const decisions = qsa('[data-bi]', modalEl).map((row) => ({
-            bookingItemId: row.dataset.bi,
-            decision: qs('[data-decision="reject"]', row).getAttribute('aria-pressed') === 'true' ? 'reject' : 'accept',
-            reason: 'Hộ từ chối trong bản mô phỏng (demo).',
-          }));
-          const r = respondToBooking(currentBooking.id, decisions);
-          if (!r.ok) { NotificationService.notify(r.reason, 'error'); return; }
-          setBody(resultStepHtml(r.booking, r.items));
-          qs('#bk-close-result', modalEl).addEventListener('click', () => {
-            closeFn();
-            if (onDone) onDone(r.booking, r.items);
-          });
-        });
       }
 
       wireCart();

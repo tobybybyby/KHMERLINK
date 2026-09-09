@@ -27,6 +27,12 @@ export function formatCurrency(vnd) {
   return new Intl.NumberFormat('vi-VN').format(vnd) + ' đ';
 }
 
+/** Dùng cho số tiền tài chính (doanh thu, giải ngân, thanh toán) — 0 hiện "0 đ", không phải "Miễn phí". */
+export function formatMoney(vnd) {
+  if (vnd === null || vnd === undefined) return '—';
+  return new Intl.NumberFormat('vi-VN').format(vnd) + ' đ';
+}
+
 export function formatDateShort(isoOrDate) {
   const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
   if (Number.isNaN(d.getTime())) return '—';

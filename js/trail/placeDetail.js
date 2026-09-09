@@ -1,4 +1,4 @@
-import { getState, toggleFavorite, isFavorite, addDraftItineraryItem, saveItinerary } from '../storage.js';
+import { getState, toggleFavorite, isFavorite, addDraftItineraryItem, saveItinerary, recordDestinationView } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDateShort, categoryEmoji, deriveCategoryVisual,
   destinationImageSrc, renderStars, qs, qsa,
@@ -113,7 +113,6 @@ function openSingleExperienceBooking(container, exp) {
           items: [{ experienceId: exp.id, slotId, quantity: qty }],
           partySize: qty,
           onDone: () => {
-            NotificationService.notify('Đặt trải nghiệm hoàn tất — xem trạng thái trong Hộ chiếu.', 'success');
             renderPlaceDetail(container, exp.destinationId);
           },
         });
@@ -193,6 +192,8 @@ export function renderPlaceDetail(container, id) {
     `;
     return;
   }
+
+  recordDestinationView(dest.id);
 
   const experiences = state.experiences.filter((e) => e.destinationId === dest.id);
   const reviews = [

@@ -1,4 +1,4 @@
-import { getState, getItinerary, saveItinerary, addPassportStamp, addPoints, setActiveItinerary } from '../storage.js';
+import { getState, getItinerary, saveItinerary, addPassportStamp, setActiveItinerary } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDurationMin, combineDateTime,
   categoryEmoji, deriveCategoryVisual, destinationImageSrc, getSimulatedCrowdLevel,
@@ -110,7 +110,7 @@ function liveBookingActionHtml(state, stop) {
   const bi = state.bookingItems.find((x) => x.id === stop.bookingItemId);
   if (!bi) return '';
   if (bi.status === 'accepted') {
-    return `<button type="button" class="btn btn-accent btn-sm" data-act="complete-booking" data-bi="${bi.id}">🎭 Mô phỏng: hộ xác nhận hoàn thành</button>`;
+    return '<span class="text-sm text-faint">Hộ sẽ xác nhận hoàn thành trong Studio sau khi bạn tham gia.</span>';
   }
   if (bi.status === 'completed') {
     const reviewed = state.userReviews.some((r) => r.bookingItemId === bi.id);
@@ -302,10 +302,6 @@ function wireStopActions(container, itinerary) {
         addPassportStamp({ destinationId: itinerary.stops[index].destinationId, type: 'visited-self' });
         NotificationService.notify('Đã đánh dấu ghé thăm (tự đánh dấu, khác với xác nhận booking).', 'success');
         render(container, itinerary.id);
-      } else if (act === 'complete-booking') {
-        const biId = btn.dataset.bi;
-        completeBookingItemDemo(biId, itinerary);
-        render(container, itinerary.id);
       } else if (act === 'review') {
         openReviewModal(btn.dataset.dest, btn.dataset.bi, () => render(container, itinerary.id));
       } else if (act === 'crowd-suggest') {
@@ -313,26 +309,6 @@ function wireStopActions(container, itinerary) {
       }
     });
   });
-}
-
-function completeBookingItemDemo(bookingItemId, itinerary) {
-  const state = getState();
-  const bi = state.bookingItems.find((x) => x.id === bookingItemId);
-  if (!bi || bi.status !== 'accepted') return;
-  const now = new Date().toISOString();
-  bi.status = 'completed';
-  bi.statusHistory.push({ status: 'completed', at: now, note: 'Mô phỏng hộ xác nhận hoàn thành (demo — Studio chưa xây).' });
-  const booking = state.bookings.find((b) => b.id === bi.bookingId);
-  const otherActive = state.bookingItems.some((x) => x.bookingId === bi.bookingId && x.status !== 'completed' && x.status !== 'cancelled' && x.status !== 'rejected');
-  if (booking && !otherActive) {
-    booking.status = 'completed';
-    booking.payoutStatus = 'holding';
-  }
-  addPassportStamp({ destinationId: bi.destinationId, type: 'visited-confirmed', bookingItemId: bi.id });
-  const firstTimeWithHost = !state.pointsLedger.some((p) => p.reason.startsWith(`host-${bi.destinationId}`));
-  addPoints(10, `complete-${bi.id}`, bi.bookingId);
-  if (firstTimeWithHost) addPoints(5, `host-${bi.destinationId}-${bi.id}`, bi.bookingId);
-  NotificationService.notify('Đã hoàn thành trải nghiệm — cộng điểm thưởng, có thể viết đánh giá.', 'success');
 }
 
 function liveModeBanner(itinerary, currentInfo) {

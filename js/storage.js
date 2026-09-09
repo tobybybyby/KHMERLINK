@@ -44,8 +44,33 @@ export async function init() {
     ...userData,
     ui: { ...content.ui, ...(userData.ui || {}) },
   };
+
+  // Trải nghiệm do hộ tạo/sửa trong Studio được lưu riêng ở hostExperiences (persist) và
+  // hợp nhất đè lên bản "nội dung" (experiences, nạp mới mỗi phiên từ data.js) ở đây —
+  // giống cách destinations.json hợp nhất với dữ liệu người dùng.
+  (state.hostExperiences || []).forEach((hostExp) => {
+    const idx = state.experiences.findIndex((e) => e.id === hostExp.id);
+    if (idx >= 0) state.experiences[idx] = hostExp;
+    else state.experiences.push(hostExp);
+  });
+
   persist();
   return state;
+}
+
+/** Lưu (tạo mới hoặc ghi đè) một trải nghiệm do hộ quản lý trong Studio — xem ghi chú ở init(). */
+export function upsertHostExperience(experience) {
+  const s = getState();
+  const idxLive = s.experiences.findIndex((e) => e.id === experience.id);
+  if (idxLive >= 0) s.experiences[idxLive] = experience;
+  else s.experiences.push(experience);
+
+  const idxSaved = s.hostExperiences.findIndex((e) => e.id === experience.id);
+  if (idxSaved >= 0) s.hostExperiences[idxSaved] = experience;
+  else s.hostExperiences.push(experience);
+
+  persist();
+  return experience;
 }
 
 export function getState() {
@@ -246,6 +271,102 @@ export function createSupportTicket({ category, description, bookingId = null, d
   s.supportTickets.push(ticket);
   persist();
   return ticket;
+}
+
+// ---------- Studio: hộ đang xem (chuyển vai trò demo) ----------
+export function setCurrentHostId(hostId) {
+  const s = getState();
+  s.ui.currentHostId = hostId;
+  persist();
+}
+
+export function getCurrentHostId() {
+  return getState().ui.currentHostId;
+}
+
+// ---------- Studio: lượt xem (để tính gợi ý "nhiều lượt xem nhưng ít booking") ----------
+export function recordDestinationView(destinationId) {
+  const s = getState();
+  s.viewCounts[destinationId] = (s.viewCounts[destinationId] || 0) + 1;
+  persist();
+}
+
+// ---------- Studio: gợi ý cải thiện — trạng thái người dùng đã chọn cho từng gợi ý ----------
+export function setSuggestionDecision(suggestionId, decision) {
+  const s = getState();
+  s.suggestionDecisions[suggestionId] = decision;
+  persist();
+}
+
+// ---------- Studio: đề án hỗ trợ ----------
+export function createProposal({ hostId, title, problem, desiredSupport, expectedBenefit, evidence, proposedBudget = null, status = 'sent' }) {
+  const s = getState();
+  const now = new Date().toISOString();
+  const proposal = {
+    id: uidLocal('proposal'),
+    hostId,
+    title,
+    problem,
+    desiredSupport,
+    expectedBenefit,
+    evidence,
+    proposedBudget,
+    status,
+    createdAt: now,
+    timeline: [{ status, at: now, note: status === 'sent' ? 'Đã gửi đề án.' : 'Đã lưu nháp.' }],
+  };
+  s.proposals.push(proposal);
+  persist();
+  return proposal;
+}
+
+export function updateProposal(id, patch) {
+  const s = getState();
+  const p = s.proposals.find((x) => x.id === id);
+  if (!p) return null;
+  Object.assign(p, patch);
+  persist();
+  return p;
+}
+
+export function setProposalStatus(id, status, note) {
+  const s = getState();
+  const p = s.proposals.find((x) => x.id === id);
+  if (!p) return null;
+  p.status = status;
+  p.timeline.push({ status, at: new Date().toISOString(), note });
+  persist();
+  return p;
+}
+
+// ---------- Studio: yêu cầu xem xét ngoại lệ CPS ----------
+export function requestCpsException({ hostId, reason, category, startDate, endDate }) {
+  const s = getState();
+  const now = new Date().toISOString();
+  const exception = {
+    id: uidLocal('cpsexc'),
+    hostId,
+    reason,
+    category,
+    startDate,
+    endDate,
+    status: 'pending',
+    createdAt: now,
+    history: [{ status: 'pending', at: now }],
+  };
+  s.cpsExceptions.push(exception);
+  persist();
+  return exception;
+}
+
+export function decideCpsException(id, status, note) {
+  const s = getState();
+  const exc = s.cpsExceptions.find((x) => x.id === id);
+  if (!exc) return null;
+  exc.status = status;
+  exc.history.push({ status, at: new Date().toISOString(), note });
+  persist();
+  return exc;
 }
 
 function uidLocal(prefix) {

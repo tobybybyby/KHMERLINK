@@ -162,6 +162,39 @@ export const INTEREST_OPTIONS = [
   { value: 'van-hoa-khmer', label: 'Văn hoá Khmer' },
 ];
 
+const MONTH_NAMES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+
+// Dữ liệu báo cáo 12 tháng minh hoạ cho Studio — xác định theo hostId nên ổn định trong
+// phiên (không đổi ngẫu nhiên mỗi lần vẽ lại biểu đồ); tháng hiện tại được ghi đè bằng số
+// liệu thật tính từ booking thật khi hiển thị (xem js/studio/reports.js) để biểu đồ và
+// bảng luôn khớp nhau (không tạo biểu đồ khác hẳn dữ liệu thật).
+function seededRandom(seedStr) {
+  let h = 0;
+  for (let i = 0; i < seedStr.length; i += 1) h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
+  return () => {
+    h = (h * 1103515245 + 12345) >>> 0;
+    return (h % 1000) / 1000;
+  };
+}
+
+function buildMonthlyMetrics(hostIds) {
+  const now = new Date();
+  const monthlyByHost = {};
+  hostIds.forEach((hostId, hostIdx) => {
+    const rand = seededRandom(hostId);
+    const months = [];
+    for (let i = 11; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const base = 800000 + hostIdx * 300000;
+      const revenue = Math.round((base + rand() * base * 1.5) / 10000) * 10000;
+      const visitors = Math.round(6 + rand() * 20);
+      months.push({ label: MONTH_NAMES[d.getMonth()], year: d.getFullYear(), month: d.getMonth(), revenue, visitors });
+    }
+    monthlyByHost[hostId] = months;
+  });
+  return monthlyByHost;
+}
+
 export function createSeedState() {
   return {
     schemaVersion: 1,
@@ -169,6 +202,7 @@ export function createSeedState() {
     destinations: [],
     hosts: JSON.parse(JSON.stringify(HOSTS)),
     experiences: buildExperiences(),
+    hostExperiences: [],
     slots: [],
     voucherCatalog: buildVoucherCatalog(),
     itineraries: [],
@@ -184,13 +218,17 @@ export function createSeedState() {
     events: buildEvents(),
     supportTickets: [],
     proposals: [],
+    cpsExceptions: [],
     moderationRecords: [],
-    metrics: {},
+    metrics: { monthlyByHost: buildMonthlyMetrics(HOSTS.map((h) => h.id)) },
     favorites: [],
+    viewCounts: {},
+    suggestionDecisions: {},
     ui: {
       draftItinerary: [],
       notifications: [],
       activeItineraryId: null,
+      currentHostId: null,
     },
   };
 }

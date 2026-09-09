@@ -18,7 +18,7 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 3 | Phong cách thị giác, responsive 375/768/1440 | `css/*` | Hoạt động (demo) |
 | 4 | Màn chào 2 lựa chọn + Cổng quản lý | `welcome.js` | Hoạt động (demo) |
 | 4 | Trail 4 tab | `trail/shell.js` | Khám phá + Cá nhân: Hoạt động (demo); Hành trình/Hộ chiếu: Giai đoạn sau |
-| 4 | Studio 5 tab | — | Giai đoạn sau (Phase 6) |
+| 4 | Studio 5 tab | `js/studio/shell.js` | Hoạt động (demo) — sidebar desktop / bottom-nav mobile |
 | 4 | Cổng quản lý 4 tab | — | Giai đoạn sau (Phase 7) |
 | 4 | Cổng vận hành 4 khu | — | Giai đoạn sau (Phase 8) |
 | 5.1 | Bản đồ tương tác, pan/zoom/marker/cluster/vị trí của tôi | `trail/explore.js`, `services/mapService.js` | Hoạt động (demo) |
@@ -33,15 +33,15 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 6 | Kết quả 2–3 phương án, thuật toán rule-based | `services/aiService.js` | Hoạt động (demo) — chỉ hiện phương án khác biệt thật, không fake |
 | 6 | Thêm/xoá/thay thế/sắp xếp điểm, tính lại giờ/giá | `trail/itineraryDetail.js` | Hoạt động (demo) |
 | 6 | Kiểm tra giờ mở/thời lượng/khoảng cách/sức chứa | `services/aiService.js`, `services/bookingService.js` | Hoạt động (demo) — chặn vượt sức chứa đã kiểm thử thật |
-| 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — mô phỏng phản hồi hộ do Studio chưa xây |
+| 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — hộ phản hồi thật trong Studio (`studio/bookings.js`), không còn mô phỏng ở Trail |
 | 7 | Chính sách huỷ/hoàn tiền theo mốc thời gian | `services/bookingService.js` | Hoạt động (demo, minh hoạ) |
 | 8 | Hành trình đang diễn ra, đã ghé thăm, hỗ trợ sự cố | `trail/itineraryDetail.js`, `trail/support.js` | Hoạt động (demo) |
 | 8 | Heatmap (Khám phá + trong hành trình), đề xuất đổi điểm | `trail/explore.js`, `trail/itineraryDetail.js` | Hoạt động (demo, mô phỏng) |
 | 9 | Đánh giá, Traveller Passport, điểm/voucher | `trail/passport.js` | Hoạt động (demo) |
-| 10 | Studio: tổng quan/đăng trải nghiệm/booking/báo cáo/CPS/đề án | — | Giai đoạn sau (Phase 6) |
-| 11 | Cổng dữ liệu quản lý | — | Giai đoạn sau (Phase 7) |
-| 12 | Cổng vận hành & cố vấn cộng đồng | — | Giai đoạn sau (Phase 8) |
-| 13 | Quy tắc dữ liệu dùng chung, trạng thái nhất quán | `js/storage.js`, `js/data.js` | Hoạt động (demo) cho phần đã xây (yêu thích, dữ liệu địa điểm); phần booking/giải ngân áp dụng khi xây phase sau |
+| 10 | Studio: tổng quan/đăng trải nghiệm/booking/báo cáo/CPS/đề án | `js/studio/*.js`, `js/services/cpsService.js` | Hoạt động (demo) — chi tiết ở bảng Phase 5 bên dưới |
+| 11 | Cổng dữ liệu quản lý | — | Giai đoạn sau (Phase 6) |
+| 12 | Cổng vận hành & cố vấn cộng đồng | — | Giai đoạn sau (Phase 7) |
+| 13 | Quy tắc dữ liệu dùng chung, trạng thái nhất quán | `js/storage.js`, `js/data.js` | Hoạt động (demo) — đã kiểm thử thật cho booking (Trail tạo → Studio xử lý → Trail thấy cập nhật, cùng một `state.bookingItems`); phần Cổng quản lý/vận hành áp dụng khi xây phase sau |
 | 13 | Dữ liệu minh hoạ có nhãn, không bịa giá/lịch/nhận xét | `data/destinations.json`, `DATA_ISSUES.md` | Hoạt động (demo) — Phase 2: 37 địa danh, mỗi trường gắn trạng thái verified/estimated/missing, mâu thuẫn được ghi nhận công khai thay vì che giấu |
 | 14 | Yêu thích/nháp/lịch sử, tìm kiếm không dấu, tiếp cận đúng ngữ cảnh | Khám phá + Hồ sơ | Hoạt động (demo) một phần — chia sẻ/in hành trình chờ phase sau |
 | 14 | Trang "Về bản demo" | Tab Cá nhân | Hoạt động (demo) |
@@ -59,5 +59,22 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | Placeholder cho địa danh chưa có ảnh | `js/utils.js` (`placeholderImageDataUri`) | Hoạt động (demo) — áp dụng cho toàn bộ 37 mục |
 | Báo cáo DATA_ISSUES.md (thiếu toạ độ/ảnh/giờ, trùng lặp, mâu thuẫn) | `DATA_ISSUES.md` | Hoàn thành |
 | Chưa tìm/tải ảnh từ Internet trong phase này | — | Đúng như yêu cầu — chỉ lưu link tham khảo, chưa tải |
+
+## Phase 5 — Hoàn thiện Studio dành cho hộ cung cấp trải nghiệm (theo yêu cầu riêng của người dùng)
+
+| Yêu cầu (từ hội thoại Phase 5) | Màn hình/chức năng | Trạng thái |
+|---|---|---|
+| Tổng quan doanh thu, khách, booking, đánh giá | `js/studio/overview.js` | Hoạt động (demo) — tính trực tiếp từ `state.bookingItems`/`state.bookings`, không số liệu giả |
+| Tạo và chỉnh sửa trải nghiệm | `js/studio/experiences.js`, `upsertHostExperience` (`js/storage.js`) | Hoạt động (demo) — nháp → gửi duyệt → mô phỏng cộng đồng/vận hành duyệt → hiển thị ngay ở hồ sơ địa điểm Trail |
+| Quản lý lịch, sức chứa, booking | `js/studio/experiences.js` (slot), `js/studio/bookings.js` | Hoạt động (demo) — thêm/đóng-mở/xoá khung giờ, xoá bị chặn khi đã có khách đặt |
+| Chấp nhận / từ chối booking | `js/studio/bookings.js`, `respondToBooking` (`js/services/bookingService.js`) | Hoạt động (demo) — chuyển hẳn từ Trail (Phase 4 mô phỏng) sang Studio (hành động thật) |
+| Xác nhận hoàn thành | `completeBookingItem` (`js/services/bookingService.js`) | Hoạt động (demo) — cộng Passport + điểm thưởng bên Trail, đã kiểm thử không cộng trùng |
+| Thu nhập, khoản chờ nhận, giải ngân mô phỏng | `js/studio/overview.js`, `releasePayout` (`js/services/bookingService.js`) | Hoạt động (demo) — chặn giải ngân khi còn ticket hỗ trợ mở |
+| Báo cáo kinh doanh | `js/studio/reports.js` | Hoạt động (demo) — Chart.js qua CDN có fallback bảng chữ (đã kiểm thử lỗi tải thật); tháng hiện tại luôn khớp dữ liệu booking thật |
+| CPS nội bộ | `js/services/cpsService.js` | Hoạt động (demo) — công thức có trọng số công khai, New Spotlight cho hộ mới &lt;3 booking, không gắn nhãn kém chất lượng |
+| Gợi ý cải thiện dựa trên dữ liệu | `js/services/cpsService.js` (`generateSuggestions`), `js/studio/reports.js` | Hoạt động (demo) — chỉ dùng lượt xem/booking/sức chứa thật, không bịa số |
+| Gửi/theo dõi đề án hỗ trợ | `js/studio/support.js`, `createProposal`/`setProposalStatus` (`js/storage.js`) | Hoạt động (demo) — mô phỏng quản lý/vận hành duyệt vì cổng đó chưa xây |
+| Yêu cầu xem xét ngoại lệ CPS | `js/studio/support.js`, `requestCpsException`/`decideCpsException` (`js/storage.js`) | Hoạt động (demo) — ngoại lệ đã duyệt loại trừ đúng booking trong kỳ tính CPS |
+| Booking từ Trail xuất hiện trong Studio bằng dữ liệu dùng chung | `js/trail/booking.js` → `js/studio/bookings.js` | Đã kiểm thử thật — đặt ở Trail, đổi hộ trong Studio, booking hiện đúng ngay không cần đồng bộ |
 
 Ghi chú: bảng này cập nhật cuối mỗi phase, không xóa dòng cũ — chỉ đổi trạng thái.

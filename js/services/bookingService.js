@@ -1,6 +1,6 @@
 // Adapter giữ chỗ/booking — mô phỏng trên state cục bộ (không có backend thật).
 // Triển khai thật cần backend khoá chỗ nguyên tử để tránh overbooking giữa nhiều thiết bị/tab.
-import { getState, persist } from '../storage.js';
+import { getState, persist, addPassportStamp, addPoints } from '../storage.js';
 import { uid, generateBookingCode } from '../utils.js';
 
 export const HOLD_TTL_MINUTES = 15;
@@ -19,6 +19,7 @@ export function findExperienceAndSlot(experienceId, slotId) {
 
 export function getSlotRemaining(slot, excludeBookingItemId = null) {
   if (!slot) return 0;
+  if (slot.isOpen === false) return 0;
   const s = getState();
   const reserved = s.bookingItems
     .filter((bi) => bi.slotId === slot.id && bi.id !== excludeBookingItemId && isActiveStatus(bi.status))
@@ -114,8 +115,7 @@ export function createBooking({ itineraryId = null, partySize, items }) {
 }
 
 /**
- * Mô phỏng phản hồi của hộ — vì Studio (Phase sau) chưa xây, người dùng demo tạm đóng vai
- * hộ để xác nhận/từ chối từng mục và xem hệ quả (đây LÀ hành vi mô phỏng, ghi nhãn rõ trong UI).
+ * Hộ chấp nhận/từ chối từng mục trong booking (gọi từ Studio → Lịch & Booking).
  * decisions: [{ bookingItemId, decision: 'accept'|'reject', reason? }]
  */
 export function respondToBooking(bookingId, decisions) {
@@ -150,6 +150,50 @@ export function respondToBooking(bookingId, decisions) {
 
   persist();
   return { ok: true, booking, items };
+}
+
+/**
+ * Hộ xác nhận một mục đã hoàn thành (check-in) — gọi từ Studio → Lịch & Booking.
+ * Tách biệt với "Đã ghé thăm" (khách tự đánh dấu bên Trail): chỉ hành động này mới cộng
+ * điểm thưởng, tạo dấu Passport "đã xác nhận" và chuyển khoản hộ nhận sang trạng thái "đang giữ".
+ */
+export function completeBookingItem(bookingItemId) {
+  const s = getState();
+  const bi = s.bookingItems.find((x) => x.id === bookingItemId);
+  if (!bi) return { ok: false, reason: 'Không tìm thấy mục booking.' };
+  if (bi.status !== 'accepted') return { ok: false, reason: 'Chỉ có thể xác nhận hoàn thành cho mục đã được chấp nhận.' };
+  const now = new Date().toISOString();
+  bi.status = 'completed';
+  bi.statusHistory.push({ status: 'completed', at: now, note: 'Hộ xác nhận hoàn thành (Studio).' });
+
+  const booking = s.bookings.find((b) => b.id === bi.bookingId);
+  const otherActive = s.bookingItems.some((x) => x.bookingId === bi.bookingId && x.id !== bi.id && x.status !== 'completed' && x.status !== 'cancelled' && x.status !== 'rejected');
+  if (booking && !otherActive) {
+    booking.status = 'completed';
+    if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'deposit_paid') booking.payoutStatus = 'holding';
+  }
+
+  addPassportStamp({ destinationId: bi.destinationId, type: 'visited-confirmed', bookingItemId: bi.id });
+  const firstTimeWithHost = !s.pointsLedger.some((p) => p.reason.startsWith(`host-${bi.destinationId}`));
+  addPoints(10, `complete-${bi.id}`, bi.bookingId);
+  if (firstTimeWithHost) addPoints(5, `host-${bi.destinationId}-${bi.id}`, bi.bookingId);
+
+  persist();
+  return { ok: true, bookingItem: bi, booking };
+}
+
+/** Giải ngân khoản đang giữ của một booking (mô phỏng — thật cần chờ mốc thời gian + không có sự cố mở). */
+export function releasePayout(bookingId) {
+  const s = getState();
+  const booking = s.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { ok: false };
+  if (booking.payoutStatus !== 'holding') return { ok: false, reason: 'Khoản này chưa ở trạng thái đang giữ.' };
+  const hasOpenTicket = s.supportTickets.some((t) => t.bookingId === bookingId && t.status !== 'da-xu-ly');
+  if (hasOpenTicket) return { ok: false, reason: 'Có ticket hỗ trợ đang mở liên quan đến booking này — cần xử lý xong trước khi giải ngân.' };
+  booking.payoutStatus = 'released';
+  booking.statusHistory.push({ status: 'payout_released', at: new Date().toISOString(), note: 'Giải ngân mô phỏng (demo dùng nút thay vì chờ thời gian thật).' });
+  persist();
+  return { ok: true };
 }
 
 export function computeRefundAmount(booking) {
@@ -197,6 +241,8 @@ export function cancelBooking(bookingId) {
 export const BookingService = {
   createBooking,
   respondToBooking,
+  completeBookingItem,
+  releasePayout,
   cancelBooking,
   computeRefundAmount,
   getSlotRemaining,

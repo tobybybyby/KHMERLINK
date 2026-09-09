@@ -9,12 +9,24 @@ import { renderProfile } from './trail/profile.js';
 import { renderItineraryHome, renderItineraryWizard } from './trail/itinerary.js';
 import { renderItineraryDetail } from './trail/itineraryDetail.js';
 import { renderPassport } from './trail/passport.js';
+import { renderStudioShell } from './studio/shell.js';
+import { renderOverview } from './studio/overview.js';
+import { renderExperiences } from './studio/experiences.js';
+import { renderBookings } from './studio/bookings.js';
+import { renderReports } from './studio/reports.js';
+import { renderSupport } from './studio/support.js';
 
 const appRoot = document.getElementById('app');
 
 function mountTrailPage(tabKey, pageRenderFn) {
   const content = renderTrailShell(appRoot, tabKey);
   pageRenderFn(content);
+  content.focus({ preventScroll: true });
+}
+
+function mountStudioPage(tabKey, pageRenderFn, params) {
+  const { content, hostId } = renderStudioShell(appRoot, tabKey);
+  pageRenderFn(content, hostId, params);
   content.focus({ preventScroll: true });
 }
 
@@ -31,11 +43,14 @@ const ROUTES = [
   { pattern: /^#\/trail\/profile$/, handler: () => mountTrailPage('profile', renderProfile) },
   { pattern: /^#\/trail\/?$/, handler: () => { window.location.hash = '#/trail/explore'; } },
 
-  { pattern: /^#\/studio.*$/, handler: () => renderComingSoon(appRoot, {
-    title: 'Studio — dành cho hộ dân & nghệ nhân',
-    description: 'Tổng quan, đăng trải nghiệm, booking & thu nhập, báo cáo & CPS, đề án hỗ trợ sẽ có ở Phase 6.',
-    phase: 6,
-  }) },
+  { pattern: /^#\/studio\/experiences\/new$/, handler: () => mountStudioPage('experiences', renderExperiences, { newExp: true }) },
+  { pattern: /^#\/studio\/experiences\/([\w-]+)$/, handler: (m) => mountStudioPage('experiences', renderExperiences, { editId: m[1] }) },
+  { pattern: /^#\/studio\/experiences$/, handler: () => mountStudioPage('experiences', renderExperiences) },
+  { pattern: /^#\/studio\/bookings$/, handler: () => mountStudioPage('bookings', renderBookings) },
+  { pattern: /^#\/studio\/reports$/, handler: () => mountStudioPage('reports', renderReports) },
+  { pattern: /^#\/studio\/support$/, handler: () => mountStudioPage('support', renderSupport) },
+  { pattern: /^#\/studio\/overview$/, handler: () => mountStudioPage('overview', renderOverview) },
+  { pattern: /^#\/studio\/?$/, handler: () => { window.location.hash = '#/studio/overview'; } },
   { pattern: /^#\/admin.*$/, handler: () => renderComingSoon(appRoot, {
     title: 'Cổng dữ liệu quản lý',
     description: 'Dashboard tổng hợp booking, luồng khách, nhu cầu & cơ hội, đề án, báo cáo sẽ có ở Phase 7.',
