@@ -386,3 +386,16 @@ Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Linh** (trước
 - Tên "Khmer Linh" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
 - Chưa tích hợp ảnh/hoạ tiết trang trí thật từ nguồn ngoài — mới dùng SVG tự vẽ đơn giản (sóng, hoa sen). Nếu người dùng cung cấp ảnh cụ thể, có thể tích hợp thêm ở phần nền trang chào hoặc header mà không cần đổi lại kiến trúc.
 - Bản đồ Leaflet/OpenStreetMap vẫn dùng tile gốc (không có tuỳ chọn theme màu cho tile bản đồ) — chỉ marker/polyline đổi màu theo bảng mới.
+
+## Sửa lỗi Cổng quản lý (sau khi đổi thương hiệu) — 2026-09-09
+
+Người dùng báo "phần cổng quản lý hơi lỗi" sau khi đổi giao diện. Kiểm tra trực tiếp qua trình duyệt phát hiện: trang `#/gateway` (Cổng quản lý) bị tràn chữ ngang — tiêu đề, đoạn giới thiệu và mô tả thẻ "Cổng dữ liệu quản lý" bị cắt mất ở mép phải thay vì xuống dòng.
+
+**Nguyên nhân**: đoạn giới thiệu (`<p>`) trong `renderGateway()` (`js/welcome.js`) chưa từng có ràng buộc `max-width` kể từ Phase 1 (xác nhận qua `git log -p`). Vì là con trực tiếp của `.welcome-page` (flex-column, `align-items:center`, không giới hạn chiều rộng con), phần tử này co giãn theo kích thước nội dung thay vì theo viewport — chữ dài render tràn ra ngoài và bị `body{overflow-x:hidden}` cắt âm thầm thay vì xuống dòng. Lỗi vốn tồn tại từ đầu nhưng chỉ lộ rõ gần đây do (a) đoạn mô tả bị kéo dài hơn ở phase trước và (b) phông serif mới (Cormorant Garamond) rộng hơn phông cũ.
+
+**Đã sửa** — `css/layout.css`, thêm ràng buộc chiều rộng cho mọi `<div>` con trực tiếp của `.welcome-page` (áp dụng chung, không chỉ riêng phần tử lỗi) và `overflow-x:hidden` phòng vệ:
+```css
+.welcome-page > div { max-width: 480px; width: 100%; min-width: 0; }
+```
+
+**Đã kiểm thử qua trình duyệt thật**: trang chào (`#/`) và Cổng quản lý (`#/gateway`) ở cả desktop và mobile 375px — chữ xuống dòng đúng, không còn bị cắt; xác nhận qua JS `document.documentElement.scrollWidth === clientWidth` (không tràn ngang). Kiểm tra thêm Cổng dữ liệu quản lý (`#/admin/overview`, dùng `.studio-shell` khác layout) — không bị ảnh hưởng, hiển thị bình thường.
