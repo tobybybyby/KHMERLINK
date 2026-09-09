@@ -345,6 +345,14 @@ Người dùng tự kiểm thử app phát hiện: sau khi đánh dấu "Đã gh
 Card địa điểm trong trang tổng kết tràn ra ngoài màn hình mobile — dùng nhầm class `.mini-card__img` (width:100%, thiết kế cho ảnh full-width trong grid) thay vì `.itin-stop__img` (72×72px cố định, đúng cho layout ảnh nhỏ + text bên cạnh). Đã sửa bằng cách dùng lại cấu trúc `.itin-stop`/`.itin-stop__body` có sẵn (cùng pattern itineraryDetail.js đang dùng) — xác nhận lại đúng trên mobile 375px, không tràn ngang.
 
 ### Giới hạn đã biết (không giấu)
-- Cảm nhận tự khai báo (`placeImpressions`) không cộng điểm thưởng — khác với trải nghiệm trả phí hoàn thành qua Studio (đúng chủ đích, tránh trộn lẫn hai cơ chế: tự báo cáo cho điểm miễn phí vs. xác nhận qua booking cho điểm thưởng).
+- Việc gửi/bỏ qua cảm nhận từng điểm (`placeImpressions`) không tự cộng điểm thưởng — điểm thưởng được cộng một lần cho **cả hành trình** khi hoàn thành (xem mục cập nhật bên dưới), tách bạch với điểm thưởng trải nghiệm trả phí hoàn thành qua Studio.
 - Hoàn thành hành trình hiện chỉ dựa vào "tất cả điểm đã tự đánh dấu ghé thăm" (không phụ thuộc trạng thái booking) — khớp đúng hành động người dùng vừa bấm, nhưng có nghĩa một hành trình có thể "hoàn thành" dù một hoạt động trả phí trong đó chưa được hộ xác nhận xong; đây là tín hiệu tiến trình cá nhân của khách, tách bạch với xác nhận booking (đúng nguyên tắc đã áp dụng xuyên suốt dự án).
 - Tổng hợp tiêu chí (vd "Ao Bà Om được khen nhiều về cảnh quan nhưng hay bị phàn nàn vệ sinh") chưa hiển thị ở trang chi tiết địa điểm — mới dừng ở mức thu thập dữ liệu có cấu trúc; hiển thị tổng hợp để lại cho lần sau nếu cần.
+
+## Cập nhật trang tổng kết hành trình — điểm thưởng + đổi voucher
+
+Theo yêu cầu bổ sung: phía trên trang tổng kết hiện lời chúc mừng + số điểm thưởng nhận được, phía dưới là danh sách voucher có thể đổi ngay.
+
+- Thêm điểm thưởng cho **hoàn thành cả hành trình** (khác với điểm thưởng theo từng trải nghiệm trả phí đã có) — `POINTS_PER_STOP_ON_ITINERARY_COMPLETE = 5` điểm/điểm đã ghé thăm (`js/trail/itineraryDetail.js`), cộng đúng một lần nhờ `addPoints()` đã chống lặp sẵn theo `reason = itinerary-complete-<id>` (an toàn dù tải lại trang hay xem lại trang tổng kết nhiều lần).
+- `js/trail/itinerarySummary.js`: đổi tiêu đề thành "Chúc mừng bạn đã hoàn thành chuyến đi!", thêm khối nổi bật "Số điểm bạn nhận được: +X điểm" (đọc từ `pointsLedger` theo đúng hành trình, không suy đoán) và "Tổng điểm hiện có", ngay bên dưới là mục "Đổi điểm lấy voucher" dùng lại đúng danh sách/nút đổi voucher đã có ở Hộ chiếu (`voucherCatalogHtml()` — export từ `passport.js` để dùng chung, không viết lại).
+- Đã kiểm thử qua DOM thật: hành trình 2 điểm → hiện đúng "+10 điểm" (2×5) và tổng điểm cập nhật đúng; nút đổi voucher tự khoá khi chưa đủ điểm, cộng thêm 100 điểm rồi đổi voucher 100 điểm ngay trên trang tổng kết → đúng trừ điểm, tạo voucher, cập nhật số dư hiển thị ngay không cần tải lại trang. Trang Hộ chiếu vẫn hoạt động đúng sau khi tách `voucherCatalogHtml()` ra dùng chung. Kiểm tra mobile 375px: khối điểm thưởng và danh sách voucher hiển thị gọn, không tràn ngang.

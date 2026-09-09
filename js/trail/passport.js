@@ -103,7 +103,7 @@ function stampListHtml(state) {
   }).join('')}</div>`;
 }
 
-function voucherCatalogHtml(state, balance) {
+export function voucherCatalogHtml(state, balance) {
   return state.voucherCatalog.map((v) => `
     <div class="activity-card">
       <div class="activity-card__head">

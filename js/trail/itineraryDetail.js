@@ -1,4 +1,4 @@
-import { getState, getItinerary, saveItinerary, addPassportStamp, setActiveItinerary } from '../storage.js';
+import { getState, getItinerary, saveItinerary, addPassportStamp, setActiveItinerary, addPoints } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDurationMin, combineDateTime,
   categoryEmoji, deriveCategoryVisual, destinationImageSrc, getSimulatedCrowdLevel,
@@ -278,6 +278,10 @@ function applyAddOrReplace(container, itinerary, destinationId, replaceIndex) {
 /** Gọi sau khi đóng modal cảm nhận (dù gửi hay bỏ qua) — nếu tất cả điểm đã tự đánh dấu ghé
  * thăm thì đánh dấu hành trình hoàn tất và điều hướng sang trang tổng kết; nếu chưa, vẽ lại
  * trang hành trình như bình thường. */
+/** Điểm thưởng khi hoàn thành cả hành trình (khác điểm thưởng hoàn thành từng trải nghiệm trả
+ * phí qua Studio) — tính theo số điểm đã ghé thăm, minh hoạ, có thể chỉnh ở đây. */
+export const POINTS_PER_STOP_ON_ITINERARY_COMPLETE = 5;
+
 function finishVisitStep(container, itineraryId) {
   const itinerary = getItinerary(itineraryId);
   if (!itinerary) return;
@@ -285,6 +289,7 @@ function finishVisitStep(container, itineraryId) {
   if (allVisited && itinerary.status !== 'completed') {
     itinerary.status = 'completed';
     saveItinerary(itinerary);
+    addPoints(itinerary.stops.length * POINTS_PER_STOP_ON_ITINERARY_COMPLETE, `itinerary-complete-${itineraryId}`, null);
     window.location.hash = `#/trail/itinerary/${itineraryId}/summary`;
     return;
   }
