@@ -1,10 +1,13 @@
-import { getState, toggleFavorite, isFavorite, addDraftItineraryItem } from '../storage.js';
+import { getState, toggleFavorite, isFavorite, addDraftItineraryItem, saveItinerary } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDateShort, categoryEmoji, deriveCategoryVisual,
   destinationImageSrc, renderStars, qs, qsa,
 } from '../utils.js';
 import { NotificationService } from '../services/notificationService.js';
-import { initAccordion, renderEmptyState } from '../ui.js';
+import { getSlotRemaining } from '../services/bookingService.js';
+import { recalcTimeline } from '../services/aiService.js';
+import { initAccordion, renderEmptyState, openModal, confirmDialog } from '../ui.js';
+import { openBookingFlow } from './booking.js';
 
 function quickFact(label, value) {
   return `
@@ -41,10 +44,10 @@ function activityCardHtml(exp) {
   const upcoming = exp.slots
     .filter((s) => new Date(s.date) >= new Date(new Date().setHours(0, 0, 0, 0)))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
-  const totalRemaining = upcoming.reduce((sum, s) => sum + Math.max(0, s.capacity - s.booked), 0);
+  const withRemaining = upcoming.map((s) => ({ s, remaining: getSlotRemaining(s) }));
+  const totalRemaining = withRemaining.reduce((sum, x) => sum + x.remaining, 0);
   const slotsHtml = upcoming.length
-    ? upcoming.map((s) => {
-        const remaining = s.capacity - s.booked;
+    ? withRemaining.map(({ s, remaining }) => {
         const full = remaining <= 0;
         return `<div class="text-sm">${formatDateShort(s.date)} · ${s.startTime}–${s.endTime} — ${full ? '<strong style="color:var(--color-danger)">Hết chỗ</strong>' : `còn ${remaining}/${s.capacity} chỗ`}</div>`;
       }).join('')
@@ -64,6 +67,59 @@ function activityCardHtml(exp) {
       </button>
     </div>
   `;
+}
+
+function openSingleExperienceBooking(container, exp) {
+  const upcoming = exp.slots
+    .filter((s) => new Date(s.date) >= new Date(new Date().setHours(0, 0, 0, 0)))
+    .map((s) => ({ s, remaining: getSlotRemaining(s) }))
+    .filter((x) => x.remaining > 0);
+  if (!upcoming.length) {
+    NotificationService.notify('Hoạt động này hiện không còn khung giờ trống.', 'error');
+    return;
+  }
+  const bodyHtml = `
+    <div class="flex-col gap-3">
+      <div>
+        <span class="field-label">Chọn khung giờ</span>
+        <div class="flex-col gap-2">
+          ${upcoming.map(({ s, remaining }, i) => `
+            <label class="flex items-center gap-2">
+              <input type="radio" name="pd-slot-pick" value="${s.id}" ${i === 0 ? 'checked' : ''}>
+              ${formatDateShort(s.date)} · ${s.startTime}–${s.endTime} (còn ${remaining} chỗ)
+            </label>
+          `).join('')}
+        </div>
+      </div>
+      <div><label class="field-label" for="pd-qty">Số khách</label><input type="number" min="1" value="1" class="field-input" id="pd-qty"></div>
+      <div class="modal__actions"><button type="button" class="btn btn-primary" id="pd-continue">Tiếp tục</button></div>
+    </div>
+  `;
+  openModal({
+    title: exp.title,
+    bodyHtml,
+    onMount: (modalEl, closeFn) => {
+      qs('#pd-continue', modalEl).addEventListener('click', () => {
+        const picked = modalEl.querySelector('input[name="pd-slot-pick"]:checked');
+        const slotId = picked ? picked.value : upcoming[0].s.id;
+        const qty = Math.max(1, Number(qs('#pd-qty', modalEl).value) || 1);
+        const match = upcoming.find((x) => x.s.id === slotId);
+        if (match && qty > match.remaining) {
+          NotificationService.notify(`Chỉ còn ${match.remaining} chỗ cho khung giờ này.`, 'error');
+          return;
+        }
+        closeFn();
+        openBookingFlow({
+          items: [{ experienceId: exp.id, slotId, quantity: qty }],
+          partySize: qty,
+          onDone: () => {
+            NotificationService.notify('Đặt trải nghiệm hoàn tất — xem trạng thái trong Hộ chiếu.', 'success');
+            renderPlaceDetail(container, exp.destinationId);
+          },
+        });
+      });
+    },
+  });
 }
 
 function reviewItemHtml(rv) {
@@ -139,7 +195,10 @@ export function renderPlaceDetail(container, id) {
   }
 
   const experiences = state.experiences.filter((e) => e.destinationId === dest.id);
-  const reviews = state.reviews.filter((r) => r.destinationId === dest.id);
+  const reviews = [
+    ...state.reviews.filter((r) => r.destinationId === dest.id),
+    ...state.userReviews.filter((r) => r.destinationId === dest.id),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
   const destGroup = deriveCategoryVisual(dest.category).group;
   const nearby = state.destinations
     .filter((d) => d.id !== dest.id && deriveCategoryVisual(d.category).group === destGroup)
@@ -200,7 +259,7 @@ export function renderPlaceDetail(container, id) {
           ${accordionItem('acc-contact', 'Liên hệ', `<p>${factDisplay(dest.contact, dest.contactStatus, 'Chưa xác minh được từ nguồn công khai đủ tin cậy.')}</p>`)}
           ${accordionItem('acc-reviews', `Đánh giá tiêu biểu (${reviews.length})`, reviews.length
             ? reviews.map(reviewItemHtml).join('')
-            : renderEmptyState({ icon: '📝', title: 'Chưa có đánh giá tiêu biểu', message: 'Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận (tính năng đánh giá hoàn thiện ở Phase 5).' }))}
+            : renderEmptyState({ icon: '📝', title: 'Chưa có đánh giá tiêu biểu', message: 'Hoàn thành một trải nghiệm đã đặt để có thể viết đánh giá đầu tiên.' }))}
         </section>
 
         ${sourcesSectionHtml(dest)}
@@ -230,18 +289,40 @@ export function renderPlaceDetail(container, id) {
   });
 
   qs('#add-itinerary-btn', container).addEventListener('click', () => {
+    const editableItinerary = state.itineraries.find((it) => it.status === 'selected');
+    if (editableItinerary) {
+      confirmDialog({
+        title: 'Thêm vào hành trình?',
+        message: `Thêm "${dest.name}" vào hành trình "${editableItinerary.name}" đang chỉnh sửa?`,
+        confirmLabel: 'Thêm vào',
+      }).then((ok) => {
+        if (!ok) return;
+        editableItinerary.stops.push({
+          destinationId: dest.id, name: dest.name, category: dest.category,
+          arriveMin: 0, departMin: 0, travelMinFromPrev: 0, travelEstimated: true,
+          experienceId: null, slotId: null, experienceTitle: null, experiencePrice: 0,
+          note: '', selfVisitedAt: null, bookingItemId: null,
+        });
+        recalcTimeline(editableItinerary);
+        saveItinerary(editableItinerary);
+        NotificationService.notify('Đã thêm vào hành trình — giờ và chi phí đã cập nhật.', 'success');
+        window.location.hash = `#/trail/itinerary/${editableItinerary.id}`;
+      });
+      return;
+    }
     const added = addDraftItineraryItem(dest.id);
     NotificationService.notify(
       added
-        ? 'Đã thêm vào hành trình nháp — phần sắp xếp lịch trình đầy đủ sẽ hoàn thiện ở Phase 2.'
-        : 'Địa điểm này đã có trong hành trình nháp của bạn.',
+        ? 'Đã lưu vào danh sách gợi ý — vào "Hành trình" để tạo hành trình đầy đủ, danh sách này sẽ được dùng làm gợi ý ban đầu.'
+        : 'Địa điểm này đã có trong danh sách gợi ý ban đầu.',
       'info',
     );
   });
 
   qsa('[data-book-exp]', container).forEach((btn) => {
     btn.addEventListener('click', () => {
-      NotificationService.notify('Đặt trải nghiệm (giữ chỗ, thanh toán demo) sẽ hoàn thiện ở Phase 3.', 'info');
+      const exp = experiences.find((e) => e.id === btn.dataset.bookExp);
+      if (exp) openSingleExperienceBooking(container, { ...exp, destinationId: dest.id });
     });
   });
 }

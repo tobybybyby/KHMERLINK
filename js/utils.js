@@ -44,6 +44,67 @@ export function uid(prefix = 'id') {
   return `${prefix}-${Date.now().toString(36)}-${idCounter}`;
 }
 
+export function generateBookingCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i += 1) code += chars[Math.floor(Math.random() * chars.length)];
+  return `VLT-${code}`;
+}
+
+export function combineDateTime(dateIso, hhmm) {
+  const base = new Date(dateIso);
+  const [h, m] = String(hhmm || '00:00').split(':').map(Number);
+  base.setHours(h || 0, m || 0, 0, 0);
+  return base;
+}
+
+export function addMinutes(date, minutes) {
+  return new Date(date.getTime() + minutes * 60000);
+}
+
+export function minutesBetween(a, b) {
+  return Math.round((b.getTime() - a.getTime()) / 60000);
+}
+
+export function formatTimeHHmm(date) {
+  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+export function formatDateTimeShort(date) {
+  return `${formatDateShort(date)} ${formatTimeHHmm(date)}`;
+}
+
+export function formatDurationMin(min) {
+  if (min < 60) return `${min} phút`;
+  const h = Math.floor(min / 60);
+  const rem = min % 60;
+  return rem ? `${h} giờ ${rem} phút` : `${h} giờ`;
+}
+
+const CROWD_LEVELS = [
+  { key: 'vang', label: 'Vắng', color: '#2f7d4f' },
+  { key: 'vua', label: 'Vừa', color: '#c8862e' },
+  { key: 'dong', label: 'Đông', color: '#b3413a' },
+  { key: 'gan-het', label: 'Gần hết sức chứa', color: '#7a1f1f' },
+];
+
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i += 1) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Mô phỏng mật độ khách theo giờ trong ngày (không phải dữ liệu thời gian thực).
+// Xác định (deterministic) theo id + khung giờ hiện tại để nhất quán trong cùng một phiên,
+// nhưng đổi theo giờ/ngày để trông "sống động" — luôn gắn nhãn rõ là mô phỏng ở nơi hiển thị.
+export function getSimulatedCrowdLevel(destinationId, atDate = new Date()) {
+  const hourBucket = Math.floor(atDate.getHours() / 3);
+  const dayKey = atDate.toISOString().slice(0, 10);
+  const h = hashString(`${destinationId}|${dayKey}|${hourBucket}`);
+  const level = CROWD_LEVELS[h % CROWD_LEVELS.length];
+  return { ...level, updatedAt: atDate };
+}
+
 export function debounce(fn, wait = 250) {
   let t = null;
   return (...args) => {

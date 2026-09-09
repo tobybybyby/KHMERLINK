@@ -2,7 +2,7 @@ import { getState } from '../storage.js';
 import {
   escapeHtml, matchesQuery, haversineKm,
   categoryEmoji, deriveCategoryVisual, debounce, qs, qsa,
-  destinationImageSrc,
+  destinationImageSrc, getSimulatedCrowdLevel,
 } from '../utils.js';
 import { INTEREST_OPTIONS, PAIR_SUGGESTIONS } from '../data.js';
 import { MapService } from '../services/mapService.js';
@@ -27,6 +27,7 @@ let userPoint = null;
 let manualPickMode = false;
 let selectedId = null;
 let panelExpanded = false;
+let heatmapOn = false;
 
 function startOfToday() {
   const d = new Date();
@@ -45,6 +46,7 @@ function buildSkeleton() {
         <button type="button" class="btn btn-secondary btn-sm filter-toggle-btn" id="explore-filter-btn">
           ⚙️ Bộ lọc <span class="filter-count-dot" id="filter-count-dot" hidden>0</span>
         </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="heatmap-toggle-btn" aria-pressed="false">🌡️ Mật độ (mô phỏng)</button>
       </div>
       <div class="explore-category-row" id="category-chip-row"></div>
       <p class="explore-stats" id="explore-stats"></p>
@@ -132,7 +134,8 @@ function renderStats(container, visible) {
   if (!el) return;
   const noCoords = visible.filter((d) => d.lat === null || d.lng === null).length;
   const extra = noCoords ? ` (${noCoords} địa điểm chưa có toạ độ xác thực, chỉ xem được trong danh sách)` : '';
-  el.textContent = `${visible.length} địa điểm/trải nghiệm đang hiển thị trong dữ liệu demo${extra} — không phải thống kê chính thức của tỉnh.`;
+  const heatmapNote = heatmapOn ? ` · Mật độ mô phỏng, cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} (không phải số liệu thời gian thực).` : '';
+  el.textContent = `${visible.length} địa điểm/trải nghiệm đang hiển thị trong dữ liệu demo${extra} — không phải thống kê chính thức của tỉnh.${heatmapNote}`;
 }
 
 function estimatedTag(status) {
@@ -148,6 +151,11 @@ function priceBadge(d) {
   return `<span class="badge ${cls}">${escapeHtml(d.priceDisplay)}</span>${estimatedTag(d.priceStatus)}`;
 }
 
+function crowdBadgeHtml(destinationId) {
+  const crowd = getSimulatedCrowdLevel(destinationId);
+  return `<span class="badge" style="background:${crowd.color}22;color:${crowd.color};">● ${escapeHtml(crowd.label)}</span>`;
+}
+
 function cardHtml(d) {
   const img = destinationImageSrc(d);
   const noCoords = d.lat === null || d.lng === null;
@@ -161,6 +169,7 @@ function cardHtml(d) {
           ${d.recognized ? '<span class="badge badge-recognized">✓ Được ghi nhận</span>' : ''}
           ${d.isNew ? '<span class="badge badge-new">Mới</span>' : ''}
           ${noCoords ? '<span class="badge badge-demo">📍 Chưa có toạ độ</span>' : ''}
+          ${heatmapOn ? crowdBadgeHtml(d.id) : ''}
         </span>
         <span class="place-card__meta">
           <span class="rating-inline">⭐ ${d.rating.toFixed(1)}</span>${estimatedTag(d.ratingStatus)}
@@ -406,6 +415,12 @@ function wireToolbar(container) {
   }, 200));
 
   qs('#explore-filter-btn', container).addEventListener('click', () => openFilterModal(container));
+
+  qs('#heatmap-toggle-btn', container).addEventListener('click', (e) => {
+    heatmapOn = !heatmapOn;
+    e.currentTarget.setAttribute('aria-pressed', String(heatmapOn));
+    renderAll(container);
+  });
 }
 
 function wirePanelHandle(container) {

@@ -29,11 +29,15 @@ Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt độn
 | 5.2 | Hồ sơ địa điểm gọn theo lớp, mục mở rộng | `trail/placeDetail.js` | Hoạt động (demo) |
 | 5.2 | Hoạt động trả phí tách khỏi tham quan miễn phí | Hồ sơ địa điểm | Hoạt động (demo) |
 | 5.2 | Không lộ trường vận hành nội bộ cho khách | Hồ sơ địa điểm | Hoạt động (demo) |
-| 6 | Form từng bước tạo hành trình | — | Giai đoạn sau (Phase 2) |
-| 6 | Kết quả 2–3 phương án, thuật toán rule-based | — | Giai đoạn sau (Phase 2) |
-| 7 | Booking, giữ chỗ, thanh toán demo, combo | — | Giai đoạn sau (Phase 3) |
-| 8 | Trong chuyến đi, heatmap, QR/audio, hỗ trợ sự cố | — | Giai đoạn sau (Phase 4) |
-| 9 | Đánh giá, Traveller Passport, điểm/voucher | — | Giai đoạn sau (Phase 5) |
+| 6 | Form từng bước tạo hành trình | `trail/itinerary.js` | Hoạt động (demo) — 4 bước |
+| 6 | Kết quả 2–3 phương án, thuật toán rule-based | `services/aiService.js` | Hoạt động (demo) — chỉ hiện phương án khác biệt thật, không fake |
+| 6 | Thêm/xoá/thay thế/sắp xếp điểm, tính lại giờ/giá | `trail/itineraryDetail.js` | Hoạt động (demo) |
+| 6 | Kiểm tra giờ mở/thời lượng/khoảng cách/sức chứa | `services/aiService.js`, `services/bookingService.js` | Hoạt động (demo) — chặn vượt sức chứa đã kiểm thử thật |
+| 7 | Booking, giữ chỗ có TTL, thanh toán demo, combo | `trail/booking.js`, `services/bookingService.js`, `services/paymentService.js` | Hoạt động (demo) — mô phỏng phản hồi hộ do Studio chưa xây |
+| 7 | Chính sách huỷ/hoàn tiền theo mốc thời gian | `services/bookingService.js` | Hoạt động (demo, minh hoạ) |
+| 8 | Hành trình đang diễn ra, đã ghé thăm, hỗ trợ sự cố | `trail/itineraryDetail.js`, `trail/support.js` | Hoạt động (demo) |
+| 8 | Heatmap (Khám phá + trong hành trình), đề xuất đổi điểm | `trail/explore.js`, `trail/itineraryDetail.js` | Hoạt động (demo, mô phỏng) |
+| 9 | Đánh giá, Traveller Passport, điểm/voucher | `trail/passport.js` | Hoạt động (demo) |
 | 10 | Studio: tổng quan/đăng trải nghiệm/booking/báo cáo/CPS/đề án | — | Giai đoạn sau (Phase 6) |
 | 11 | Cổng dữ liệu quản lý | — | Giai đoạn sau (Phase 7) |
 | 12 | Cổng vận hành & cố vấn cộng đồng | — | Giai đoạn sau (Phase 8) |

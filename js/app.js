@@ -6,6 +6,9 @@ import { renderTrailShell } from './trail/shell.js';
 import { renderExplore } from './trail/explore.js';
 import { renderPlaceDetail } from './trail/placeDetail.js';
 import { renderProfile } from './trail/profile.js';
+import { renderItineraryHome, renderItineraryWizard } from './trail/itinerary.js';
+import { renderItineraryDetail } from './trail/itineraryDetail.js';
+import { renderPassport } from './trail/passport.js';
 
 const appRoot = document.getElementById('app');
 
@@ -21,18 +24,10 @@ const ROUTES = [
 
   { pattern: /^#\/trail\/explore$/, handler: () => mountTrailPage('explore', renderExplore) },
   { pattern: /^#\/trail\/place\/([\w-]+)$/, handler: (m) => mountTrailPage('explore', (el) => renderPlaceDetail(el, m[1])) },
-  { pattern: /^#\/trail\/itinerary$/, handler: () => mountTrailPage('itinerary', (el) => renderComingSoon(el, {
-    title: 'Tạo hành trình cá nhân hoá',
-    description: 'Form từng bước, kết quả 2-3 phương án gợi ý tự động (rule-based) sẽ có ở Phase 2.',
-    phase: 2,
-    backHref: '#/trail/explore',
-  })) },
-  { pattern: /^#\/trail\/passport$/, handler: () => mountTrailPage('passport', (el) => renderComingSoon(el, {
-    title: 'Hộ chiếu du khách (Traveller Passport)',
-    description: 'Bản đồ điểm đã ghé, dấu trải nghiệm, điểm thưởng và voucher sẽ có ở Phase 5.',
-    phase: 5,
-    backHref: '#/trail/explore',
-  })) },
+  { pattern: /^#\/trail\/itinerary\/new$/, handler: () => mountTrailPage('itinerary', renderItineraryWizard) },
+  { pattern: /^#\/trail\/itinerary\/([\w-]+)$/, handler: (m) => mountTrailPage('itinerary', (el) => renderItineraryDetail(el, m[1])) },
+  { pattern: /^#\/trail\/itinerary$/, handler: () => mountTrailPage('itinerary', renderItineraryHome) },
+  { pattern: /^#\/trail\/passport$/, handler: () => mountTrailPage('passport', renderPassport) },
   { pattern: /^#\/trail\/profile$/, handler: () => mountTrailPage('profile', renderProfile) },
   { pattern: /^#\/trail\/?$/, handler: () => { window.location.hash = '#/trail/explore'; } },
 

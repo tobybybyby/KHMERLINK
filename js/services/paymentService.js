@@ -1,22 +1,21 @@
 // Adapter thanh toán mô phỏng — không thu thông tin thẻ thật, không chuyển tiền thật.
-// Chưa dùng ở Phase 1 — Phase 3 (booking/thanh toán) sẽ hiện thực hoá đầy đủ.
+import { getState, persist } from '../storage.js';
+import { uid } from '../utils.js';
 
-export const PaymentService = {
-  demo: true,
+/** kind: 'deposit' | 'full' */
+export function payBooking(bookingId, kind) {
+  const s = getState();
+  const booking = s.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { ok: false, reason: 'Không tìm thấy booking.' };
+  if (booking.paymentStatus === 'paid') return { ok: false, reason: 'Booking đã thanh toán đủ.' };
 
-  createDemoCharge(_amount, _method) {
-    return {
-      demo: true,
-      status: 'not_implemented',
-      note: 'Sẽ hoàn thiện ở Phase 3 theo Prompt-Claude-Vinh-Long.md mục 7.',
-    };
-  },
+  const amount = kind === 'deposit' ? booking.depositAmount : booking.totalAmount;
+  const now = new Date().toISOString();
+  s.payments.push({ id: uid('pay'), bookingId, amount, method: 'demo_card', kind, status: 'success', createdAt: now });
+  booking.paymentStatus = kind === 'deposit' ? 'deposit_paid' : 'paid';
+  booking.statusHistory.push({ status: `payment_${booking.paymentStatus}`, at: now });
+  persist();
+  return { ok: true, amount };
+}
 
-  refundDemo(_paymentId) {
-    return {
-      demo: true,
-      status: 'not_implemented',
-      note: 'Sẽ hoàn thiện ở Phase 3.',
-    };
-  },
-};
+export const PaymentService = { payBooking };

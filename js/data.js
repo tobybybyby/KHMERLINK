@@ -7,9 +7,11 @@ function addDays(n) {
   return d.toISOString();
 }
 
-function slot(dayOffset, startTime, endTime, capacity, booked) {
+// id cố định (không dùng uid() ngẫu nhiên) để bookingItems tham chiếu đúng slot
+// qua nhiều phiên, dù ngày giờ của slot được tính lại mỗi lần tải trang.
+function slot(expId, index, dayOffset, startTime, endTime, capacity, booked) {
   return {
-    id: uid('slot'),
+    id: `${expId}-s${index}`,
     date: addDays(dayOffset),
     startTime,
     endTime,
@@ -17,7 +19,6 @@ function slot(dayOffset, startTime, endTime, capacity, booked) {
     booked,
   };
 }
-
 
 const HOSTS = [
   { id: 'host-lo-gom-ba-thanh', name: 'Lò gốm Ba Thạnh', destinationId: 'vuong-quoc-gach-gom-mang-thit', isDemoHost: true, bio: 'Hộ demo minh hoạ mô hình nghệ nhân gốm truyền thống tại làng nghề Mang Thít.' },
@@ -39,9 +40,9 @@ function buildExperiences() {
       price: 90000,
       conditions: 'Phù hợp mọi lứa tuổi; trẻ em cần người lớn đi kèm.',
       slots: [
-        slot(1, '09:00', '10:00', 12, 4),
-        slot(2, '14:00', '15:00', 12, 0),
-        slot(4, '09:00', '10:00', 12, 12),
+        slot('exp-gom-mang-thit', 1, 1, '09:00', '10:00', 12, 4),
+        slot('exp-gom-mang-thit', 2, 2, '14:00', '15:00', 12, 0),
+        slot('exp-gom-mang-thit', 3, 4, '09:00', '10:00', 12, 12),
       ],
     },
     {
@@ -54,9 +55,9 @@ function buildExperiences() {
       price: 150000,
       conditions: 'Nên mặc đồ thoải mái, có thể lội nước nhẹ. Không phù hợp người không biết bơi đi một mình.',
       slots: [
-        slot(1, '08:00', '10:00', 10, 2),
-        slot(1, '14:00', '16:00', 10, 6),
-        slot(3, '08:00', '10:00', 10, 0),
+        slot('exp-mietvuon-anbinh', 1, 1, '08:00', '10:00', 10, 2),
+        slot('exp-mietvuon-anbinh', 2, 1, '14:00', '16:00', 10, 6),
+        slot('exp-mietvuon-anbinh', 3, 3, '08:00', '10:00', 10, 0),
       ],
     },
     {
@@ -69,8 +70,8 @@ function buildExperiences() {
       price: 120000,
       conditions: 'Dữ liệu hộ minh hoạ — giá và lịch mang tính trình diễn.',
       slots: [
-        slot(2, '09:00', '10:30', 6, 1),
-        slot(5, '09:00', '10:30', 6, 0),
+        slot('exp-banhtet-coba', 1, 2, '09:00', '10:30', 6, 1),
+        slot('exp-banhtet-coba', 2, 5, '09:00', '10:30', 6, 0),
       ],
     },
     {
@@ -83,8 +84,8 @@ function buildExperiences() {
       price: 80000,
       conditions: 'Dữ liệu hộ minh hoạ — giá và lịch mang tính trình diễn.',
       slots: [
-        slot(2, '15:00', '16:15', 8, 3),
-        slot(4, '09:00', '10:15', 8, 0),
+        slot('exp-danlat-chusau', 1, 2, '15:00', '16:15', 8, 3),
+        slot('exp-danlat-chusau', 2, 4, '09:00', '10:15', 8, 0),
       ],
     },
     {
@@ -97,8 +98,8 @@ function buildExperiences() {
       price: 50000,
       conditions: 'Đăng ký trước tối thiểu 1 ngày.',
       slots: [
-        slot(1, '09:30', '10:15', 20, 5),
-        slot(3, '09:30', '10:15', 20, 0),
+        slot('exp-thuyetminh-khmer', 1, 1, '09:30', '10:15', 20, 5),
+        slot('exp-thuyetminh-khmer', 2, 3, '09:30', '10:15', 20, 0),
       ],
     },
   ];
@@ -122,15 +123,23 @@ function buildEvents() {
 
 function buildReviews() {
   return [
-    { id: uid('rv'), destinationId: 'van-thanh-mieu', author: 'Khách demo — Minh', rating: 5, comment: 'Không gian yên tĩnh, hướng dẫn viên nhiệt tình giải thích lịch sử.', date: addDays(-30) },
-    { id: uid('rv'), destinationId: 'van-thanh-mieu', author: 'Khách demo — Thảo', rating: 4, comment: 'Đẹp và cổ kính, chỉ hơi khó tìm chỗ gửi xe.', date: addDays(-12) },
-    { id: uid('rv'), destinationId: 'chua-ang', author: 'Khách demo — Huy', rating: 5, comment: 'Kiến trúc chạm khắc rất tinh xảo, nên đi kèm hướng dẫn viên để hiểu thêm văn hoá Khmer.', date: addDays(-20) },
-    { id: uid('rv'), destinationId: 'chua-ang', author: 'Khách demo — Lan', rating: 5, comment: 'Không gian trang nghiêm, mọi người rất thân thiện.', date: addDays(-6) },
-    { id: uid('rv'), destinationId: 'ao-ba-om', author: 'Khách demo — Phúc', rating: 4, comment: 'Cây cổ thụ rất đẹp để chụp ảnh, nên đi vào sáng sớm.', date: addDays(-15) },
-    { id: uid('rv'), destinationId: 'cu-lao-an-binh', author: 'Khách demo — Ngọc', rating: 5, comment: 'Trải nghiệm chèo xuồng rất thú vị, trái cây tươi ngon.', date: addDays(-9) },
-    { id: uid('rv'), destinationId: 'cu-lao-an-binh', author: 'Khách demo — Hải', rating: 4, comment: 'Phù hợp đi cùng gia đình có trẻ nhỏ.', date: addDays(-3) },
-    { id: uid('rv'), destinationId: 'vuong-quoc-gach-gom-mang-thit', author: 'Khách demo — Yến', rating: 5, comment: 'Rất ấn tượng với quy mô các lò gạch cổ, nên có thêm chỗ nghỉ chân.', date: addDays(-18) },
-    { id: uid('rv'), destinationId: 'nha-vuon-co-ba', author: 'Khách demo — Trang', rating: 5, comment: 'Hộ demo minh hoạ — nội dung đánh giá mang tính trình diễn.', date: addDays(-2) },
+    { id: 'rv-seed-1', destinationId: 'van-thanh-mieu', author: 'Khách demo — Minh', rating: 5, comment: 'Không gian yên tĩnh, hướng dẫn viên nhiệt tình giải thích lịch sử.', date: addDays(-30) },
+    { id: 'rv-seed-2', destinationId: 'van-thanh-mieu', author: 'Khách demo — Thảo', rating: 4, comment: 'Đẹp và cổ kính, chỉ hơi khó tìm chỗ gửi xe.', date: addDays(-12) },
+    { id: 'rv-seed-3', destinationId: 'chua-ang', author: 'Khách demo — Huy', rating: 5, comment: 'Kiến trúc chạm khắc rất tinh xảo, nên đi kèm hướng dẫn viên để hiểu thêm văn hoá Khmer.', date: addDays(-20) },
+    { id: 'rv-seed-4', destinationId: 'chua-ang', author: 'Khách demo — Lan', rating: 5, comment: 'Không gian trang nghiêm, mọi người rất thân thiện.', date: addDays(-6) },
+    { id: 'rv-seed-5', destinationId: 'ao-ba-om', author: 'Khách demo — Phúc', rating: 4, comment: 'Cây cổ thụ rất đẹp để chụp ảnh, nên đi vào sáng sớm.', date: addDays(-15) },
+    { id: 'rv-seed-6', destinationId: 'cu-lao-an-binh', author: 'Khách demo — Ngọc', rating: 5, comment: 'Trải nghiệm chèo xuồng rất thú vị, trái cây tươi ngon.', date: addDays(-9) },
+    { id: 'rv-seed-7', destinationId: 'cu-lao-an-binh', author: 'Khách demo — Hải', rating: 4, comment: 'Phù hợp đi cùng gia đình có trẻ nhỏ.', date: addDays(-3) },
+    { id: 'rv-seed-8', destinationId: 'vuong-quoc-gach-gom-mang-thit', author: 'Khách demo — Yến', rating: 5, comment: 'Rất ấn tượng với quy mô các lò gạch cổ, nên có thêm chỗ nghỉ chân.', date: addDays(-18) },
+    { id: 'rv-seed-9', destinationId: 'nha-vuon-co-ba', author: 'Khách demo — Trang', rating: 5, comment: 'Hộ demo minh hoạ — nội dung đánh giá mang tính trình diễn.', date: addDays(-2) },
+  ];
+}
+
+function buildVoucherCatalog() {
+  return [
+    { id: 'voucher-giam-20k', title: 'Giảm 20.000đ cho trải nghiệm tiếp theo', pointsCost: 100, discountLabel: 'Giảm 20.000đ', condition: 'Áp dụng cho 1 trải nghiệm trả phí bất kỳ, không cộng dồn.', validDays: 30 },
+    { id: 'voucher-giam-10pct', title: 'Giảm 10% hoạt động trải nghiệm', pointsCost: 150, discountLabel: 'Giảm 10%', condition: 'Áp dụng tối đa 1 lần/hoạt động, không áp dụng vé tham quan miễn phí.', validDays: 30 },
+    { id: 'voucher-uu-tien-dat-cho', title: 'Ưu tiên đặt chỗ dịp lễ hội', pointsCost: 250, discountLabel: 'Ưu tiên xác nhận trong 24h', condition: 'Áp dụng khi đặt trải nghiệm trong 7 ngày quanh sự kiện/lễ hội trên mạng lưới.', validDays: 60 },
   ];
 }
 
@@ -161,11 +170,13 @@ export function createSeedState() {
     hosts: JSON.parse(JSON.stringify(HOSTS)),
     experiences: buildExperiences(),
     slots: [],
+    voucherCatalog: buildVoucherCatalog(),
     itineraries: [],
     bookings: [],
     bookingItems: [],
     payments: [],
     reviews: buildReviews(),
+    userReviews: [],
     travellerReviews: [],
     passportStamps: [],
     pointsLedger: [],
@@ -179,6 +190,7 @@ export function createSeedState() {
     ui: {
       draftItinerary: [],
       notifications: [],
+      activeItineraryId: null,
     },
   };
 }
