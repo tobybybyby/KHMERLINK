@@ -1,55 +1,80 @@
 import { createSeedState } from './data.js';
+import { loadDestinations } from './services/destinationsService.js';
 
-export const SCHEMA_VERSION = 1;
-const STORAGE_KEY = 'vlt_state';
+export const SCHEMA_VERSION = 2;
+const STORAGE_KEY = 'vlt_user_state';
+
+// Nội dung/catalog (destinations, hosts, experiences, events, reviews mẫu, metrics) được nạp
+// lại mới mỗi lần khởi động — không lưu vào localStorage — để cập nhật data/destinations.json
+// luôn có hiệu lực ngay, không cần người dùng "khôi phục dữ liệu mẫu". Chỉ dữ liệu do người
+// dùng thao tác (yêu thích, hành trình nháp, booking...) mới được lưu.
+const CONTENT_KEYS = ['destinations', 'hosts', 'experiences', 'slots', 'events', 'reviews', 'metrics'];
 
 let state = null;
 
-function withDefaults(raw) {
+function defaultUserData() {
   const seed = createSeedState();
-  return {
-    ...seed,
-    ...raw,
-    ui: { ...seed.ui, ...(raw.ui || {}) },
-  };
+  const userData = { schemaVersion: SCHEMA_VERSION };
+  Object.keys(seed).forEach((key) => {
+    if (!CONTENT_KEYS.includes(key)) userData[key] = seed[key];
+  });
+  return userData;
 }
 
-export function init() {
-  let raw = null;
+function loadUserData() {
   try {
     const text = window.localStorage.getItem(STORAGE_KEY);
-    if (text) raw = JSON.parse(text);
+    if (!text) return null;
+    const parsed = JSON.parse(text);
+    if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION) return null;
+    return parsed;
   } catch (err) {
-    raw = null;
+    return null;
   }
+}
 
-  if (!raw || raw.schemaVersion !== SCHEMA_VERSION || !Array.isArray(raw.destinations)) {
-    state = createSeedState();
-    persist();
-  } else {
-    state = withDefaults(raw);
-  }
+export async function init() {
+  const content = createSeedState();
+  content.destinations = await loadDestinations();
+
+  const userData = loadUserData() || defaultUserData();
+
+  state = {
+    ...content,
+    ...userData,
+    ui: { ...content.ui, ...(userData.ui || {}) },
+  };
+  persist();
   return state;
 }
 
 export function getState() {
-  if (!state) init();
+  if (!state) {
+    throw new Error('Storage chưa được khởi tạo — cần gọi await Storage.init() trước khi render.');
+  }
   return state;
 }
 
 export function persist() {
+  const snapshot = { schemaVersion: SCHEMA_VERSION };
+  Object.keys(state).forEach((key) => {
+    if (!CONTENT_KEYS.includes(key)) snapshot[key] = state[key];
+  });
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     return true;
   } catch (err) {
     return false;
   }
 }
 
-export function resetSample() {
-  state = createSeedState();
-  persist();
-  return state;
+export async function resetSample() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch (err) {
+    // bỏ qua — localStorage có thể bị chặn (chế độ ẩn danh nghiêm ngặt)
+  }
+  return init();
 }
 
 export function toggleFavorite(destinationId) {

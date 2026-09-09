@@ -1,0 +1,2898 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-09",
+  "sourceDocuments": [
+    "30-dia-diem-Vinh-Long-Tra-Vinh.md (nghiên cứu nguồn công khai, đối chiếu 08/09/2026)",
+    "Bảng giá/giờ/đánh giá ước lượng do người dùng cung cấp trong hội thoại Phase 2 (dùng cho mockup, trạng thái estimated)"
+  ],
+  "count": 37,
+  "destinations": [
+    {
+      "id": "ao-ba-om",
+      "name": "Ao Bà Om",
+      "altName": null,
+      "category": "Thắng cảnh",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ao nước với hàng cây sao, dầu và những bộ rễ nổi đặc trưng, gắn với truyện kể dân gian Khmer. Được công nhận danh thắng quốc gia năm 1994.",
+      "coordinates": {
+        "lat": 9.9362,
+        "lng": 106.3427,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Khu vực Ao Bà Om – chùa Âng, phường 8, TP. Trà Vinh (trước sáp nhập).",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ao%20B%C3%A0%20Om%20Khu%20v%E1%BB%B1c%20Ao%20B%C3%A0%20Om%20%E2%80%93%20ch%C3%B9a%20%C3%82ng%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với đơn vị quản lý."
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 846,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — 28/30 điểm trong đợt nghiên cứu này chưa đủ cơ sở dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Dạo quanh ao, xem cây cổ thụ, tìm hiểu truyện kể địa phương; kết hợp chùa Âng và bảo tàng Khmer cạnh bên.",
+      "tips": "Gợi ý: không trèo cây hoặc rễ cổ thụ; để ý trẻ nhỏ gần mép ao.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://images.baodantoc.vn/uploads/2024/Thang-9/Ngay-19/Anh/ao-ba-om.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về/chưa có quyền dùng lại cho app trong phase này."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Ao Bà Om",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/1395"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "Nguồn ghi nhận diện tích ao có số liệu mâu thuẫn giữa các bài viết — hồ sơ này không đưa số diện tích vào dữ liệu."
+      ]
+    },
+    {
+      "id": "chua-ang",
+      "name": "Chùa Âng",
+      "altName": null,
+      "category": "Chùa Khmer",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi chùa Khmer có chánh điện được trùng tu năm 1842, nổi bật với hệ cột gỗ và trang trí Phật giáo Nam tông. Thuận tiện ghé cùng Ao Bà Om và bảo tàng Khmer.",
+      "coordinates": {
+        "lat": 9.9346,
+        "lng": 106.3454,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Cạnh Ao Bà Om, khu vực phường 8, TP. Trà Vinh cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20%C3%82ng%20C%E1%BA%A1nh%20Ao%20B%C3%A0%20Om%2C%20khu%20v%E1%BB%B1c%20ph%C6%B0%E1%BB%9Dng%208%2C%20TP.%20Tr%C3%A0%20Vinh%20c%C5%A9",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với chùa."
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.2,
+        "count": 18,
+        "status": "verified",
+        "note": "Tripadvisor, truy xuất 08/09/2026. Ưu tiên số đã xác minh này thay vì số ước lượng trong bảng mockup (4,8⭐·628 lượt) — xem DATA_ISSUES.md."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, xem kiến trúc chánh điện và hoa văn Khmer.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://static-images.vnncdn.net/files/publish/2023/10/30/w-chua-ang-34-2-257.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Chùa Âng",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/1284"
+        },
+        {
+          "label": "Tripadvisor – điểm và số lượt (kết quả lập chỉ mục)",
+          "url": "https://www.tripadvisor.com/Attraction_Review-g1535794-d8095676-Reviews-Ang_Pagoda-Tra_Vinh_Tra_Vinh_Province_Mekong_Delta.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "MÂU THUẪN: bảng ước lượng do người dùng cung cấp ghi 4,8⭐·628 lượt; hồ sơ gốc có số Tripadvisor đã xác minh 4,2/5·18 đánh giá (08/09/2026). Đã ưu tiên số xác minh."
+      ]
+    },
+    {
+      "id": "bao-tang-khmer-tra-vinh",
+      "name": "Bảo tàng Văn hóa dân tộc Khmer Trà Vinh",
+      "altName": null,
+      "category": "Bảo tàng",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Giới thiệu đời sống, tín ngưỡng và nghệ thuật Khmer qua kinh lá buông, nông cụ, nhạc cụ và trang phục. Bảo tàng Lịch sử Quốc gia (2014) mô tả 4 phòng trưng bày; chưa xác nhận lại quy mô hiện nay.",
+      "coordinates": {
+        "lat": 9.9351,
+        "lng": 106.3436,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Khu Văn hóa – Du lịch Ao Bà Om, phường 8, TP. Trà Vinh cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o%20t%C3%A0ng%20V%C4%83n%20h%C3%B3a%20d%C3%A2n%20t%E1%BB%99c%20Khmer%20Tr%C3%A0%20Vinh%20Khu%20V%C4%83n%20h%C3%B3a%20%E2%80%93%20Du%20l%E1%BB%8Bch%20Ao%20B%C3%A0%20Om",
+      "openingHours": {
+        "value": "07:00–11:00; 13:00–17:00",
+        "status": "estimated",
+        "note": "Theo Crystal Bay (31/03/2025); chưa xác nhận trực tiếp với bảo tàng."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Theo Crystal Bay (2025); cần xác nhận lại với bảo tàng."
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 214,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem hiện vật, tìm hiểu chữ viết, sân khấu Rô-băm và Dù-kê; chưa có lịch biểu diễn được xác minh.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://afamilycdn.com/150157425591193600/2024/8/30/nhabaotang-1724920850499-17249208507381251495120-1724991034220-17249910346791070697589.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Bảo tàng Lịch sử Quốc gia, 13/05/2014",
+          "url": "https://baotanglichsu.vn/vi/Articles/3096/16337/bao-tang-van-hoa-dan-toc-khmer-tinh-tra-vinh.html"
+        },
+        {
+          "label": "Crystal Bay, 31/03/2025 – thông tin vận hành tham khảo",
+          "url": "https://crystalbay.com/62-kham-pha-bao-tang-van-hoa-dan-toc-khmer-tra-vinh-n56388.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "chua-hang-kompong-chray",
+      "name": "Chùa Hang (KomPong Chray)",
+      "altName": null,
+      "category": "Chùa Khmer",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Cổng vòm gợi hình hang động là dấu hiệu nhận diện của chùa. Theo Cục Du lịch Quốc gia, khuôn viên rộng khoảng 10 ha, có nhiều cây lớn và chim cư trú.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Khu vực thị trấn Châu Thành cũ, dọc Quốc lộ 54, Trà Vinh.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Hang%20%28KomPong%20Chray%29%20Khu%20v%E1%BB%B1c%20th%E1%BB%8B%20tr%E1%BA%A5n%20Ch%C3%A2u%20Th%C3%A0nh%20c%C5%A9%2C%20d%E1%BB%8Dc%20Qu%E1%BB%91c%20l%E1%BB%99%2054%3B%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với chùa."
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 5,
+        "status": "verified",
+        "note": "Tripadvisor, truy xuất 08/09/2026. Ưu tiên số đã xác minh này thay vì số ước lượng trong bảng mockup (4,7⭐·532 lượt) — xem DATA_ISSUES.md."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan kiến trúc, dạo khuôn viên và quan sát chim từ xa.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; không gây tiếng động lớn hoặc đến gần tổ chim.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://mia.vn/media/uploads/blog-du-lich/kien-truc-co-kinh-1706425957.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Chùa Hang Trà Vinh",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/1283"
+        },
+        {
+          "label": "Tripadvisor – điểm và số lượt (kết quả lập chỉ mục)",
+          "url": "https://www.tripadvisor.com/Attraction_Review-g15293058-d8041149-Reviews-Hang_Pagoda-Th_Tran_Chau_Thanh_Tra_Vinh_Province_Mekong_Delta.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "MÂU THUẪN: bảng ước lượng do người dùng cung cấp ghi 4,7⭐·532 lượt; hồ sơ gốc có số Tripadvisor đã xác minh 4,4/5·5 đánh giá (08/09/2026). Đã ưu tiên số xác minh."
+      ]
+    },
+    {
+      "id": "chua-ong-met",
+      "name": "Chùa Ông Mẹt",
+      "altName": "Bodhisàlaràja",
+      "category": "Chùa Khmer",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi chùa Khmer giữa khu đô thị, có cổng và kiến trúc chánh điện đặc trưng. Được xếp hạng di tích quốc gia ngày 03/03/2009.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "50/1 Lê Lợi, phường 1, TP. Trà Vinh cũ.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20%C3%94ng%20M%E1%BA%B9t%20%28Bodhis%C3%A0lar%C3%A0ja%29%2050/1%20L%C3%AA%20L%E1%BB%A3i%2C%20ph%C6%B0%E1%BB%9Dng%201%2C%20TP.%20Tr%C3%A0%20Vinh%20c%C5%A9",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với chùa."
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 176,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, quan sát kiến trúc và tìm hiểu vai trò ngôi chùa trong cộng đồng Khmer.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "VOV, 17/10/2022",
+          "url": "https://vov.gov.vn/chua-ong-met-di-tich-cap-quoc-gia-o-tinh-tra-vinh-dtnew-441445"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "phuoc-minh-cung",
+      "name": "Phước Minh Cung",
+      "altName": "Chùa Ông",
+      "category": "Cơ sở tín ngưỡng người Hoa",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Nơi thờ Quan Công, nổi bật với chạm khắc gỗ, phù điêu và mái ngói âm dương. Công trình có 3 toà tiền điện, trung điện và chánh điện.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "44 Điện Biên Phủ, phường Trà Vinh, tỉnh Vĩnh Long.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ph%C6%B0%E1%BB%9Bc%20Minh%20Cung%20%28Ch%C3%B9a%20%C3%94ng%29%2044%20%C4%90i%E1%BB%87n%20Bi%C3%AAn%20Ph%E1%BB%A7%2C%20ph%C6%B0%E1%BB%9Dng%20Tr%C3%A0%20Vinh%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với đơn vị quản lý."
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 287,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan nghệ thuật trang trí, tìm hiểu tín ngưỡng người Hoa và chiêm bái.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://thanhnien.vn/ngoi-chua-gan-500-nam-tuoi-o-vinh-long-dep-nhu-bao-tang-my-thuat-185260407163714185.htm",
+        "status": "external-not-downloaded",
+        "note": "Trang nguồn có ảnh minh hoạ — chưa tải về (đây là link bài viết, không phải link ảnh trực tiếp)."
+      },
+      "sources": [
+        {
+          "label": "Thanh Niên, 10/04/2026 – địa chỉ, kiến trúc và ảnh",
+          "url": "https://thanhnien.vn/ngoi-chua-gan-500-nam-tuoi-o-vinh-long-dep-nhu-bao-tang-my-thuat-185260407163714185.htm"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "Dễ nhầm với \"Miếu Công Thần Vĩnh Long\" (dữ liệu Phase 1) do tên gọi cùng dạng miếu/cung — đây là hai địa danh khác nhau, không phải trùng lặp."
+      ]
+    },
+    {
+      "id": "chua-vam-ray",
+      "name": "Chùa Vàm Ray",
+      "altName": null,
+      "category": "Chùa Khmer",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi chùa mang phong cách kiến trúc Khmer, nổi bật với tượng Phật nằm dài 54 m. Khuôn viên và các công trình có sắc vàng đặc trưng.",
+      "coordinates": {
+        "lat": 9.7186,
+        "lng": 106.2668,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Vàm Ray, xã Hàm Tân, huyện Trà Cú, Trà Vinh — địa chỉ theo nguồn trước sáp nhập.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20V%C3%A0m%20Ray%20%E1%BA%A4p%20V%C3%A0m%20Ray%2C%20x%C3%A3%20H%C3%A0m%20T%C3%A2n%2C%20huy%E1%BB%87n%20Tr%C3%A0%20C%C3%BA%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": "07:00–19:00",
+        "status": "estimated",
+        "note": "Theo MIA; chưa xác nhận trực tiếp với chùa."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Theo MIA (không thu vé tham quan); chưa xác nhận trực tiếp với chùa."
+      },
+      "suggestedDurationMin": {
+        "value": 75,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 1246,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, xem tượng Phật nằm và kiến trúc chùa.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://i.ex-cdn.com/phatgiao.org.vn/files/huongmi/2018/12/04/tuong-phat-nam-lon-nhat-viet-nam-o-chua-vam-ray-6-0640.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng thông tin Phật giáo Việt Nam, 04/12/2018",
+          "url": "https://phatgiao.org.vn/tuong-phat-nam-lon-nhat-viet-nam-tai-chua-vam-ray-d32688.html"
+        },
+        {
+          "label": "MIA – thông tin tham khảo",
+          "url": "https://mia.vn/cam-nang-du-lich/chua-vam-ray-12829"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "chua-nodol-chua-co",
+      "name": "Chùa Nôdol",
+      "altName": "Chùa Cò",
+      "category": "Chùa Khmer",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi chùa Khmer còn được gọi là Chùa Cò do có chim về trú trong khuôn viên. Cục Du lịch Quốc gia ghi diện tích khoảng 3 ha.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Giồng Lớn, xã Đại An, huyện Trà Cú, Trà Vinh — địa chỉ cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20N%C3%B4dol%20%28Ch%C3%B9a%20C%C3%B2%29%20%E1%BA%A4p%20Gi%E1%BB%93ng%20L%E1%BB%9Bn%2C%20x%C3%A3%20%C4%90%E1%BA%A1i%20An%2C%20huy%E1%BB%87n%20Tr%C3%A0%20C%C3%BA%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh với chùa."
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 193,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem kiến trúc Khmer, dạo sân chùa, quan sát chim; số lượng chim thay đổi tự nhiên, không có số đếm hiện tại.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; giữ khoảng cách với chim, không tác động tổ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://vietnamtourism.vn/imguploads/tourist/old/5399.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Chùa Nôdol",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/1947"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "bien-ba-dong",
+      "name": "Biển Ba Động",
+      "altName": null,
+      "category": "Bãi biển",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Điểm tham quan ven biển gắn với vùng Duyên Hải. Theo Cục Du lịch Quốc gia, cách trung tâm Trà Vinh khoảng 55 km; khoảng cách thực tế tuỳ điểm xuất phát.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Khu vực Trường Long Hoà, Duyên Hải, Trà Vinh — địa danh theo nguồn cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Bi%E1%BB%83n%20Ba%20%C4%90%E1%BB%99ng%20Khu%20v%E1%BB%B1c%20Tr%C6%B0%E1%BB%9Dng%20Long%20H%C3%B2a%2C%20Duy%C3%AAn%20H%E1%BA%A3i%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí dạo biển",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — hàng quán ven biển tính phí riêng, chưa xác minh."
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.3,
+        "count": 964,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Đi dạo bờ biển, ngắm cảnh và dùng hải sản tại các hàng quán; giá từng quán chưa xác minh.",
+      "tips": "Gợi ý: kiểm tra thời tiết, thuỷ triều và biển báo tại chỗ; chỉ tắm tại khu vực được cho phép, có điều kiện an toàn phù hợp.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Bãi biển Ba Động",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/1948"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "den-tho-bac-ho-long-duc",
+      "name": "Đền thờ Bác Hồ tại Long Đức",
+      "altName": null,
+      "category": "Di tích lịch sử",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi đền được người dân xây dựng từ năm 1970 trong thời chiến. Khu di tích có không gian tưởng niệm và trưng bày về quá trình xây dựng, bảo vệ đền.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Vĩnh Hội, xã Long Đức, Trà Vinh — địa chỉ theo nguồn cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=%C4%90%E1%BB%81n%20th%E1%BB%9D%20B%C3%A1c%20H%E1%BB%93%20t%E1%BA%A1i%20Long%20%C4%90%E1%BB%A9c%20%E1%BA%A4p%20V%C4%A9nh%20H%E1%BB%99i%2C%20x%C3%A3%20Long%20%C4%90%E1%BB%A9c%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": "07:00–11:00; 13:00–17:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 152,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Dâng hương, tham quan nhà truyền thống và tìm hiểu lịch sử địa phương.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Cục Du lịch Quốc gia – Đền thờ Bác Hồ",
+          "url": "https://vietnamtourism.vn/index.php/tourism/items/2642"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "con-chim",
+      "name": "Du lịch cộng đồng Cồn Chim",
+      "altName": null,
+      "category": "Du lịch cộng đồng",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Cộng đồng làm du lịch gắn với sinh kế tôm – lúa và món ăn dân gian. Điểm đến được nhận Giải thưởng Du lịch cộng đồng ASEAN năm 2025.",
+      "coordinates": {
+        "lat": 9.9302,
+        "lng": 106.2789,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Cồn Chim, xã Hoà Minh, huyện Châu Thành, Trà Vinh.",
+        "status": "verified",
+        "note": "Theo cổng du lịch cộng đồng."
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Du%20l%E1%BB%8Bch%20c%E1%BB%99ng%20%C4%91%E1%BB%93ng%20C%E1%BB%93n%20Chim%20%E1%BA%A4p%20C%E1%BB%93n%20Chim%2C%20x%C3%A3%20H%C3%B2a%20Minh%2C%20huy%E1%BB%87n%20Ch%C3%A2u%20Th%C3%A0nh%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": "08:00–17:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh lịch mở cửa chung của cồn."
+      },
+      "price": {
+        "value": "Bánh lá Cô Ba Sửa: 25.000đ/phần",
+        "status": "verified",
+        "note": "Đây là giá một phần bánh tại một hộ, KHÔNG phải vé vào cồn hay giá lớp làm bánh — xem cổng du lịch cộng đồng."
+      },
+      "suggestedDurationMin": {
+        "value": 180,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 386,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Thưởng thức bánh lá Cô Ba Sửa (25.000đ/phần, chưa ghi thời hạn giá); các hoạt động tại từng hộ cần thống nhất trước, chưa có thời lượng chuẩn.",
+      "tips": "Gợi ý: hẹn hộ đón khách và bến đò trước; mặc áo phao khi qua sông, báo yêu cầu ăn uống khi đặt bữa.",
+      "contact": {
+        "value": "0359 816 056",
+        "status": "estimated",
+        "note": "Số trên cổng du lịch cộng đồng; chưa gọi xác nhận."
+      },
+      "imageRef": {
+        "url": "https://image.sggp.org.vn/w1000/Uploaded/2026/zotnae/2025_02_03/du-lich-con-chim-3593-6471.jpg.webp",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "SGGP, 03/02/2025 – giải thưởng",
+          "url": "https://www.sggp.org.vn/tra-vinh-du-lich-cong-dong-con-chim-duoc-nhan-giai-thuong-du-lich-asean-2025-post780369.html"
+        },
+        {
+          "label": "Cổng Du lịch cộng đồng Cồn Chim – liên hệ",
+          "url": "https://dlcc.vnpttravinh.vn/"
+        },
+        {
+          "label": "Bánh lá Cô Ba Sửa – giá niêm yết",
+          "url": "https://dlcc.vnpttravinh.vn/dia-diem/banh-la-co-ba-sua/8"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "Bảng ước lượng mockup ghi \"Trải nghiệm từ 25.000đ\" tổng quát; hồ sơ gốc làm rõ đây là giá một món tại một hộ cụ thể, không phải vé chung — đã điều chỉnh mô tả giá cho chính xác hơn."
+      ]
+    },
+    {
+      "id": "con-ho",
+      "name": "Du lịch cộng đồng Cồn Hô",
+      "altName": null,
+      "category": "Du lịch cộng đồng",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Cồn giữa sông Cổ Chiên, diện tích khoảng 25,5 ha. Khảo sát tháng 9/2026 ghi nhận 8 hộ liên kết làm du lịch, mỗi hộ phục vụ một nhóm trải nghiệm.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Xã Nhị Long, tỉnh Vĩnh Long; khu vực Trà Vinh cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Du%20l%E1%BB%8Bch%20c%E1%BB%99ng%20%C4%91%E1%BB%93ng%20C%E1%BB%93n%20H%C3%B4%20X%C3%A3%20Nh%E1%BB%8B%20Long%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "08:00–17:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Trải nghiệm từ 35.000đ",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — nguồn gốc chưa xác minh giá và thời lượng từng hoạt động."
+      },
+      "suggestedDurationMin": {
+        "value": 150,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 128,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Thưởng thức trà, trái cây và mứt bưởi; trải nghiệm trứng vịt nướng đất sét hoặc ngâm chân thảo dược theo hộ đã hẹn. Giá và thời lượng chưa xác minh.",
+      "tips": "Gợi ý: hẹn tàu và giờ về, mặc áo phao. Cồn chưa có điện lưới (nguồn 09/2026); nên hỏi trước nhu cầu sạc thiết bị.",
+      "contact": {
+        "value": "0368 529 156",
+        "status": "estimated",
+        "note": "Số công khai trên trang Du lịch Cồn Hô; chưa gọi xác nhận."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Tiền Phong, 07/09/2026 – khảo sát thực tế",
+          "url": "https://tienphong.vn/giac-mo-anh-sang-giua-dong-song-co-chien-post1874452.tpo"
+        },
+        {
+          "label": "Trang Du lịch Cồn Hô – liên hệ/ảnh",
+          "url": "https://www.facebook.com/dulichconho/"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "nha-co-huynh-ky",
+      "name": "Nhà cổ Huỳnh Kỳ",
+      "altName": null,
+      "category": "Nhà cổ",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi nhà kết hợp kiến trúc Pháp với nội thất mang nét truyền thống Việt. Khởi dựng năm 1920 và hoàn thành năm 1924.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Khóm 2, thị trấn Cầu Kè, Trà Vinh.",
+        "status": "verified",
+        "note": "Theo nguồn năm 2024."
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20c%E1%BB%95%20Hu%E1%BB%B3nh%20K%E1%BB%B3%20Kh%C3%B3m%202%2C%20th%E1%BB%8B%20tr%E1%BA%A5n%20C%E1%BA%A7u%20K%C3%A8%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "20.000đ/người",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.5,
+        "count": 96,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem mặt đứng, trang trí và không gian nhà cổ; lịch mở từng khu vực cần hỏi tại điểm.",
+      "tips": "Gợi ý: không chạm đồ nội thất cổ; xác nhận giờ mở khu nhà bên trong trước khi đi.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://laodong.vn/photo/can-canh-nha-co-huynh-ky-tron-100-tuoi-o-tra-vinh-1387477.ldo",
+        "status": "external-not-downloaded",
+        "note": "Trang nguồn có bộ ảnh — chưa tải về (link bài viết, không phải link ảnh trực tiếp)."
+      },
+      "sources": [
+        {
+          "label": "Nhân Dân, 24/08/2024",
+          "url": "https://nhandan.vn/ky-niem-100-nam-di-tich-kien-truc-nghe-thuat-nha-co-huynh-ky-o-tra-vinh-post826563.html"
+        },
+        {
+          "label": "Lao Động – bộ ảnh năm 2024",
+          "url": "https://laodong.vn/photo/can-canh-nha-co-huynh-ky-tron-100-tuoi-o-tra-vinh-1387477.ldo"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "khu-tuong-niem-ut-tich",
+      "name": "Khu tưởng niệm nữ Anh hùng Nguyễn Thị Út",
+      "altName": "Út Tịch",
+      "category": "Khu tưởng niệm",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Không gian tưởng niệm và tìm hiểu cuộc đời nữ Anh hùng Út Tịch, nguyên mẫu tác phẩm \"Người mẹ cầm súng\". Công trình hoàn thành năm 2016, rộng khoảng 1,4 ha.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Ngọc Hồ, xã Tam Ngãi, tỉnh Vĩnh Long; khu vực Trà Vinh cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20t%C6%B0%E1%BB%9Fng%20ni%E1%BB%87m%20n%E1%BB%AF%20Anh%20h%C3%B9ng%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20%C3%9At%20%28%C3%9At%20T%E1%BB%8Bch%29%20%E1%BA%A4p%20Ng%E1%BB%8Dc%20H%E1%BB%93%2C%20x%C3%A3%20Tam%20Ng%C3%A3i%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:30–11:00; 13:00–17:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 84,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Dâng hương, xem tượng đài và tìm hiểu tư liệu về nữ du kích Út Tịch.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Nhân Dân, 30/07/2025",
+          "url": "https://nhandan.vn/suc-song-moi-tren-que-huong-nguoi-me-cam-sung-post897569.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "sokfarm",
+      "name": "Sokfarm",
+      "altName": null,
+      "category": "Nông nghiệp và sản phẩm bản địa",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Sokfarm phát triển sản phẩm từ mật hoa dừa, gắn với tri thức khai thác hoa dừa của người Khmer. Bài viết năm 2022 ghi nhận khu vườn gia đình khoảng 2 ha được chuẩn bị để đón khách.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Cây Hẹ, xã Tiểu Cần, tỉnh Vĩnh Long — địa chỉ liên hệ doanh nghiệp; cần xác nhận điểm hẹn vườn.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Sokfarm%20%E1%BA%A4p%20C%C3%A2y%20H%E1%BA%B9%2C%20x%C3%A3%20Ti%E1%BB%83u%20C%E1%BA%A7n%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "08:00–17:00 · Hẹn trước",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Gói tham quan từ 100.000đ",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — nguồn gốc ghi \"chưa xác minh gói cố định\"."
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.9,
+        "count": 78,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tìm hiểu cách lấy mật hoa dừa và các sản phẩm chế biến; hoạt động trực tiếp tại vườn phải hẹn, chưa xác minh gói cố định.",
+      "tips": "Gợi ý: đặt hẹn trước; không tự leo dừa hoặc thao tác lấy mật khi chưa được hướng dẫn.",
+      "contact": {
+        "value": "0974 038 946",
+        "status": "verified",
+        "note": "Hotline Sokfarm — hỏi lịch tham quan và vị trí đón."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Sokfarm – địa chỉ, số liên hệ chính thức",
+          "url": "https://sokfarm.com/contact"
+        },
+        {
+          "label": "Tạp chí Công Thương, 24/11/2022 – trải nghiệm vườn",
+          "url": "https://tapchicongthuong.vn/kinh-nghiem-cua-sokfarm--che-bien-sau-nham-gia-tang-gia-tri-dac-san-vung-mien--gop-phan-phat-trien-kinh-te-dong-bao-vung-sau-vung-xa-101863.htm"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "khu-du-lich-huynh-kha",
+      "name": "Khu du lịch Huỳnh Kha",
+      "altName": null,
+      "category": "Khu vui chơi",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Tổ hợp vui chơi có Công viên nước Khủng Long và dịch vụ ăn uống. Công viên nước công bố phục vụ từ 07:00 đến 18:00 mỗi ngày.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Đường Chu Văn An, phường Long Đức, tỉnh Vĩnh Long; trước đây phường 4, TP. Trà Vinh.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20du%20l%E1%BB%8Bch%20Hu%E1%BB%B3nh%20Kha%20%C4%90%C6%B0%E1%BB%9Dng%20Chu%20V%C4%83n%20An%2C%20ph%C6%B0%E1%BB%9Dng%20Long%20%C4%90%E1%BB%A9c%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "Công viên nước: 07:00–18:00 hằng ngày",
+        "status": "verified",
+        "note": "Theo trang đơn vị; chỉ áp dụng công viên nước, không suy rộng cho nhà hàng hoặc toàn khu."
+      },
+      "price": {
+        "value": "Vé công viên nước 80.000đ",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — giá vé theo nhóm tuổi/chiều cao và thời lượng vé chưa xác minh."
+      },
+      "suggestedDurationMin": {
+        "value": 150,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 716,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Vui chơi tại công viên nước và ăn uống; giá vé theo nhóm tuổi/chiều cao và thời lượng vé chưa xác minh.",
+      "tips": "Gợi ý: hỏi điều kiện chiều cao từng trò chơi; trẻ nhỏ cần người lớn theo sát trong khu nước.",
+      "contact": {
+        "value": "0294 628 2828",
+        "status": "verified",
+        "note": "Số do khu du lịch công bố."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Khu du lịch Huỳnh Kha – địa chỉ và liên hệ",
+          "url": "https://www.facebook.com/KDLHUYNHKHA/"
+        },
+        {
+          "label": "Thông báo giờ Công viên nước Khủng Long",
+          "url": "https://www.facebook.com/KDLHUYNHKHA/videos/1578354003854205/"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "bao-tang-dua-sap",
+      "name": "Bảo tàng Dừa Sáp Trà Vinh",
+      "altName": null,
+      "category": "Bảo tàng",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Giới thiệu dừa sáp Cầu Kè qua trưng bày và sản phẩm địa phương. Mini tour có thời lượng 60–120 phút.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "221 Ấp 2, xã Tam Ngãi, tỉnh Vĩnh Long; website còn ghi xã Thạnh Phú, huyện Cầu Kè cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o%20t%C3%A0ng%20D%E1%BB%ABa%20S%C3%A1p%20Tr%C3%A0%20Vinh%20221%20%E1%BA%A4p%202%2C%20x%C3%A3%20Tam%20Ng%C3%A3i%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:30–17:00 hằng ngày, gồm lễ/Tết",
+        "status": "verified",
+        "note": "Theo website Bảo tàng Dừa Sáp."
+      },
+      "price": {
+        "value": "Mini tour 55.000đ/người lớn; 33.000đ/HSSV có thẻ; miễn phí trẻ dưới 6 tuổi hoặc dưới 1,2 m",
+        "status": "verified",
+        "note": "Theo website đơn vị — đây là giá mini tour có dịch vụ, KHÔNG phải giá vé tự tham quan."
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "verified",
+        "note": "Website ghi 60–120 phút cho mini tour; lấy trung điểm cho mockup."
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 143,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Mini tour có hướng dẫn, trà và kẹo. Hoạt động gói kẹo/trang phục Khmer hỏi giá riêng.",
+      "tips": "Theo đơn vị: từ 10 khách liên hệ trực tiếp; đăng ký online chờ xác nhận 24–48 giờ.",
+      "contact": {
+        "value": "0972 189 650",
+        "status": "verified",
+        "note": "Số trên trang đặt tour."
+      },
+      "imageRef": {
+        "url": "https://baotangduasap.com/booking-tour/",
+        "status": "external-not-downloaded",
+        "note": "Trang nguồn có ảnh — chưa tải về (link trang đặt tour, không phải link ảnh trực tiếp)."
+      },
+      "sources": [
+        {
+          "label": "Bảo tàng Dừa Sáp – giá, lịch, điều kiện và liên hệ",
+          "url": "https://baotangduasap.com/booking-tour/"
+        },
+        {
+          "label": "Báo Vĩnh Long, 07/2026 – xác nhận địa bàn mới",
+          "url": "https://baovinhlong.com.vn/xa-hoi/du-lich/202607/bao-tang-dua-sap-tra-vinh-duoc-vinh-danh-diem-tham-quan-di-san-van-hoa-thu-hut-khach-hang-dau-f4a3863/"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "MÂU THUẪN ĐỊA CHỈ: website đơn vị ghi xã Thạnh Phú, huyện Cầu Kè (cũ); nguồn khác ghi xã Tam Ngãi. Đã ghi rõ cả hai, ưu tiên hiển thị theo nguồn gần đây hơn (Tam Ngãi) — cần xác nhận lại với đơn vị."
+      ]
+    },
+    {
+      "id": "chua-giac-linh-chua-doi",
+      "name": "Chùa Giác Linh",
+      "altName": "Chùa Dơi (Trà Vinh)",
+      "category": "Chùa và di tích lịch sử",
+      "region": "Trà Vinh cũ",
+      "isDemoHost": false,
+      "summary": "Chùa hình thành từ Linh Sơn Điện năm 1871, gắn với hoạt động cách mạng tại Mỹ Long. Được xếp hạng di tích quốc gia ngày 24/01/1998.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Nhứt A, xã Mỹ Long Bắc, huyện Cầu Ngang, Trà Vinh — địa chỉ theo nguồn trước sáp nhập.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Gi%C3%A1c%20Linh%20%28Ch%C3%B9a%20D%C6%A1i%29%20%E1%BA%A4p%20Nh%E1%BB%A9t%20A%2C%20x%C3%A3%20M%E1%BB%B9%20Long%20B%E1%BA%AFc%2C%20huy%E1%BB%87n%20C%E1%BA%A7u%20Ngang%2C%20Tr%C3%A0%20Vinh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 62,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, tìm hiểu lịch sử và không gian di tích; không nhầm với Chùa Dơi ở Sóc Trăng.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Vietnam.vn, 05/01/2025 – thông tin và tham quan thực tế ảo",
+          "url": "https://www.vietnam.vn/tra-vinh-di-tich-lich-su-cach-mang-chua-giac-linh-chua-doi"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "CẢNH BÁO NHẦM LẪN: đây là \"Chùa Dơi\" ở Trà Vinh (tên gọi khác của Chùa Giác Linh), KHÔNG phải Chùa Dơi (Wat Sro Loun) nổi tiếng ở Sóc Trăng — nguồn gốc đã cảnh báo rõ."
+      ]
+    },
+    {
+      "id": "van-thanh-mieu",
+      "name": "Văn Thánh Miếu Vĩnh Long",
+      "altName": null,
+      "category": "Di tích văn hóa",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Không gian thờ Khổng Tử và tôn vinh truyền thống Nho học địa phương, với Văn Xương Các trong khuôn viên. Công trình được hoàn thành năm 1866.",
+      "coordinates": {
+        "lat": 10.2496,
+        "lng": 105.9713,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Đường Trần Phú, khu vực phường 4, TP. Vĩnh Long cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=V%C4%83n%20Th%C3%A1nh%20Mi%E1%BA%BFu%20V%C4%A9nh%20Long%20%C4%90%C6%B0%E1%BB%9Dng%20Tr%E1%BA%A7n%20Ph%C3%BA%2C%20khu%20v%E1%BB%B1c%20ph%C6%B0%E1%BB%9Dng%204%2C%20TP.%20V%C4%A9nh%20Long%20c%C5%A9",
+      "openingHours": {
+        "value": "07:00–17:00 hằng ngày",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 327,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan kiến trúc, bia ký và tìm hiểu truyền thống hiếu học.",
+      "tips": "Gợi ý: giữ yên lặng tại nơi thờ tự, không chạm bia và đồ thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/L%C6%B0u%20tr%C3%BA/10.%20V%C4%83n%20Th%C3%A1nh%20Mi%E1%BA%BFu%20V%C4%A9nh%20Long/636533514444702043_panel.png",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long, 18/06/2024",
+          "url": "https://vinhlongtourist.vn/vi/detailnews/?id=news_10942&t=van-thanh-mieu-di-tich-lich-su-van-hoa-cap-quoc-gia"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "bao-tang-vinh-long",
+      "name": "Bảo tàng Vĩnh Long",
+      "altName": "Cơ sở 01 Phan Bội Châu",
+      "category": "Bảo tàng",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Trưng bày về lịch sử, văn hóa và con người Vĩnh Long. Cổng du lịch giới thiệu bộ sưu tập hơn 28.000 tài liệu, hiện vật; đây không phải số hiện vật đang bày cùng lúc.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "01 Phan Bội Châu, khu vực trung tâm TP. Vĩnh Long cũ.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o%20t%C3%A0ng%20V%C4%A9nh%20Long%20%E2%80%93%20c%C6%A1%20s%E1%BB%9F%2001%20Phan%20B%E1%BB%99i%20Ch%C3%A2u%2001%20Phan%20B%E1%BB%99i%20Ch%C3%A2u",
+      "openingHours": {
+        "value": "Thứ Ba–Sáu 07:00–11:00, 13:00–17:00; sáng thứ Bảy 07:00–11:00",
+        "status": "verified",
+        "note": "Theo Cổng Du lịch Vĩnh Long; lịch lễ và ngày khác cần xác nhận thêm."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh trực tiếp."
+      },
+      "suggestedDurationMin": {
+        "value": 120,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 218,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem các không gian trưng bày và hiện vật; thuyết minh cho đoàn cần hỏi trước.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": "0270 382 3181",
+        "status": "verified",
+        "note": "Số trên cổng du lịch."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/19.%20B%E1%BA%A3o%20t%C3%A0ng%20VL/636556865806908362_1.JPG",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – hồ sơ bảo tàng",
+          "url": "https://vinhlongtourist.vn/en/baotangtinhvinhlong"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "khu-tuong-niem-pham-hung",
+      "name": "Khu tưởng niệm Chủ tịch Hội đồng Bộ trưởng Phạm Hùng",
+      "altName": null,
+      "category": "Khu tưởng niệm",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Giới thiệu cuộc đời và hoạt động của Phạm Hùng. Khu trưng bày ngoài trời có 3 công trình phục dựng theo tỷ lệ 1:1 gắn với những nơi ông từng sống và làm việc.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Long Thuận A, xã Long Phước, huyện Long Hồ — địa chỉ theo nguồn cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20t%C6%B0%E1%BB%9Fng%20ni%E1%BB%87m%20Ch%E1%BB%A7%20t%E1%BB%8Bch%20H%E1%BB%99i%20%C4%91%E1%BB%93ng%20B%E1%BB%99%20tr%C6%B0%E1%BB%9Fng%20Ph%E1%BA%A1m%20H%C3%B9ng%20%E1%BA%A4p%20Long%20Thu%E1%BA%ADn%20A%2C%20x%C3%A3%20Long%20Ph%C6%B0%E1%BB%9Bc%2C%20huy%E1%BB%87n%20Long%20H%E1%BB%93",
+      "openingHours": {
+        "value": "07:30–17:00",
+        "status": "verified",
+        "note": "Theo cổng du lịch; lịch nghỉ đặc biệt chưa xác nhận."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 362,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Dâng hương, xem nhà trưng bày và các không gian phục dựng.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": "0270 383 4286",
+        "status": "verified",
+        "note": "Số trên cổng du lịch."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/1.%20Khu%20t%C6%B0%E1%BB%9Fng%20ni%E1%BB%87m%20c%E1%BB%91%20Ch%E1%BB%A7%20t%E1%BB%8Bch%20H%C4%90BT%20Ph%E1%BA%A1m%20H%C3%B9ng/636528327474054864_images1925966_phung_1.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – hồ sơ Phạm Hùng",
+          "url": "https://vinhlongtourist.vn/en/khuluuniemphamhung"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "khu-tuong-niem-vo-van-kiet",
+      "name": "Khu tưởng niệm Thủ tướng Võ Văn Kiệt",
+      "altName": null,
+      "category": "Khu tưởng niệm",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Không gian tưởng niệm, lưu giữ tư liệu về cuộc đời và đóng góp của Thủ tướng Võ Văn Kiệt. Cổng du lịch gợi ý thời gian tham quan khoảng 60 phút.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "10 Nam Kỳ Khởi Nghĩa, xã Trung Thành, tỉnh Vĩnh Long.",
+        "status": "verified",
+        "note": "Theo hồ sơ cổng du lịch hiện có."
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20t%C6%B0%E1%BB%9Fng%20ni%E1%BB%87m%20Th%E1%BB%A7%20t%C6%B0%E1%BB%9Bng%20V%C3%B5%20V%C4%83n%20Ki%E1%BB%87t%2010%20Nam%20K%E1%BB%B3%20Kh%E1%BB%9Fi%20Ngh%C4%A9a%2C%20x%C3%A3%20Trung%20Th%C3%A0nh%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:30–17:00",
+        "status": "verified",
+        "note": "Theo cổng du lịch; lịch nghỉ đặc biệt chưa xác nhận."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 419,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Dâng hương, xem tư liệu và không gian trưng bày.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": "0270 397 1111",
+        "status": "verified",
+        "note": "Số trên cổng du lịch."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/2.Khu%20TN%20CCT%20V%C3%B5%20V%C4%83n%20Ki%E1%BB%87t/636528361291743385_Capture.PNG",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – hồ sơ Võ Văn Kiệt",
+          "url": "https://vinhlongtourist.vn/vi/vovankiet"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "khu-luu-niem-tran-dai-nghia",
+      "name": "Khu lưu niệm Giáo sư, Viện sĩ Trần Đại Nghĩa",
+      "altName": null,
+      "category": "Khu lưu niệm",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Giới thiệu cuộc đời và công trình của nhà khoa học Trần Đại Nghĩa. Khu lưu niệm khánh thành ngày 18/05/2015, có nhà tưởng niệm và nhà trưng bày.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Mỹ Phú 1, xã Tường Lộc, huyện Tam Bình — địa chỉ theo nguồn cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20l%C6%B0u%20ni%E1%BB%87m%20Gi%C3%A1o%20s%C6%B0%2C%20Vi%E1%BB%87n%20s%C4%A9%20Tr%E1%BA%A7n%20%C4%90%E1%BA%A1i%20Ngh%C4%A9a%20%E1%BA%A4p%20M%E1%BB%B9%20Ph%C3%BA%201%2C%20x%C3%A3%20T%C6%B0%E1%BB%9Dng%20L%E1%BB%99c%2C%20huy%E1%BB%87n%20Tam%20B%C3%ACnh",
+      "openingHours": {
+        "value": "07:30–11:00; 13:00–17:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 156,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tìm hiểu tư liệu, hiện vật khoa học – lịch sử; xem các mẫu vũ khí được trưng bày.",
+      "tips": "Gợi ý: không chạm hiện vật; hỏi nhân viên về chụp ảnh và thuyết minh.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Nhân Dân, 18/05/2015 – khánh thành",
+          "url": "https://nhandan.vn/khanh-thanh-khu-luu-niem-giao-su-vien-si-tran-dai-nghia-tai-vinh-long-post232622.html"
+        },
+        {
+          "label": "Báo Vĩnh Long, 09/2023 – địa chỉ và hiện trạng",
+          "url": "https://baovinhlong.com.vn/the-gioi-tre/202309/khu-luu-niem-giao-su-vien-si-tran-dai-nghia-dia-chi-do-giao-duc-truyen-thong-cho-the-he-mai-sau-3175324/"
+        },
+        {
+          "label": "Cổng du lịch – trưng bày vũ khí, 09/2024",
+          "url": "https://vinhlongtourist.vn/vi/detailnews/?id=news_11741&t=an-tuong-vu-khi-trung-bay-tai-khu-luu-niem-giao-su-vien-si-tran-dai-nghia"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "chua-tien-chau",
+      "name": "Chùa Tiên Châu",
+      "altName": null,
+      "category": "Chùa",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi chùa cổ trên cù lao An Bình với kiến trúc gỗ và trang trí truyền thống. Cổng du lịch ghi nhận đợt trùng tu năm 1899.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Bình Lương, xã An Bình, tỉnh Vĩnh Long.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Ti%C3%AAn%20Ch%C3%A2u%20%E1%BA%A4p%20B%C3%ACnh%20L%C6%B0%C6%A1ng%2C%20x%C3%A3%20An%20B%C3%ACnh%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.6,
+        "count": 245,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, xem kiến trúc và dạo khuôn viên.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": "0270 385 8965",
+        "status": "verified",
+        "note": "Số trên cổng du lịch."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/12.%20Ch%C3%B9a%20Ti%C3%AAn%20ch%C3%A2u/636533527491727993_panel.png",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – Chùa Tiên Châu",
+          "url": "https://vinhlongtourist.vn/en/chuatienchau"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "chua-phat-ngoc-xa-loi",
+      "name": "Chùa Phật Ngọc Xá Lợi Vĩnh Long",
+      "altName": null,
+      "category": "Chùa",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Quần thể Phật giáo có cổng tam quan lớn và nhiều công trình thờ tự. Nguồn Phật giáo ghi nhận lễ an vị 18 tượng La Hán năm 2017.",
+      "coordinates": {
+        "lat": 10.247,
+        "lng": 105.9702,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "287A, ấp Vĩnh Hoà, xã Tân Ngãi, TP. Vĩnh Long — địa chỉ theo nguồn cũ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Ph%E1%BA%ADt%20Ng%E1%BB%8Dc%20X%C3%A1%20L%E1%BB%A3i%20V%C4%A9nh%20Long%20287A%2C%20%E1%BA%A5p%20V%C4%A9nh%20H%C3%B2a%2C%20x%C3%A3%20T%C3%A2n%20Ng%C3%A3i%2C%20TP.%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "06:00–18:00",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 75,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 1384,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, xem tượng La Hán, kiến trúc cổng và cảnh quan.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – giới thiệu chùa",
+          "url": "https://vinhlongtourist.vn/en/detailnews/?id=news_10854&t=kham-pha-chua-phat-ngoc-xa-loi-diem-du-lich-tam-linh-noi-tieng-cua-tinh-vinh-long"
+        },
+        {
+          "label": "Thiền Tôn Phật Quang, 15/09/2017 – địa chỉ và tượng La Hán",
+          "url": "https://thientonphatquang.com/vinh-long-le-vu-lan-bao-hieu-tai-chua-phat-ngoc-xa-loi/"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "chua-phuoc-hau",
+      "name": "Chùa Phước Hậu",
+      "altName": null,
+      "category": "Chùa",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Chùa nổi bật với vườn kinh Pháp Cú khắc trên đá. VnExpress năm 2024 ghi nhận 213 phiến đá, sắp đặt theo hình lá bồ đề.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Đông Phú, xã Ngãi Tứ, huyện Tam Bình — địa chỉ theo nguồn cũ, gần Quốc lộ 54.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Ph%C6%B0%E1%BB%9Bc%20H%E1%BA%ADu%20%E1%BA%A4p%20%C4%90%C3%B4ng%20Ph%C3%BA%2C%20x%C3%A3%20Ng%C3%A3i%20T%E1%BB%A9%2C%20huy%E1%BB%87n%20Tam%20B%C3%ACnh",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 308,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chiêm bái, dạo vườn kinh đá và tìm hiểu văn hóa Phật giáo.",
+      "tips": "Gợi ý: mặc lịch sự, giữ yên lặng; hỏi trước khi chụp ảnh trong điện thờ.",
+      "contact": {
+        "value": "0984 232 821",
+        "status": "verified",
+        "note": "Số trên cổng du lịch."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/13.%20Ch%C3%B9a%20Ph%C6%B0%E1%BB%9Bc%20H%E1%BA%ADu/636533531001669378_panel.png",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long – hồ sơ Phước Hậu",
+          "url": "https://vinhlongtourist.vn/vi/chuaphuochau"
+        },
+        {
+          "label": "VnExpress, 09/01/2024 – vườn kinh đá",
+          "url": "https://vnexpress.net/cam-nang-du-lich-vinh-long-4698188.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "nha-co-cai-cuong",
+      "name": "Nhà cổ Cai Cường",
+      "altName": null,
+      "category": "Nhà cổ",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Ngôi nhà cổ ven rạch Cái Muối, nổi bật với trang trí kiến trúc Nam Bộ. Bảo tàng Lịch sử Quốc gia ghi niên đại xây dựng năm 1885.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Bình Hoà, xã Bình Hoà Phước, huyện Long Hồ — địa chỉ theo nguồn cũ; trên cù lao An Bình.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20c%E1%BB%95%20Cai%20C%C6%B0%E1%BB%9Dng%20%E1%BA%A4p%20B%C3%ACnh%20H%C3%B2a%2C%20x%C3%A3%20B%C3%ACnh%20H%C3%B2a%20Ph%C6%B0%E1%BB%9Bc%2C%20huy%E1%BB%87n%20Long%20H%E1%BB%93",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "30.000đ/người",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh."
+      },
+      "suggestedDurationMin": {
+        "value": 45,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.5,
+        "count": 124,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem kiến trúc và nội thất cổ; việc vào bên trong hoặc tổ chức giao lưu cần liên hệ trước.",
+      "tips": "Gợi ý: hỏi giờ đón khách trước; không tự ý chạm đồ cổ hoặc vào khu sinh hoạt gia đình.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://thamhiemmekong.com/wp-content/uploads/2020/04/nhacocaicuong1.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Bảo tàng Lịch sử Quốc gia, 16/05/2017",
+          "url": "https://baotanglichsu.vn/vi/Articles/3091/19950/trang-tri-kien-truc-nha-co-cai-muoi-mot-net-rieng-nam-bo.html"
+        },
+        {
+          "label": "Thám Hiểm Mekong – địa chỉ và ảnh nhà Cai Cường",
+          "url": "https://thamhiemmekong.com/thong-tin-du-lich-mien-tay/nha-co-cai-cuong.html"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "nha-dua-cocohome",
+      "name": "Nhà dừa CocoHome",
+      "altName": null,
+      "category": "Nhà kiến trúc và trải nghiệm miệt vườn",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Quần thể nhà sử dụng gỗ dừa cho cột, vách và nhiều chi tiết nội thất. Theo VnExpress năm 2024, gia đình bắt đầu xây dựng từ năm 2009.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Ấp Hoà Quí, xã An Bình, tỉnh Vĩnh Long; địa chỉ cũ thuộc Hoà Ninh, Long Hồ.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20d%E1%BB%ABa%20CocoHome%20%E1%BA%A4p%20H%C3%B2a%20Qu%C3%AD%2C%20x%C3%A3%20An%20B%C3%ACnh%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:00–18:00",
+        "status": "verified",
+        "note": "Theo cổng du lịch; cần xác nhận lịch ngày lễ/đoàn."
+      },
+      "price": {
+        "value": "50.000đ/người",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa xác minh; không nhầm giá tour với vé vào điểm."
+      },
+      "suggestedDurationMin": {
+        "value": 120,
+        "status": "verified",
+        "note": "Cổng du lịch gợi ý."
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 296,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan nhà dừa, thưởng thức món ăn từ dừa theo đặt trước; vườn/trải nghiệm theo mùa cần hỏi đơn vị.",
+      "tips": "Gợi ý: đặt bữa trước; hỏi rõ giá nhà dừa và gói vườn, tránh nhầm giá tour với vé vào điểm.",
+      "contact": {
+        "value": "0932 871 175",
+        "status": "verified",
+        "note": "Số được công bố trên cổng địa phương và trang CocoHome."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/adminportal_vlg/dia_diem/nha_dua_cocohome/z1975117437418_3746f337069ffde95799e16bd81e929b_637315445056494777_23792555.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "VnExpress, 09/01/2024 – kiến trúc và lịch sử",
+          "url": "https://vnexpress.net/cam-nang-du-lich-vinh-long-4698188.html"
+        },
+        {
+          "label": "Cổng Du lịch Vĩnh Long – hồ sơ CocoHome",
+          "url": "https://vinhlongtourist.vn/vi/cch"
+        },
+        {
+          "label": "Cổng nông nghiệp Vĩnh Long – liên hệ",
+          "url": "https://nongnghiepvinhlong.vn/OCOP.aspx?id=43202591633931"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "lang-gom-tu-buoi",
+      "name": "Làng gốm Tư Buôi",
+      "altName": null,
+      "category": "Không gian gốm và trải nghiệm nghề",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Không gian giới thiệu gốm đỏ Vĩnh Long qua kiến trúc, sản phẩm và hoạt động trải nghiệm. Cổng du lịch năm 2025 ghi quy mô khoảng 8.000 m².",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "F55 khu Minh Linh, phường Thanh Đức, tỉnh Vĩnh Long.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=L%C3%A0ng%20g%E1%BB%91m%20T%C6%B0%20Bu%C3%B4i%20F55%20khu%20Minh%20Linh%2C%20ph%C6%B0%E1%BB%9Dng%20Thanh%20%C4%90%E1%BB%A9c%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:00–17:00 hằng ngày",
+        "status": "verified",
+        "note": "Theo bài giới thiệu Cổng Du lịch Vĩnh Long, 25/02/2026."
+      },
+      "price": {
+        "value": "30.000đ/người",
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — nguồn gốc dùng đơn vị \"xu\" ở một số hoạt động, chưa có tỷ lệ quy đổi rõ."
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 184,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem gốm, trải nghiệm tạo hình đất và thưởng thức món dân gian khi có tổ chức. Chưa xác minh giá và thời lượng từng hoạt động.",
+      "tips": "Gợi ý: hỏi trước lịch trải nghiệm làm gốm và việc nung/nhận sản phẩm; không vào khu lò khi chưa được phép.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal/Images/VLG/adminportal_vlg/yem/2026/t2/25_2/1_18225227.jpg",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Cổng Du lịch Vĩnh Long, 25/02/2026 – địa chỉ và giờ",
+          "url": "https://vinhlongtourist.vn/vi/detailnews/?id=news_57308&t=lang-gom-tu-buoi-noi-cham-vao-ky-uc-mien-que-giua-long-do-thi"
+        },
+        {
+          "label": "Cổng Du lịch Vĩnh Long, 14/04/2025 – quy mô",
+          "url": "https://vinhlongtourist.vn/en/detailnews/?id=news_12120&t=lang-gom-tu-buoi-diem-du-lich-thu-hut-khach-du-lich-tai-vinh-long"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": [
+        "Liên quan nhưng KHÔNG trùng với \"Vương quốc gạch gốm Mang Thít\" (dữ liệu Phase 1, legacy) — cùng vùng nghề gốm đỏ Vĩnh Long nhưng là hai địa điểm cụ thể khác nhau."
+      ]
+    },
+    {
+      "id": "khu-du-lich-vinh-sang",
+      "name": "Khu du lịch Vinh Sang",
+      "altName": null,
+      "category": "Khu vui chơi và trải nghiệm miệt vườn",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Khu du lịch trên cù lao An Bình có hoạt động sông nước và món ăn Nam Bộ. Bảng giá chính thức ghi thời hạn áp dụng từ 01/01 đến 31/12/2026.",
+      "coordinates": {
+        "lat": null,
+        "lng": null,
+        "status": "missing",
+        "note": "Nguồn chỉ cung cấp link tìm kiếm theo tên/địa chỉ, chưa có toạ độ khảo sát thực địa."
+      },
+      "address": {
+        "value": "Tổ 14, ấp An Thuận, xã An Bình, tỉnh Vĩnh Long.",
+        "status": "verified",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Khu%20du%20l%E1%BB%8Bch%20Vinh%20Sang%20T%E1%BB%95%2014%2C%20%E1%BA%A5p%20An%20Thu%E1%BA%ADn%2C%20x%C3%A3%20An%20B%C3%ACnh%2C%20t%E1%BB%89nh%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa xác minh được từ nguồn công khai đủ tin cậy."
+      },
+      "price": {
+        "value": "Vé cổng 50.000đ/người lớn; 35.000đ/trẻ em dưới 1,3 m",
+        "status": "verified",
+        "note": "Theo bảng giá chính thức 2026 của đơn vị (đã gồm thuế); chưa thấy chính sách trẻ sơ sinh tách riêng."
+      },
+      "suggestedDurationMin": {
+        "value": 180,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 876,
+        "status": "estimated",
+        "note": "Ước lượng cho mockup — chưa có dữ liệu đánh giá thật."
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chèo xuồng trong ao: 40.000đ/2 khách/15 phút (giá xác minh). Gói bánh tét: 45.000đ/khách, tối thiểu 5 khách (giá xác minh, chưa công bố thời lượng). Các khoản này tách khỏi vé cổng nếu không có gói bao gồm.",
+      "tips": "Gợi ý: đặt trước hoạt động theo nhóm; hỏi điều kiện trẻ em và sử dụng áo phao khi tham gia hoạt động nước.",
+      "contact": {
+        "value": "0270 627 7277",
+        "status": "verified",
+        "note": "Số chỉ đường/liên hệ của Vinh Sang."
+      },
+      "imageRef": {
+        "url": "https://dltm-cdn.vnptit3.vn/resources/portal//Images/VLG/superadminportal.vlg/%C4%90%E1%BB%8Ba%20%C4%91i%E1%BB%83m/5.%20KDL%20Vinh%20Sang/636557553590112041_DSC_7186.JPG",
+        "status": "external-not-downloaded",
+        "note": "Link ảnh tham khảo do người dùng cung cấp — chưa tải về."
+      },
+      "sources": [
+        {
+          "label": "Vinh Sang – bảng giá chính thức 2026",
+          "url": "https://www.vinhsang.com/bang-gia-dich-vu-nam-2026/"
+        },
+        {
+          "label": "Cổng Du lịch Vĩnh Long – địa chỉ",
+          "url": "https://vinhlongtourist.vn/en/vinhsang"
+        }
+      ],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "researched-batch-2026-09",
+      "notes": []
+    },
+    {
+      "id": "mieu-cong-than",
+      "name": "Miếu Công Thần Vĩnh Long",
+      "altName": null,
+      "category": "Bảo tàng / Di tích",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Di tích thờ các bậc tiền hiền có công khai khẩn vùng đất Vĩnh Long xưa, mang kiến trúc gỗ truyền thống Nam Bộ.",
+      "coordinates": {
+        "lat": 10.243,
+        "lng": 105.965,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Phường Long Châu, TP. Vĩnh Long.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=Mi%E1%BA%BFu%20C%C3%B4ng%20Th%E1%BA%A7n%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:00–17:00 hằng ngày",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 40,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 41,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan kiến trúc, tìm hiểu lịch sử khai khẩn vùng đất Vĩnh Long.",
+      "tips": "Nên hỏi trước nếu muốn chụp ảnh khu vực thờ chính.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "legacy-phase1-unverified",
+      "notes": [
+        "Không nằm trong đợt nghiên cứu 30 điểm (09/2026) — dữ liệu do Phase 1 tự soạn từ kiến thức chung, cần xác minh nguồn trước khi dùng chính thức. Không nhầm với \"Phước Minh Cung\" (mục #06, Trà Vinh)."
+      ]
+    },
+    {
+      "id": "vuong-quoc-gach-gom-mang-thit",
+      "name": "Vương quốc gạch gốm Mang Thít",
+      "altName": null,
+      "category": "Làng nghề thủ công",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Quần thể lò gạch, lò gốm truyền thống trải dài ven sông, từng được ví như \"vương quốc\" gạch gốm của miền Tây.",
+      "coordinates": {
+        "lat": 10.1682,
+        "lng": 106.0361,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Huyện Mang Thít, Vĩnh Long.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=V%C6%B0%C6%A1ng%20qu%E1%BB%91c%20g%E1%BA%A1ch%20g%E1%BB%91m%20Mang%20Th%C3%ADt",
+      "openingHours": {
+        "value": "08:00–17:00 hằng ngày",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 212,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan các lò gạch, gốm truyền thống; trải nghiệm tô màu gốm cùng nghệ nhân (hoạt động trả phí riêng — xem mục trải nghiệm).",
+      "tips": "Đường vào một số lò gạch còn nhỏ, nên đi giày thoải mái. Một số khu vực đang xuống cấp cần chú ý an toàn.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "legacy-phase1-unverified",
+      "notes": [
+        "Không nằm trong đợt nghiên cứu 30 điểm — dữ liệu do Phase 1 tự soạn, cần xác minh nguồn. Liên quan nhưng khác với \"Làng gốm Tư Buôi\" (mục #29, đã xác minh) — hai địa điểm cụ thể khác nhau trong cùng vùng nghề gốm."
+      ]
+    },
+    {
+      "id": "cu-lao-an-binh",
+      "name": "Cù lao An Bình – Miệt vườn Long Hồ",
+      "altName": null,
+      "category": "Thắng cảnh",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": false,
+      "summary": "Cù lao xanh mát giữa sông Tiền với các vườn cây ăn trái, kênh rạch nhỏ và nhà vườn đón khách kiểu miền Tây. Khu vực bao gồm nhiều địa danh cụ thể như Chùa Tiên Châu, Nhà cổ Cai Cường, CocoHome, Vinh Sang (xem riêng từng mục).",
+      "coordinates": {
+        "lat": 10.2278,
+        "lng": 105.9836,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Xã An Bình, huyện Long Hồ, Vĩnh Long.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=C%C3%B9%20lao%20An%20B%C3%ACnh%20Long%20H%E1%BB%93%20V%C4%A9nh%20Long",
+      "openingHours": {
+        "value": "07:00–18:00 hằng ngày",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 150,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.7,
+        "count": 305,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Chèo xuồng miệt vườn, hái trái cây theo mùa, ghé các điểm cụ thể trên cù lao.",
+      "tips": "Nên mặc đồ gọn nhẹ, mang theo nón; một số hoạt động có thể lội nước nhẹ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "legacy-phase1-unverified",
+      "notes": [
+        "Đây là mục tổng quan vùng (Phase 1), không phải một địa danh cụ thể — dễ trùng lặp nội dung với các mục cụ thể hơn trong cùng khu vực (Chùa Tiên Châu, Nhà cổ Cai Cường, CocoHome, Vinh Sang). Cân nhắc gộp/định tuyến lại ở phase sau."
+      ]
+    },
+    {
+      "id": "con-phung",
+      "name": "Cồn Phụng",
+      "altName": null,
+      "category": "Thắng cảnh",
+      "region": "Bến Tre cũ",
+      "isDemoHost": false,
+      "summary": "Cồn nổi giữa sông Tiền, gắn với di tích Đạo Dừa và các vườn dừa, cơ sở thủ công từ dừa.",
+      "coordinates": {
+        "lat": 10.3661,
+        "lng": 106.3839,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Xã Tân Thạch, huyện Châu Thành, Bến Tre.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=C%E1%BB%93n%20Ph%E1%BB%A5ng%20B%E1%BA%BFn%20Tre",
+      "openingHours": {
+        "value": "07:00–17:00 hằng ngày",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": "Một số khu vực có thể thu phí tham quan riêng — thông tin chưa xác minh."
+      },
+      "suggestedDurationMin": {
+        "value": 120,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.4,
+        "count": 266,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Tham quan di tích Đạo Dừa, các vườn dừa và cơ sở thủ công.",
+      "tips": "Một số khu vực trong Cồn Phụng có thể thu phí tham quan riêng.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "legacy-phase1-unverified",
+      "notes": [
+        "Không nằm trong đợt nghiên cứu 30 điểm (phạm vi 09/2026 chỉ gồm Trà Vinh cũ + Vĩnh Long cũ, không gồm Bến Tre) — dữ liệu do Phase 1 tự soạn, cần xác minh nguồn."
+      ]
+    },
+    {
+      "id": "lang-keo-dua-mo-cay",
+      "name": "Làng nghề kẹo dừa Mỏ Cày",
+      "altName": null,
+      "category": "Làng nghề thủ công",
+      "region": "Bến Tre cũ",
+      "isDemoHost": false,
+      "summary": "Làng nghề truyền thống làm kẹo dừa thủ công, nổi bật với công đoạn sên kẹo và gói kẹo bằng tay.",
+      "coordinates": {
+        "lat": 10.2163,
+        "lng": 106.2681,
+        "status": "estimated",
+        "note": "Toạ độ minh hoạ từ Phase 1 (ước lượng theo khu vực), chưa khảo sát thực địa."
+      },
+      "address": {
+        "value": "Huyện Mỏ Cày Nam, Bến Tre.",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": "https://www.google.com/maps/search/?api=1&query=L%C3%A0ng%20ngh%E1%BB%81%20k%E1%BA%B9o%20d%E1%BB%ABa%20M%E1%BB%8F%20C%C3%A0y%20B%E1%BA%BFn%20Tre",
+      "openingHours": {
+        "value": "07:00–17:00 hằng ngày",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": "Miễn phí",
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 60,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.5,
+        "count": 145,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Xem quy trình làm kẹo dừa thủ công, mua sản phẩm làm quà.",
+      "tips": "Hỏi trước khi chụp ảnh khu sản xuất.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "legacy-phase1-unverified",
+      "notes": [
+        "Không nằm trong đợt nghiên cứu 30 điểm (phạm vi không gồm Bến Tre) — dữ liệu do Phase 1 tự soạn, cần xác minh nguồn."
+      ]
+    },
+    {
+      "id": "nha-vuon-co-ba",
+      "name": "Nhà vườn Cô Ba (dữ liệu minh hoạ)",
+      "altName": null,
+      "category": "Trải nghiệm tại hộ dân",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": true,
+      "summary": "Hộ demo minh hoạ mô hình nhà vườn nhỏ đón khách trải nghiệm nấu ăn dân dã. Tên và hình ảnh là dữ liệu mô phỏng cho bản demo.",
+      "coordinates": {
+        "lat": 10.2295,
+        "lng": 105.9852,
+        "status": "estimated",
+        "note": "Hộ demo hoàn toàn hư cấu — toạ độ chỉ mang tính minh hoạ vị trí trong khu vực Cù lao An Bình."
+      },
+      "address": {
+        "value": "Xã An Bình, huyện Long Hồ, Vĩnh Long (vị trí minh hoạ).",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": null,
+      "openingHours": {
+        "value": "Theo lịch hẹn trước",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": 120000,
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 90,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.9,
+        "count": 6,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Học gói bánh tét cùng Nhà vườn Cô Ba (hoạt động trả phí demo).",
+      "tips": "Cần đặt lịch trước ít nhất 1 ngày vì sức chứa nhỏ.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "demo-fictional",
+      "notes": [
+        "Hộ hoàn toàn hư cấu, phục vụ trình diễn luồng Studio/New Spotlight ở phase sau — không phải cơ sở kinh doanh có thật."
+      ]
+    },
+    {
+      "id": "xuong-dan-lat-chu-sau",
+      "name": "Xưởng đan lát Chú Sáu (dữ liệu minh hoạ)",
+      "altName": null,
+      "category": "Trải nghiệm tại hộ dân",
+      "region": "Vĩnh Long cũ",
+      "isDemoHost": true,
+      "summary": "Hộ demo minh hoạ mô hình nghệ nhân đan lát nhỏ, mới tham gia mạng lưới. Tên và hình ảnh là dữ liệu mô phỏng cho bản demo.",
+      "coordinates": {
+        "lat": 10.171,
+        "lng": 106.0392,
+        "status": "estimated",
+        "note": "Hộ demo hoàn toàn hư cấu — toạ độ chỉ mang tính minh hoạ vị trí trong khu vực Mang Thít."
+      },
+      "address": {
+        "value": "Huyện Mang Thít, Vĩnh Long (vị trí minh hoạ).",
+        "status": "estimated",
+        "note": null
+      },
+      "mapSearchUrl": null,
+      "openingHours": {
+        "value": "08:00–16:00",
+        "status": "estimated",
+        "note": null
+      },
+      "price": {
+        "value": 80000,
+        "status": "estimated",
+        "note": null
+      },
+      "suggestedDurationMin": {
+        "value": 75,
+        "status": "estimated",
+        "note": null
+      },
+      "rating": {
+        "value": 4.8,
+        "count": 4,
+        "status": "estimated",
+        "note": null
+      },
+      "crowdLevel": {
+        "value": null,
+        "status": "missing",
+        "note": "Chưa có dữ liệu mật độ theo thời gian thực; không suy diễn từ ngày lễ hoặc hình ảnh."
+      },
+      "availability": {
+        "value": "Liên hệ xác nhận",
+        "status": "missing",
+        "note": "Chưa có dữ liệu tồn chỗ/booking của đơn vị."
+      },
+      "activities": "Đan lát thủ công cùng Chú Sáu (hoạt động trả phí demo).",
+      "tips": "Không gian xưởng nhỏ, nên đi theo nhóm dưới 8 người.",
+      "contact": {
+        "value": null,
+        "status": "missing",
+        "note": null
+      },
+      "imageRef": {
+        "url": null,
+        "status": "missing",
+        "note": "Chưa có ảnh/video nguồn được ghi nhận."
+      },
+      "sources": [],
+      "badge": {
+        "recognized": false,
+        "note": "Chưa gắn huy hiệu \"Được ghi nhận\" của app — cơ chế duyệt riêng, khác với xếp hạng di tích/giải thưởng."
+      },
+      "dataQuality": "demo-fictional",
+      "notes": [
+        "Hộ hoàn toàn hư cấu, phục vụ trình diễn luồng Studio/New Spotlight ở phase sau — không phải cơ sở kinh doanh có thật."
+      ]
+    }
+  ]
+}

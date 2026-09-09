@@ -6,7 +6,7 @@ Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thá
 
 ## Trạng thái dự án
 
-Xem `PROGRESS.md` (trạng thái theo phase) và `REQUIREMENTS_MATRIX.md` (đối chiếu từng yêu cầu spec). Dự án triển khai theo 9 phase, hiện đã hoàn thành **Phase 1**.
+Xem `PROGRESS.md` (trạng thái theo phase), `REQUIREMENTS_MATRIX.md` (đối chiếu từng yêu cầu spec) và `DATA_ISSUES.md` (chất lượng dữ liệu địa danh). Dự án triển khai theo 9 phase, hiện đã hoàn thành **Phase 1 + Phase 2**.
 
 ## Chạy thử ở máy local
 
@@ -33,14 +33,20 @@ Không mở trực tiếp file `index.html` bằng `file://` — trình duyệt 
 
 ```
 index.html            Shell HTML duy nhất, mount nội dung theo hash route
+data/
+  destinations.json    Dữ liệu địa danh đã chuẩn hoá (verified/estimated/missing theo từng trường)
 css/                  tokens (màu/spacing) → base → layout → components → trail, gộp qua styles.css
 js/
   app.js              Hash router
-  storage.js          localStorage có schema version, seed, reset, xử lý lỗi
-  data.js             Dữ liệu mẫu (địa điểm, trải nghiệm, slot, sự kiện...)
-  utils.js, ui.js     Hàm dùng chung (escape HTML, tìm kiếm không dấu, toast, modal...)
+  storage.js          localStorage có schema version; tách "nội dung" (destinations/hosts/
+                      experiences/events — nạp mới mỗi lần) khỏi "dữ liệu người dùng" (yêu
+                      thích, hành trình nháp... mới lưu localStorage)
+  data.js             Dữ liệu mẫu hosts/experiences/slot/sự kiện/đánh giá mẫu (không còn destinations)
+  utils.js, ui.js     Hàm dùng chung (escape HTML, tìm kiếm không dấu, toast, modal, tự nhận
+                      diện danh mục/màu/icon từ dữ liệu...)
   services/           Adapter mô phỏng: aiService, paymentService, mapService,
-                      notificationService, bookingService — sẽ nối API thật sau này
+                      notificationService, bookingService, destinationsService (nạp + chuẩn
+                      hoá data/destinations.json) — sẽ nối API thật sau này
   welcome.js          Màn chào
   comingSoon.js        Khung "sắp có" dùng chung cho các phần chưa tới phase
   trail/               Các màn của vai trò du khách (shell, explore, placeDetail, profile)
@@ -52,7 +58,7 @@ assets/icons/          Icon SVG (favicon...)
 - **Không có backend/database thật.** Mọi vai trò (du khách/hộ dân/quản lý/vận hành) chạy trên cùng một trình duyệt, dùng chung một bộ dữ liệu `localStorage` để trình diễn luồng liên kết — không phải đồng bộ nhiều người dùng thật.
 - **Không nhúng API key** nào trong mã nguồn frontend.
 - Bản đồ dùng **Leaflet** tải qua CDN (unpkg) khi vào tab Khám phá; nếu mạng chặn/CDN lỗi, trang tự chuyển sang chế độ chỉ-danh-sách, không vỡ giao diện.
-- Toạ độ các địa điểm dựa trên vị trí thực tế được biết đến rộng rãi ở mức tương đối (minh hoạ khi chưa xác minh chính xác từng mét) — xem ghi chú `verified: false` trong `js/data.js`.
+- Dữ liệu địa danh trong `data/destinations.json` (37 mục) đến từ nghiên cứu nguồn công khai có trích dẫn — mỗi trường (địa chỉ, giờ mở, giá, đánh giá, toạ độ...) mang trạng thái `verified` / `estimated` / `missing` rõ ràng, không tự bịa. 23/37 địa danh chưa có toạ độ xác thực nên chưa hiện marker trên bản đồ (vẫn có trong danh sách, dùng link tìm-kiếm-theo-tên để chỉ đường). Xem `DATA_ISSUES.md` để biết chi tiết từng trường hợp và các mâu thuẫn đã phát hiện.
 
 ## Deploy
 
@@ -80,11 +86,28 @@ Vì đây là site tĩnh, chỉ cần tải toàn bộ nội dung thư mục (tr
 
 Ghi chú: đã phát hiện và sửa 2 lỗi trong lúc kiểm thử — (1) khung bản đồ cao 0px ở desktop do CSS `height:100%` không có cơ sở phần trăm hợp lệ (đổi sang flexbox `flex:1`), (2) chip danh mục bị ngắt dòng ở mobile do thiếu `white-space:nowrap`. Plugin gom cụm marker (Leaflet.markercluster) gây marker không hiển thị dù dữ liệu đã nạp đúng — đã gỡ bỏ, dùng marker đơn cho quy mô 14 điểm hiện tại.
 
+## Kiểm thử thực tế (Phase 2 — tích hợp dữ liệu địa danh)
+
+| Kịch bản | Kết quả |
+|---|---|
+| Nạp `data/destinations.json` (37 địa danh) qua fetch khi khởi động | ✅ Pass — thanh thống kê hiện đúng "37 địa điểm..." |
+| Tự động sinh danh mục/bộ lọc từ dữ liệu (không hard-code) | ✅ Pass — 8 nhóm danh mục tự tính đúng tổng 37 (Tôn giáo 10, Làng nghề & cộng đồng 8, Bảo tàng/Di tích 5, Khu tưởng niệm 5, Thiên nhiên 4, Nhà cổ 2, Trải nghiệm tại hộ dân 2, Khu vui chơi 1) |
+| Địa danh thiếu toạ độ không hiện marker nhưng vẫn có trong danh sách + link tìm bản đồ | ✅ Pass — 23/37 không marker (14 marker hiện đúng); trang chi tiết Sokfarm (thiếu toạ độ) hiện nút "🔍 Tìm trên bản đồ" thay vì "Chỉ đường" |
+| Trạng thái verified/estimated/missing hiển thị đúng, không lẫn lộn | ✅ Pass — Chùa Âng hiện đánh giá xác minh "4.2 (18 lượt)" không có nhãn "(ước lượng)"; Sokfarm hiện toàn bộ trường "(ước lượng)" đúng như dữ liệu |
+| Mâu thuẫn dữ liệu (đánh giá Chùa Âng/Chùa Hang) được ưu tiên số xác minh và cảnh báo | ✅ Pass — trang chi tiết Chùa Âng hiện khối "⚠️ MÂU THUẪN..." trong mục Nguồn dữ liệu |
+| Hợp nhất 7 địa danh trùng Phase 1, giữ liên kết review/host/experience cũ | ✅ Pass — Chùa Âng vẫn hiện đúng 2 đánh giá mẫu từ Phase 1; Vương quốc gạch gốm Mang Thít vẫn liên kết đúng trải nghiệm "Tô màu gốm" |
+| Tách dữ liệu nội dung khỏi dữ liệu người dùng trong localStorage | ✅ Pass — `localStorage.vlt_user_state` chỉ chứa favorites/itineraries/bookings..., không chứa destinations (destinations luôn nạp mới từ JSON) |
+| Lưu yêu thích + reset dữ liệu mẫu vẫn hoạt động sau khi đổi kiến trúc storage bất đồng bộ | ✅ Pass — lưu/khôi phục đều thành công, không lỗi console |
+| Responsive 375 / 768 / 1440px với danh sách 37 mục | ✅ Pass (sau khi sửa lỗi bên dưới) |
+
+Lỗi phát hiện và đã sửa trong Phase 2: card địa điểm tràn khỏi khung ở mọi kích thước màn hình do `.place-card` là grid item nhưng thiếu `min-width: 0` (grid item mặc định không co lại dưới kích thước nội dung) — nội dung ước lượng/badge dài đã đẩy card rộng gấp rưỡi màn hình dù `document.documentElement.scrollWidth` không báo tràn (bị ẩn trong panel cuộn). Đã thêm `min-width: 0` cho `.place-card`, xác nhận lại đúng cả 3 mốc responsive.
+
 ## Tuỳ biến nhanh
 
 - **Màu sắc/spacing**: sửa biến CSS trong `css/tokens.css`.
-- **Địa điểm/trải nghiệm/slot**: sửa mảng trong `js/data.js`, không cần đụng vào logic hiển thị.
-- **Tiêu chí huy hiệu "Được ghi nhận"**: cờ `recognized` + `recognizedReason` trên từng địa điểm trong `js/data.js`; tooltip đọc trực tiếp từ đó.
+- **Địa danh**: sửa/thêm mục trong `data/destinations.json` (giữ đúng cấu trúc `{value, status, note}` cho từng trường) — không cần đụng vào logic hiển thị; danh mục/bộ lọc/thống kê tự cập nhật theo dữ liệu mới.
+- **Trải nghiệm trả phí/slot/sự kiện**: sửa trong `js/data.js` (`buildExperiences`, `buildEvents`), tham chiếu `destinationId` phải khớp `id` trong `data/destinations.json`.
+- **Tiêu chí huy hiệu "Được ghi nhận"**: cờ `badge.recognized` + `badge.note` trên từng địa danh trong `data/destinations.json`; tooltip đọc trực tiếp từ đó.
 - **Thêm tính năng mới**: thêm route trong `js/app.js` trỏ tới 1 module mới trong `js/trail/` (hoặc `js/studio|admin|ops/` ở phase sau) — không cần sửa các module đã có.
 
 ## Tích hợp production còn thiếu (liệt kê đầy đủ ở Phase 9)

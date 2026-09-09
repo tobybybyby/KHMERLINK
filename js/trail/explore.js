@@ -1,10 +1,10 @@
 import { getState } from '../storage.js';
 import {
-  escapeHtml, matchesQuery, formatCurrency, haversineKm,
-  categoryLabel, categoryEmoji, debounce, qs, qsa,
+  escapeHtml, matchesQuery, haversineKm,
+  categoryEmoji, deriveCategoryVisual, debounce, qs, qsa,
   placeholderImageDataUri,
 } from '../utils.js';
-import { CATEGORY_OPTIONS, INTEREST_OPTIONS, PAIR_SUGGESTIONS } from '../data.js';
+import { INTEREST_OPTIONS, PAIR_SUGGESTIONS } from '../data.js';
 import { MapService } from '../services/mapService.js';
 import { NotificationService } from '../services/notificationService.js';
 import { openModal, renderEmptyState, renderErrorState } from '../ui.js';
@@ -68,11 +68,23 @@ function buildSkeleton() {
   `;
 }
 
+function computeCategoryGroups() {
+  const state = getState();
+  const map = new Map();
+  state.destinations.forEach((d) => {
+    const v = deriveCategoryVisual(d.category);
+    const cur = map.get(v.group) || { group: v.group, count: 0, emoji: v.emoji, color: v.color };
+    cur.count += 1;
+    map.set(v.group, cur);
+  });
+  return Array.from(map.values()).sort((a, b) => b.count - a.count);
+}
+
 function computeVisible() {
   const state = getState();
   return state.destinations.filter((d) => {
     if (!matchesQuery(d.name, filterState.query)) return false;
-    if (filterState.categories.size && !filterState.categories.has(d.category)) return false;
+    if (filterState.categories.size && !filterState.categories.has(deriveCategoryVisual(d.category).group)) return false;
     if (filterState.interests.size) {
       const has = (d.interests || []).some((i) => filterState.interests.has(i));
       if (!has) return false;
@@ -88,7 +100,8 @@ function computeVisible() {
         if (!hasSlot) return false;
       }
     }
-    if (userPoint && filterState.maxDistanceKm) {
+    if (filterState.maxDistanceKm) {
+      if (!userPoint || d.lat === null || d.lng === null) return false;
       const dist = haversineKm(userPoint.lat, userPoint.lng, d.lat, d.lng);
       if (dist > filterState.maxDistanceKm) return false;
     }
@@ -117,32 +130,43 @@ function updateFilterDot(container) {
 function renderStats(container, visible) {
   const el = qs('#explore-stats', container);
   if (!el) return;
-  el.textContent = `${visible.length} địa điểm/trải nghiệm đang hiển thị trong dữ liệu demo — không phải thống kê chính thức của tỉnh.`;
+  const noCoords = visible.filter((d) => d.lat === null || d.lng === null).length;
+  const extra = noCoords ? ` (${noCoords} địa điểm chưa có toạ độ xác thực, chỉ xem được trong danh sách)` : '';
+  el.textContent = `${visible.length} địa điểm/trải nghiệm đang hiển thị trong dữ liệu demo${extra} — không phải thống kê chính thức của tỉnh.`;
+}
+
+function estimatedTag(status) {
+  if (status === 'estimated') return ' <span class="text-faint text-sm">· ước lượng</span>';
+  return '';
 }
 
 function priceBadge(d) {
-  return d.priceFrom === 0
-    ? '<span class="badge badge-free">Miễn phí</span>'
-    : `<span class="badge badge-type">Từ ${formatCurrency(d.priceFrom)}</span>`;
+  if (d.priceStatus === 'missing' || !d.priceDisplay) {
+    return '<span class="badge badge-demo">Chưa cập nhật giá</span>';
+  }
+  const cls = d.isFreeEntry ? 'badge-free' : 'badge-type';
+  return `<span class="badge ${cls}">${escapeHtml(d.priceDisplay)}</span>${estimatedTag(d.priceStatus)}`;
 }
 
 function cardHtml(d) {
   const img = placeholderImageDataUri(d.category, d.name);
+  const noCoords = d.lat === null || d.lng === null;
   return `
     <button type="button" class="place-card" data-id="${d.id}" data-selected="${d.id === selectedId}">
       <img class="place-card__img" src="${img}" alt="" />
       <span class="place-card__body">
         <span class="place-card__title">${escapeHtml(d.name)}</span>
         <span class="place-card__meta">
-          <span class="badge badge-type">${categoryEmoji(d.category)} ${escapeHtml(categoryLabel(d.category))}</span>
+          <span class="badge badge-type">${categoryEmoji(d.category)} ${escapeHtml(d.category)}</span>
           ${d.recognized ? '<span class="badge badge-recognized">✓ Được ghi nhận</span>' : ''}
           ${d.isNew ? '<span class="badge badge-new">Mới</span>' : ''}
+          ${noCoords ? '<span class="badge badge-demo">📍 Chưa có toạ độ</span>' : ''}
         </span>
         <span class="place-card__meta">
-          <span class="rating-inline">⭐ ${d.rating.toFixed(1)}</span>
+          <span class="rating-inline">⭐ ${d.rating.toFixed(1)}</span>${estimatedTag(d.ratingStatus)}
           ${priceBadge(d)}
         </span>
-        <span class="place-card__desc">${escapeHtml(d.description)}</span>
+        <span class="place-card__desc">${escapeHtml(d.summary)}</span>
       </span>
     </button>
   `;
@@ -184,8 +208,9 @@ function resetFilters() {
 function renderCategoryChips(container) {
   const row = qs('#category-chip-row', container);
   if (!row) return;
-  row.innerHTML = CATEGORY_OPTIONS.map((c) => `
-    <button type="button" class="chip" data-cat="${c.value}" aria-pressed="${filterState.categories.has(c.value)}">${categoryEmoji(c.value)} ${escapeHtml(c.label)}</button>
+  const groups = computeCategoryGroups();
+  row.innerHTML = groups.map((g) => `
+    <button type="button" class="chip" data-cat="${escapeHtml(g.group)}" aria-pressed="${filterState.categories.has(g.group)}">${g.emoji} ${escapeHtml(g.group)} <span class="text-faint">(${g.count})</span></button>
   `).join('');
   qsa('.chip', row).forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -313,7 +338,7 @@ function openFilterModal(container) {
           <option value="15" ${tmp.maxDistanceKm === 15 ? 'selected' : ''}>Trong 15km</option>
           <option value="30" ${tmp.maxDistanceKm === 30 ? 'selected' : ''}>Trong 30km</option>
         </select>
-        ${!userPoint ? '<p class="text-sm text-faint">Bấm nút 📍 trên bản đồ (hoặc chọn điểm trên bản đồ) để bật lọc theo khoảng cách.</p>' : ''}
+        ${!userPoint ? '<p class="text-sm text-faint">Bấm nút 📍 trên bản đồ (hoặc chọn điểm trên bản đồ) để bật lọc theo khoảng cách. Địa điểm chưa có toạ độ sẽ tự ẩn khi bật bộ lọc này.</p>' : ''}
       </div>
       <div class="filter-group">
         <h3>Đánh giá</h3>
@@ -401,7 +426,7 @@ function highlightCard(container, id) {
 function buildPopupHtml(d) {
   return `
     <div class="popup-title">${escapeHtml(d.name)}</div>
-    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(categoryLabel(d.category))} · ⭐ ${d.rating.toFixed(1)}</div>
+    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ⭐ ${d.rating.toFixed(1)}</div>
     <div class="popup-actions">
       <button type="button" class="btn btn-primary btn-sm" data-action="view-detail">Xem chi tiết</button>
     </div>
@@ -412,33 +437,28 @@ function renderMarkers(container, visible) {
   if (!mapInstance || !markerLayer || !window.L) return;
   const L = window.L;
   markerLayer.clearLayers();
-  visible.forEach((dest) => {
-    const marker = L.marker([dest.lat, dest.lng], { icon: MapService.categoryDivIcon(L, dest.category) });
-    marker.bindPopup(buildPopupHtml(dest));
-    marker.on('popupopen', (e) => {
-      const el = e.popup.getElement();
-      const btn = el && el.querySelector('[data-action="view-detail"]');
-      if (btn) btn.addEventListener('click', () => { window.location.hash = `#/trail/place/${dest.id}`; });
+  visible
+    .filter((dest) => dest.lat !== null && dest.lng !== null)
+    .forEach((dest) => {
+      const marker = L.marker([dest.lat, dest.lng], { icon: MapService.categoryDivIcon(L, dest.category) });
+      marker.bindPopup(buildPopupHtml(dest));
+      marker.on('popupopen', (e) => {
+        const el = e.popup.getElement();
+        const btn = el && el.querySelector('[data-action="view-detail"]');
+        if (btn) btn.addEventListener('click', () => { window.location.hash = `#/trail/place/${dest.id}`; });
+      });
+      marker.on('click', () => { selectedId = dest.id; highlightCard(container, dest.id); });
+      markerLayer.addLayer(marker);
     });
-    marker.on('click', () => { selectedId = dest.id; highlightCard(container, dest.id); });
-    markerLayer.addLayer(marker);
-  });
 }
 
 function renderLegend(container) {
   const legend = qs('#map-legend', container);
   if (!legend) return;
-  legend.innerHTML = CATEGORY_OPTIONS.map((c) => `
-    <span class="map-legend__item"><span class="map-legend__dot" style="background:${escapeHtml(getComputedColor(c.value))}"></span>${escapeHtml(c.label)}</span>
+  const groups = computeCategoryGroups();
+  legend.innerHTML = groups.map((g) => `
+    <span class="map-legend__item"><span class="map-legend__dot" style="background:${escapeHtml(g.color)}"></span>${escapeHtml(g.group)}</span>
   `).join('');
-}
-
-function getComputedColor(cat) {
-  const map = {
-    'thu-cong': '#c8862e', 'am-thuc': '#b3413a', 'ton-giao': '#1e5b3a',
-    'le-hoi': '#e7b865', 'bao-tang': '#2f6690', 'thien-nhien': '#2f7d4f', 'homestay': '#8a5a34',
-  };
-  return map[cat] || '#5b5c54';
 }
 
 function setUserPoint(container, lat, lng, opts = {}) {
@@ -518,8 +538,9 @@ async function initMap(container) {
     renderMarkers(container, computeVisible());
 
     const state = getState();
-    if (state.destinations.length) {
-      const bounds = L.latLngBounds(state.destinations.map((d) => [d.lat, d.lng]));
+    const withCoords = state.destinations.filter((d) => d.lat !== null && d.lng !== null);
+    if (withCoords.length) {
+      const bounds = L.latLngBounds(withCoords.map((d) => [d.lat, d.lng]));
       mapInstance.fitBounds(bounds, { padding: [32, 32] });
     }
 
@@ -548,6 +569,19 @@ export function renderExplore(container) {
   userMarker = null;
   manualPickMode = false;
   panelExpanded = false;
+
+  const state = getState();
+  if (!state.destinations.length) {
+    container.innerHTML = `
+      <div class="page-generic">
+        ${renderErrorState({
+          title: 'Chưa tải được dữ liệu địa điểm',
+          message: 'Không đọc được data/destinations.json. Kiểm tra bạn đang chạy qua static server (không mở trực tiếp file), sau đó tải lại trang.',
+        })}
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = buildSkeleton();
   wireToolbar(container);

@@ -76,46 +76,68 @@ export function haversineKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-const CATEGORY_LABELS = {
-  'thu-cong': 'Thủ công',
-  'am-thuc': 'Ẩm thực',
-  'ton-giao': 'Tôn giáo',
-  'le-hoi': 'Lễ hội',
-  'bao-tang': 'Bảo tàng / Di tích',
-  'thien-nhien': 'Thiên nhiên',
-  'homestay': 'Trải nghiệm tại hộ dân',
-};
+// Nhóm danh mục suy ra tự động từ chuỗi loại hình gốc trong dữ liệu (destinations.json),
+// không phải danh sách cố định thủ công — khớp rule "tự động tạo danh mục từ dữ liệu".
+const CATEGORY_GROUPS = [
+  { test: /chùa|tín ngưỡng|linh( |$)|cung/i, group: 'Tôn giáo', emoji: '🛕', color: '#1e5b3a' },
+  { test: /bảo tàng|di tích văn hóa/i, group: 'Bảo tàng / Di tích', emoji: '🏛️', color: '#2f6690' },
+  { test: /tưởng niệm|lưu niệm|di tích lịch sử/i, group: 'Khu tưởng niệm', emoji: '🕯️', color: '#6b4b8a' },
+  { test: /nhà cổ/i, group: 'Nhà cổ', emoji: '🏚️', color: '#8a5a34' },
+  { test: /thắng cảnh|bãi biển|thiên nhiên/i, group: 'Thiên nhiên', emoji: '🌿', color: '#2f7d4f' },
+  { test: /cộng đồng|nông nghiệp|miệt vườn|gốm|thủ công|làng nghề/i, group: 'Làng nghề & cộng đồng', emoji: '🧵', color: '#c8862e' },
+  { test: /vui chơi/i, group: 'Khu vui chơi', emoji: '🎡', color: '#b3413a' },
+  { test: /hộ dân/i, group: 'Trải nghiệm tại hộ dân', emoji: '🏡', color: '#8a5a34' },
+  { test: /lễ hội/i, group: 'Lễ hội', emoji: '🎉', color: '#e7b865' },
+  { test: /ẩm thực/i, group: 'Ẩm thực', emoji: '🍲', color: '#b3413a' },
+];
+
+const FALLBACK_PALETTE = ['#1e5b3a', '#2f6690', '#c8862e', '#6b4b8a', '#2f7d4f', '#b3413a', '#8a5a34'];
+function hashColor(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i += 1) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return FALLBACK_PALETTE[h % FALLBACK_PALETTE.length];
+}
+
+export function deriveCategoryVisual(rawCategory) {
+  const text = String(rawCategory || '');
+  const match = CATEGORY_GROUPS.find((g) => g.test.test(text));
+  if (match) return { group: match.group, emoji: match.emoji, color: match.color };
+  return { group: text || 'Khác', emoji: '📍', color: hashColor(text) };
+}
 
 export function categoryLabel(cat) {
-  return CATEGORY_LABELS[cat] || cat;
+  return cat || 'Khác';
 }
-
-const CATEGORY_EMOJI = {
-  'thu-cong': '🧵',
-  'am-thuc': '🍲',
-  'ton-giao': '🛕',
-  'le-hoi': '🎉',
-  'bao-tang': '🏛️',
-  'thien-nhien': '🌿',
-  'homestay': '🏡',
-};
 
 export function categoryEmoji(cat) {
-  return CATEGORY_EMOJI[cat] || '📍';
+  return deriveCategoryVisual(cat).emoji;
 }
 
-const CATEGORY_COLORS = {
-  'thu-cong': '#c8862e',
-  'am-thuc': '#b3413a',
-  'ton-giao': '#1e5b3a',
-  'le-hoi': '#e7b865',
-  'bao-tang': '#2f6690',
-  'thien-nhien': '#2f7d4f',
-  'homestay': '#8a5a34',
-};
-
 export function categoryColor(cat) {
-  return CATEGORY_COLORS[cat] || '#5b5c54';
+  return deriveCategoryVisual(cat).color;
+}
+
+export function categoryGroup(cat) {
+  return deriveCategoryVisual(cat).group;
+}
+
+// Suy luận sở thích (interest tags) tự động từ loại hình gốc, dùng cho bộ lọc "sở thích".
+const INTEREST_RULES = [
+  { test: /chùa|tín ngưỡng|linh( |$)|cung|tâm linh/i, tags: ['tam-linh'] },
+  { test: /khmer/i, tags: ['van-hoa-khmer'] },
+  { test: /bảo tàng|tưởng niệm|lưu niệm|di tích|nhà cổ|văn hóa/i, tags: ['lich-su'] },
+  { test: /thắng cảnh|bãi biển|thiên nhiên|cồn|miệt vườn/i, tags: ['thien-nhien'] },
+  { test: /cộng đồng|nông nghiệp|gốm|thủ công|làng nghề|hộ dân/i, tags: ['thu-cong', 'trai-nghiem-tay-chan'] },
+  { test: /vui chơi|miệt vườn/i, tags: ['gia-dinh'] },
+];
+
+export function deriveInterests(rawCategory) {
+  const text = String(rawCategory || '');
+  const tags = new Set();
+  INTEREST_RULES.forEach((r) => {
+    if (r.test.test(text)) r.tags.forEach((t) => tags.add(t));
+  });
+  return Array.from(tags);
 }
 
 export function placeholderImageDataUri(category, label) {

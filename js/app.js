@@ -90,7 +90,19 @@ function render() {
 }
 
 window.addEventListener('hashchange', render);
-window.addEventListener('DOMContentLoaded', () => {
-  Storage.init();
+window.addEventListener('DOMContentLoaded', async () => {
+  appRoot.innerHTML = `
+    <div class="page-generic">
+      <div class="state-block">
+        <div class="state-block__icon" aria-hidden="true">⏳</div>
+        <h3>Đang tải dữ liệu…</h3>
+      </div>
+    </div>
+  `;
+  try {
+    await Storage.init();
+  } catch (err) {
+    if (window.console && console.error) console.error(err);
+  }
   render();
 });

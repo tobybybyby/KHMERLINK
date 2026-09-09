@@ -18,6 +18,7 @@
   transition: border-color var(--transition-fast), transform var(--transition-fast);
   text-align: left;
   width: 100%;
+  min-width: 0;
 }
 .place-card:hover { transform: translateY(-1px); text-decoration: none; }
 .place-card[data-selected="true"] { border-color: var(--color-accent); }

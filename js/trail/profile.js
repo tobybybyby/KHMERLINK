@@ -49,7 +49,7 @@ export function renderProfile(container) {
       danger: true,
     });
     if (!ok) return;
-    resetSample();
+    await resetSample();
     NotificationService.notify('Đã khôi phục dữ liệu mẫu.', 'success');
     renderProfile(container);
   });

@@ -3,8 +3,7 @@
   "configurations": [
     {
       "name": "vinh-long-trail",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["--yes", "serve", ".", "-l", "5500"],
+      "url": "http://localhost:5500",
       "port": 5500
     }
   ]
