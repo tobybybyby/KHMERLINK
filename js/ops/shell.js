@@ -1,6 +1,7 @@
 const TABS = [
   { key: 'bookings', label: 'Booking & Giao dịch', icon: '🗓️', href: '#/ops/bookings' },
   { key: 'content', label: 'Nội dung', icon: '📝', href: '#/ops/content' },
+  { key: 'pilot', label: 'Pilot Khmer', icon: '📋', href: '#/ops/pilot' },
   { key: 'tickets', label: 'Sự cố', icon: '🆘', href: '#/ops/tickets' },
   { key: 'quality', label: 'Chất lượng & Hỗ trợ hộ', icon: '🏅', href: '#/ops/quality' },
 ];

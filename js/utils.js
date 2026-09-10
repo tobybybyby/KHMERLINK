@@ -143,9 +143,17 @@ export function haversineKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Nhóm danh mục suy ra tự động từ chuỗi loại hình gốc trong dữ liệu (destinations.json),
-// không phải danh sách cố định thủ công — khớp rule "tự động tạo danh mục từ dữ liệu".
+// Nhóm danh mục suy ra tự động từ chuỗi loại hình gốc trong dữ liệu. 6 rule đầu khớp CHÍNH XÁC
+// (anchor ^...$) 6 category của bộ pilot 7 listing Khmer (data/pilot-listings.json) — đặt trước
+// và anchor chặt để không bị các rule cũ bên dưới (dò theo từ khoá rộng hơn, vd "chùa") bắt nhầm
+// thành nhóm khác (vd "Chùa Khmer" lẽ ra phải hiển thị đúng tên, không bị gộp vào "Tôn giáo").
 const CATEGORY_GROUPS = [
+  { test: /^Chùa Khmer$/i, group: 'Chùa Khmer', emoji: '🛕', color: '#1e5b3a' },
+  { test: /^Bảo tàng$/i, group: 'Bảo tàng', emoji: '🏛️', color: '#2f6690' },
+  { test: /^Thủ công$/i, group: 'Thủ công', emoji: '🧵', color: '#c8862e' },
+  { test: /^Ẩm thực$/i, group: 'Ẩm thực', emoji: '🍲', color: '#b3413a' },
+  { test: /^Âm nhạc và biểu diễn$/i, group: 'Âm nhạc và biểu diễn', emoji: '🎭', color: '#6b4b8a' },
+  { test: /^Địa điểm văn hóa$/i, group: 'Địa điểm văn hóa', emoji: '🏯', color: '#8a5a34' },
   { test: /chùa|tín ngưỡng|linh( |$)|cung/i, group: 'Tôn giáo', emoji: '🛕', color: '#1e5b3a' },
   { test: /bảo tàng|di tích văn hóa/i, group: 'Bảo tàng / Di tích', emoji: '🏛️', color: '#2f6690' },
   { test: /tưởng niệm|lưu niệm|di tích lịch sử/i, group: 'Khu tưởng niệm', emoji: '🕯️', color: '#6b4b8a' },
@@ -235,4 +243,33 @@ export function destinationImageSrc(dest) {
 export function renderStars(rating) {
   const r = Math.round(clamp(rating || 0, 0, 5));
   return '★'.repeat(r) + '☆'.repeat(5 - r);
+}
+
+/** An toàn khi rating chưa có dữ liệu (vd 7 listing pilot chưa có đánh giá thật) — không được
+ * gọi .toFixed() trực tiếp trên rating có thể null ở bất kỳ đâu khác ngoài hàm này. */
+export function ratingDisplay(rating) {
+  return typeof rating === 'number' ? `⭐ ${rating.toFixed(1)}` : 'Chưa có đánh giá';
+}
+
+// Nhãn/CTA theo listingType + trạng thái booking — dùng chung cho card Khám phá và trang chi tiết
+// (xem PHASE "Thu gọn dữ liệu thành pilot 7 listing Khmer" mục 5).
+const LISTING_TYPE_BADGE = {
+  site: { label: 'Điểm tham quan', cls: 'badge-type' },
+  cluster: { label: 'Cụm điểm đến', cls: 'badge-demo' },
+  experience: { label: 'Trải nghiệm đề xuất', cls: 'badge-new' },
+  multiStopExperience: { label: 'Trải nghiệm đề xuất — 2 điểm dừng', cls: 'badge-new' },
+};
+
+export function listingTypeBadge(listingType) {
+  return LISTING_TYPE_BADGE[listingType] || { label: 'Điểm tham quan', cls: 'badge-type' };
+}
+
+const CTA_LABELS = {
+  interested: 'Quan tâm trải nghiệm',
+  notify: 'Đăng ký nhận thông báo',
+  preparing: 'Đang chuẩn bị pilot',
+};
+
+export function ctaLabel(ctaKind) {
+  return CTA_LABELS[ctaKind] || 'Quan tâm trải nghiệm';
 }

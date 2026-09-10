@@ -2,21 +2,20 @@ import { getState } from '../storage.js';
 import {
   escapeHtml, matchesQuery, haversineKm,
   categoryEmoji, deriveCategoryVisual, debounce, qs, qsa,
-  destinationImageSrc, getSimulatedCrowdLevel,
+  destinationImageSrc, getSimulatedCrowdLevel, ratingDisplay, listingTypeBadge,
 } from '../utils.js';
-import { INTEREST_OPTIONS, PAIR_SUGGESTIONS } from '../data.js';
+import { PAIR_SUGGESTIONS } from '../data.js';
 import { MapService } from '../services/mapService.js';
 import { NotificationService } from '../services/notificationService.js';
 import { openModal, renderEmptyState, renderErrorState } from '../ui.js';
 
+// Bộ lọc thu gọn cho phạm vi pilot 7 listing — chỉ còn loại hình (chip danh mục, tự sinh từ dữ
+// liệu nên không hiện danh mục rỗng) và khoảng cách (khi có vị trí). Các bộ lọc cũ (đánh giá,
+// thời lượng, còn chỗ trải nghiệm trả phí, "chỉ mới") đã bỏ vì 7 listing pilot chưa có dữ liệu
+// đánh giá/thời lượng/trải nghiệm bookable thật — hiện các lựa chọn đó sẽ luôn rỗng/gây hiểu nhầm.
 const filterState = {
   query: '',
   categories: new Set(),
-  interests: new Set(),
-  onlyAvailable: false,
-  onlyNew: false,
-  minRating: 0,
-  maxDurationMin: null,
   maxDistanceKm: null,
 };
 
@@ -29,15 +28,13 @@ let selectedId = null;
 let panelExpanded = false;
 let heatmapOn = false;
 
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 function buildSkeleton() {
   return `
     <div class="explore-page">
+      <div>
+        <h1 style="margin-bottom:4px;">Mạng lưới trải nghiệm văn hóa Khmer (pilot)</h1>
+        <p class="text-sm text-muted" style="margin-bottom:0;">7 điểm và trải nghiệm pilot tại Vĩnh Long — một số đã xác minh có thể tham quan, một số vẫn là đề xuất đang chờ khảo sát/xác nhận supplier trước khi mở bán.</p>
+      </div>
       <div class="explore-toolbar">
         <label class="explore-search">
           <span aria-hidden="true">🔍</span>
@@ -85,23 +82,8 @@ function computeCategoryGroups() {
 function computeVisible() {
   const state = getState();
   return state.destinations.filter((d) => {
-    if (!matchesQuery(d.name, filterState.query)) return false;
+    if (!matchesQuery(d.name, filterState.query) && !matchesQuery(d.altName, filterState.query)) return false;
     if (filterState.categories.size && !filterState.categories.has(deriveCategoryVisual(d.category).group)) return false;
-    if (filterState.interests.size) {
-      const has = (d.interests || []).some((i) => filterState.interests.has(i));
-      if (!has) return false;
-    }
-    if (filterState.onlyNew && !d.isNew) return false;
-    if (filterState.minRating && d.rating < filterState.minRating) return false;
-    if (filterState.maxDurationMin && d.suggestedDurationMin > filterState.maxDurationMin) return false;
-    if (filterState.onlyAvailable) {
-      const exps = state.experiences.filter((e) => e.destinationId === d.id);
-      if (exps.length) {
-        const today = startOfToday();
-        const hasSlot = exps.some((e) => e.slots.some((s) => s.booked < s.capacity && new Date(s.date) >= today));
-        if (!hasSlot) return false;
-      }
-    }
     if (filterState.maxDistanceKm) {
       if (!userPoint || d.lat === null || d.lng === null) return false;
       const dist = haversineKm(userPoint.lat, userPoint.lng, d.lat, d.lng);
@@ -112,11 +94,7 @@ function computeVisible() {
 }
 
 function activeFilterCount() {
-  let n = filterState.categories.size + filterState.interests.size;
-  if (filterState.onlyAvailable) n += 1;
-  if (filterState.onlyNew) n += 1;
-  if (filterState.minRating) n += 1;
-  if (filterState.maxDurationMin) n += 1;
+  let n = filterState.categories.size;
   if (filterState.maxDistanceKm) n += 1;
   return n;
 }
@@ -132,10 +110,14 @@ function updateFilterDot(container) {
 function renderStats(container, visible) {
   const el = qs('#explore-stats', container);
   if (!el) return;
+  const total = getState().destinations.length;
   const noCoords = visible.filter((d) => d.lat === null || d.lng === null).length;
-  const extra = noCoords ? ` (${noCoords} địa điểm chưa có toạ độ xác thực, chỉ xem được trong danh sách)` : '';
+  const extra = noCoords ? ` (${noCoords} chưa có toạ độ xác thực, chỉ xem được trong danh sách/mở Google Maps)` : '';
   const heatmapNote = heatmapOn ? ` · Mật độ mô phỏng, cập nhật lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} (không phải số liệu thời gian thực).` : '';
-  el.textContent = `${visible.length} địa điểm/trải nghiệm đang hiển thị trong dữ liệu demo${extra} — không phải thống kê chính thức của tỉnh.${heatmapNote}`;
+  const countText = visible.length === total
+    ? `${total} điểm và trải nghiệm pilot`
+    : `${visible.length}/${total} điểm và trải nghiệm pilot đang hiển thị theo bộ lọc`;
+  el.textContent = `${countText}${extra} — không phải thống kê chính thức của tỉnh.${heatmapNote}`;
 }
 
 function estimatedTag(status) {
@@ -144,8 +126,8 @@ function estimatedTag(status) {
 }
 
 function priceBadge(d) {
-  if (d.priceStatus === 'missing' || !d.priceDisplay) {
-    return '<span class="badge badge-demo">Chưa cập nhật giá</span>';
+  if (d.priceStatus === 'missing' || d.priceStatus === 'unavailable' || !d.priceDisplay) {
+    return '<span class="badge badge-demo">Đang xác minh giá</span>';
   }
   const cls = d.isFreeEntry ? 'badge-free' : 'badge-type';
   return `<span class="badge ${cls}">${escapeHtml(d.priceDisplay)}</span>${estimatedTag(d.priceStatus)}`;
@@ -156,23 +138,35 @@ function crowdBadgeHtml(destinationId) {
   return `<span class="badge" style="background:${crowd.color}22;color:${crowd.color};">● ${escapeHtml(crowd.label)}</span>`;
 }
 
+/** Nhãn phụ theo trạng thái listing — "Cần đặt trước" (khi thật sự bookable), "Đang xác minh
+ * lịch" (giờ mở cửa chưa xác minh/chưa công bố) — cộng thêm bên cạnh nhãn loại hình chính. */
+function statusBadgesHtml(d) {
+  const badges = [];
+  if (d.bookingStatus === 'bookable') badges.push('<span class="badge badge-new">Cần đặt trước</span>');
+  if (d.openingHoursStatus === 'needsFieldVerification' || d.openingHoursStatus === 'unavailable') {
+    badges.push('<span class="badge badge-demo">🕒 Đang xác minh lịch</span>');
+  }
+  return badges.join('');
+}
+
 function cardHtml(d) {
   const img = destinationImageSrc(d);
   const noCoords = d.lat === null || d.lng === null;
+  const typeBadge = listingTypeBadge(d.listingType);
   return `
     <button type="button" class="place-card" data-id="${d.id}" data-selected="${d.id === selectedId}">
       <img class="place-card__img" src="${img}" alt="" loading="lazy" />
       <span class="place-card__body">
-        <span class="place-card__title">${escapeHtml(d.name)}</span>
+        <span class="place-card__title">${escapeHtml(d.name)}${d.altName ? ` <span class="text-faint text-sm">(${escapeHtml(d.altName)})</span>` : ''}</span>
         <span class="place-card__meta">
-          <span class="badge badge-type">${categoryEmoji(d.category)} ${escapeHtml(d.category)}</span>
-          ${d.recognized ? '<span class="badge badge-recognized">✓ Được ghi nhận</span>' : ''}
-          ${d.isNew ? '<span class="badge badge-new">Mới</span>' : ''}
+          <span class="badge ${typeBadge.cls}">${categoryEmoji(d.category)} ${escapeHtml(typeBadge.label)}</span>
+          <span class="badge badge-type">${escapeHtml(d.category)}</span>
+          ${statusBadgesHtml(d)}
           ${noCoords ? '<span class="badge badge-demo">📍 Chưa có toạ độ</span>' : ''}
           ${heatmapOn ? crowdBadgeHtml(d.id) : ''}
         </span>
         <span class="place-card__meta">
-          <span class="rating-inline">⭐ ${d.rating.toFixed(1)}</span>${estimatedTag(d.ratingStatus)}
+          <span class="rating-inline">${ratingDisplay(d.rating)}</span>
           ${priceBadge(d)}
         </span>
         <span class="place-card__desc">${escapeHtml(d.summary)}</span>
@@ -206,11 +200,6 @@ function renderList(container, visible) {
 function resetFilters() {
   filterState.query = '';
   filterState.categories = new Set();
-  filterState.interests = new Set();
-  filterState.onlyAvailable = false;
-  filterState.onlyNew = false;
-  filterState.minRating = 0;
-  filterState.maxDurationMin = null;
   filterState.maxDistanceKm = null;
 }
 
@@ -237,7 +226,7 @@ function miniCardHtml(d) {
     <button type="button" class="mini-card" data-id="${d.id}">
       <img class="mini-card__img" src="${destinationImageSrc(d)}" alt="" loading="lazy" />
       <span class="mini-card__title">${escapeHtml(d.name)}</span>
-      <span class="text-sm text-muted">⭐ ${d.rating.toFixed(1)}</span>
+      <span class="text-sm text-muted">${ratingDisplay(d.rating)}</span>
     </button>
   `;
 }
@@ -313,31 +302,10 @@ function renderStaticSections(container) {
 }
 
 function openFilterModal(container) {
-  const tmp = {
-    interests: new Set(filterState.interests),
-    onlyAvailable: filterState.onlyAvailable,
-    onlyNew: filterState.onlyNew,
-    minRating: filterState.minRating,
-    maxDurationMin: filterState.maxDurationMin,
-    maxDistanceKm: filterState.maxDistanceKm,
-  };
+  const tmp = { maxDistanceKm: filterState.maxDistanceKm };
 
   const bodyHtml = `
     <div class="filter-panel">
-      <div class="filter-group">
-        <h3>Sở thích</h3>
-        <div class="chip-row">
-          ${INTEREST_OPTIONS.map((o) => `<button type="button" class="chip" data-interest="${o.value}" aria-pressed="${tmp.interests.has(o.value)}">${escapeHtml(o.label)}</button>`).join('')}
-        </div>
-      </div>
-      <div class="filter-group">
-        <h3>Thời gian tham quan</h3>
-        <select class="field-select" id="filter-duration">
-          <option value="">Không giới hạn</option>
-          <option value="60" ${tmp.maxDurationMin === 60 ? 'selected' : ''}>Dưới 1 giờ</option>
-          <option value="120" ${tmp.maxDurationMin === 120 ? 'selected' : ''}>Dưới 2 giờ</option>
-        </select>
-      </div>
       <div class="filter-group">
         <h3>Khoảng cách từ điểm xuất phát</h3>
         <select class="field-select" id="filter-distance" ${userPoint ? '' : 'disabled'}>
@@ -347,21 +315,7 @@ function openFilterModal(container) {
           <option value="15" ${tmp.maxDistanceKm === 15 ? 'selected' : ''}>Trong 15km</option>
           <option value="30" ${tmp.maxDistanceKm === 30 ? 'selected' : ''}>Trong 30km</option>
         </select>
-        ${!userPoint ? '<p class="text-sm text-faint">Bấm nút 📍 trên bản đồ (hoặc chọn điểm trên bản đồ) để bật lọc theo khoảng cách. Địa điểm chưa có toạ độ sẽ tự ẩn khi bật bộ lọc này.</p>' : ''}
-      </div>
-      <div class="filter-group">
-        <h3>Đánh giá</h3>
-        <select class="field-select" id="filter-rating">
-          <option value="0">Bất kỳ</option>
-          <option value="4" ${tmp.minRating === 4 ? 'selected' : ''}>Từ 4 sao</option>
-          <option value="4.5" ${tmp.minRating === 4.5 ? 'selected' : ''}>Từ 4.5 sao</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="flex items-center gap-2"><input type="checkbox" id="filter-available" ${tmp.onlyAvailable ? 'checked' : ''}> Còn chỗ trải nghiệm trả phí</label>
-      </div>
-      <div class="filter-group">
-        <label class="flex items-center gap-2"><input type="checkbox" id="filter-new" ${tmp.onlyNew ? 'checked' : ''}> Chỉ trải nghiệm mới</label>
+        ${!userPoint ? '<p class="text-sm text-faint">Bấm nút 📍 trên bản đồ (hoặc chọn điểm trên bản đồ) để bật lọc theo khoảng cách. Địa điểm chưa có toạ độ sẽ tự ẩn khi bật bộ lọc này — hiện phần lớn 7 listing pilot chưa có toạ độ công khai.</p>' : ''}
       </div>
     </div>
   `;
@@ -375,30 +329,12 @@ function openFilterModal(container) {
     bodyHtml,
     actionsHtml,
     onMount: (modalEl, close) => {
-      qsa('.chip[data-interest]', modalEl).forEach((chip) => {
-        chip.addEventListener('click', () => {
-          const v = chip.dataset.interest;
-          if (tmp.interests.has(v)) tmp.interests.delete(v);
-          else tmp.interests.add(v);
-          chip.setAttribute('aria-pressed', String(tmp.interests.has(v)));
-        });
-      });
       modalEl.querySelector('[data-role="reset"]').addEventListener('click', () => {
-        filterState.interests = new Set();
-        filterState.onlyAvailable = false;
-        filterState.onlyNew = false;
-        filterState.minRating = 0;
-        filterState.maxDurationMin = null;
         filterState.maxDistanceKm = null;
         close();
         renderAll(container);
       });
       modalEl.querySelector('[data-role="apply"]').addEventListener('click', () => {
-        filterState.interests = tmp.interests;
-        filterState.onlyAvailable = qs('#filter-available', modalEl).checked;
-        filterState.onlyNew = qs('#filter-new', modalEl).checked;
-        filterState.minRating = parseFloat(qs('#filter-rating', modalEl).value) || 0;
-        filterState.maxDurationMin = parseInt(qs('#filter-duration', modalEl).value, 10) || null;
         filterState.maxDistanceKm = parseInt(qs('#filter-distance', modalEl).value, 10) || null;
         close();
         renderAll(container);
@@ -449,7 +385,7 @@ function buildPopupHtml(d) {
   const hoursText = d.openingHours ? `${escapeHtml(d.openingHours)}${d.openingHoursStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giờ mở cửa</span>';
   return `
     <div class="popup-title">${escapeHtml(d.name)}</div>
-    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ⭐ ${d.rating.toFixed(1)}</div>
+    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ${ratingDisplay(d.rating)}</div>
     ${d.summary ? `<p class="text-sm" style="margin:4px 0;">${escapeHtml(popupSummary(d.summary))}</p>` : ''}
     <div class="text-sm" style="margin:2px 0;">💰 ${priceText}</div>
     <div class="text-sm" style="margin:2px 0 6px;">🕒 ${hoursText}</div>
@@ -602,7 +538,7 @@ export function renderExplore(container) {
       <div class="page-generic">
         ${renderErrorState({
           title: 'Chưa tải được dữ liệu địa điểm',
-          message: 'Không đọc được data/destinations.json. Kiểm tra bạn đang chạy qua static server (không mở trực tiếp file), sau đó tải lại trang.',
+          message: 'Không đọc được data/pilot-listings.json. Kiểm tra bạn đang chạy qua static server (không mở trực tiếp file), sau đó tải lại trang.',
         })}
       </div>
     `;

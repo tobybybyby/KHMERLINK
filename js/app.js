@@ -26,6 +26,7 @@ import { renderOpsBookings } from './ops/bookings.js';
 import { renderOpsContent } from './ops/content.js';
 import { renderOpsTickets } from './ops/tickets.js';
 import { renderOpsQuality } from './ops/quality.js';
+import { renderOpsPilot } from './ops/pilot.js';
 import { renderCommunityAdvisor } from './ops/community.js';
 
 const appRoot = document.getElementById('app');
@@ -88,6 +89,7 @@ const ROUTES = [
   { pattern: /^#\/ops\/content$/, handler: () => mountOpsPage('content', renderOpsContent) },
   { pattern: /^#\/ops\/tickets$/, handler: () => mountOpsPage('tickets', renderOpsTickets) },
   { pattern: /^#\/ops\/quality$/, handler: () => mountOpsPage('quality', renderOpsQuality) },
+  { pattern: /^#\/ops\/pilot$/, handler: () => mountOpsPage('pilot', renderOpsPilot) },
   { pattern: /^#\/ops\/?$/, handler: () => { window.location.hash = '#/ops/bookings'; } },
 ];
 

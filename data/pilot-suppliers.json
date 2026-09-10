@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10",
+  "sourceDocument": "data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx",
+  "sourceNote": "Không coi bài báo về hoạt động bảo tồn là bằng chứng một dịch vụ đang nhận đặt chỗ. Chỉ dùng nội bộ (Studio/Cổng vận hành) — không công khai cho khách.",
+  "suppliers": [
+    {
+      "id": "sup-tran-tuan-viet",
+      "name": "Hộ kinh doanh Trần Tuấn Việt",
+      "role": "Ứng viên sản xuất/chuẩn bị nguyên liệu cốm dẹp",
+      "location": "Ấp Giồng Thành, xã Nhị Trường",
+      "listingIds": ["EXP-01"],
+      "bookableReady": "Chưa xác minh",
+      "evidence": "Có hồ sơ trên Sàn giao dịch Nông sản Vĩnh Long; cần đối chiếu trực tiếp sản phẩm và tư cách OCOP hiện hành",
+      "missingInfo": "Liên hệ, cơ sở tiếp khách, công suất, an toàn, mùa vụ",
+      "approach": "Qua cơ quan khuyến nông/OCOP địa phương, xin phép khảo sát",
+      "risks": "Không mặc định xưởng sản xuất phù hợp tiếp khách",
+      "source": "https://www.nsvl.com.vn/"
+    },
+    {
+      "id": "sup-lang-com-dep-ba-so",
+      "name": "Cộng đồng làng cốm dẹp Ba So",
+      "role": "Nguồn tri thức/người hướng dẫn truyền thống",
+      "location": "Xã Nhị Trường",
+      "listingIds": ["EXP-01"],
+      "bookableReady": "Chưa xác minh",
+      "evidence": "Nhiều bài báo ghi nhận làng nghề; số hộ và sản lượng biến động theo năm",
+      "missingInfo": "Danh sách hộ đang làm năm 2026, mùa, công suất, vệ sinh",
+      "approach": "Làm việc với xã và chọn hộ tự nguyện",
+      "risks": "Tránh dùng số liệu lịch sử như số liệu hiện tại",
+      "source": "https://khoahocphothong.vn/mua-quet-com-dep-o-tra-vinh-48961.html"
+    },
+    {
+      "id": "sup-lam-phen",
+      "name": "NNƯT Lâm Phên",
+      "role": "Nghệ nhân nhạc cụ; chủ thể mặt nạ/mão; cố vấn nội dung",
+      "location": "Ấp Ba Se A, xã Song Lộc",
+      "listingIds": ["EXP-02", "EXP-03"],
+      "bookableReady": "Chưa xác minh nhận khách",
+      "evidence": "Báo Vĩnh Long 19/07/2025 ghi nhận xưởng tại nhà, hơn 200 người được truyền nghề, danh hiệu NNƯT 2015",
+      "missingInfo": "Liên hệ, lịch, số khách, phí, quyền hình ảnh, an toàn vật liệu",
+      "approach": "Qua ngành văn hóa/Bảo tàng; xin đồng thuận trước khi công khai pin",
+      "risks": "Nhà riêng; bảo vệ riêng tư và thời gian lao động",
+      "source": "https://baovinhlong.com.vn/phong-su-ky-su/202507/nghe-nhan-lam-phen-miet-mai-giu-gin-ban-sac-dan-toc-khmer-24208a3/"
+    },
+    {
+      "id": "sup-lop-nhac-mahori",
+      "name": "Lớp Nhạc Mahori Samaky Phum Khươne",
+      "role": "Ứng viên giao lưu nhạc cộng đồng, không phải supplier mặc định",
+      "location": "Khóm 20, phường Trà Vinh",
+      "listingIds": ["EXP-02"],
+      "bookableReady": "Không",
+      "evidence": "Lớp miễn phí từ 07/2025, tối thứ Năm và Sáu tại nhà Sơn Ma Lai; khoảng 10 học viên",
+      "missingInfo": "Đồng thuận tập thể, thù lao, không gian, nhóm tối đa",
+      "approach": "Chỉ pilot ngoài giờ học hoặc buổi riêng có trả phí",
+      "risks": "Không thương mại hóa lớp miễn phí hay làm gián đoạn việc học",
+      "source": "https://baovinhlong.com.vn/nhip-song-dong-bang/202509/nhung-nguoi-tham-lang-bao-ton-van-hoa-khmer-qua-lop-day-nhac-cu-dan-toc-9b41f95/"
+    },
+    {
+      "id": "sup-doan-anh-binh-minh",
+      "name": "Đoàn Nghệ thuật Khmer Ánh Bình Minh",
+      "role": "Đơn vị biểu diễn/cố vấn chất lượng Rô-băm",
+      "location": "Phường Trà Vinh; cần xác nhận venue",
+      "listingIds": ["EXP-02"],
+      "bookableReady": "Theo lịch biểu diễn, chưa xác minh tour",
+      "evidence": "Nguồn chuyên ngành và báo chí xác nhận năng lực Rô-băm; nghệ nhân Lâm Phên là người cung cấp/cố vấn nhạc cụ cho đoàn",
+      "missingInfo": "Đầu mối đặt lịch, repertoire, venue, phí, số nghệ sĩ",
+      "approach": "Ký thỏa thuận biểu diễn hoặc cố vấn cho câu lạc bộ cộng đồng",
+      "risks": "Chi phí/nhân lực cao; Rô-băm cần đào tạo và phục trang chuyên biệt",
+      "source": "https://en.nhandan.vn/robam-dance-a-unique-genre-of-khmer-traditional-theatre-post59655.html"
+    },
+    {
+      "id": "sup-ban-quan-ly-nguyet-hoa",
+      "name": "Ban quản lý/ban quản trị cụm Nguyệt Hóa",
+      "role": "Điều phối Ao Bà Om – Chùa Âng – Bảo tàng",
+      "location": "Phường Nguyệt Hóa",
+      "listingIds": ["SITE-04", "SITE-05", "SITE-06"],
+      "bookableReady": "Tham quan từng điểm; chưa có vé/lịch chung",
+      "evidence": "Các điểm tồn tại và có hồ sơ di tích; mô hình Làng là khu phát triển liên kết",
+      "missingInfo": "Đầu mối duy nhất, ranh giới, lịch sự kiện, dữ liệu đông người",
+      "approach": "Thiết lập MoU và quy trình phân luồng",
+      "risks": "Không bán nghi lễ; tôn trọng quyền quản trị chùa/bảo tàng",
+      "source": "https://vnexpress.net/loat-co-thu-khoe-re-khung-o-danh-thang-ao-ba-om-4819469.html"
+    },
+    {
+      "id": "sup-ban-quan-tri-lo-gach",
+      "name": "Ban quản trị Chùa Lò Gạch + cơ quan di tích",
+      "role": "Đón khách tại chùa và kiểm soát tiếp cận khu khảo cổ",
+      "location": "Ấp Ba Se A, xã Song Lộc",
+      "listingIds": ["SITE-07"],
+      "bookableReady": "Tham quan tự do chưa đồng nghĩa nhận tour",
+      "evidence": "Chùa và Bờ Lũy có hai hồ sơ xếp hạng khác nhau",
+      "missingInfo": "Giờ, lối đi, vùng bảo vệ, hướng dẫn viên, nhóm tối đa",
+      "approach": "Khảo sát chung với cơ quan di sản và chùa",
+      "risks": "Nguy cơ khách xâm phạm vùng khảo cổ hoặc nhặt di vật",
+      "source": "https://nhandan.vn/cong-nhan-bo-luy-la-di-tich-khao-co-cap-quoc-gia-post321520.html"
+    }
+  ]
+}

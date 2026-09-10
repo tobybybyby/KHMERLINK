@@ -5,15 +5,19 @@ import { haversineKm, deriveCategoryVisual } from '../utils.js';
 import { getSlotRemaining } from './bookingService.js';
 
 const AVG_SPEED_KMH = 28;
-const DEFAULT_TRAVEL_MIN = 20; // khi thiếu toạ độ một trong hai đầu, chưa có dịch vụ định tuyến thật
+const DEFAULT_TRAVEL_MIN = 20; // dùng để LẬP LỊCH khi thiếu toạ độ một trong hai đầu — không phải
+// số phút đã xác minh; luôn đi kèm known:false để UI hiển thị trung thực "chưa đủ dữ liệu để tối
+// ưu tuyến đường", không trình bày như một ước tính chính xác (đúng yêu cầu pilot mục 8).
 const BUFFER_MIN = 10;
 
+/** Trả về { min, known } — known:true khi có toạ độ CẢ HAI đầu (ước tính theo đường chim bay,
+ * tốc độ trung bình giả định); known:false khi thiếu toạ độ, min chỉ dùng nội bộ để lập lịch. */
 export function estimateTravelMin(a, b) {
   if (a && b && a.lat !== null && a.lng !== null && b.lat !== null && b.lng !== null) {
     const km = haversineKm(a.lat, a.lng, b.lat, b.lng);
-    return Math.max(10, Math.round((km / AVG_SPEED_KMH) * 60));
+    return { min: Math.max(10, Math.round((km / AVG_SPEED_KMH) * 60)), known: true };
   }
-  return DEFAULT_TRAVEL_MIN;
+  return { min: DEFAULT_TRAVEL_MIN, known: false };
 }
 
 function parseFirstRange(hoursText) {
@@ -36,7 +40,7 @@ function scoreDestination(dest, prefs) {
   let score = dest.rating || 0;
   if (prefs.seedIds.has(dest.id)) score += 3;
   const group = deriveCategoryVisual(dest.category).group;
-  const lively = group === 'Khu vui chơi' || group === 'Làng nghề & cộng đồng';
+  const lively = ['Khu vui chơi', 'Làng nghề & cộng đồng', 'Âm nhạc và biểu diễn', 'Ẩm thực'].includes(group);
   if (prefs.priority === 'nao-nhiet' && lively) score += 1.5;
   if (prefs.priority === 'yen-tinh' && !lively) score += 1.5;
   if (prefs.interests.size) {
@@ -64,6 +68,16 @@ export function findBookableExperience(state, dest, arriveDate, partySize) {
   return null;
 }
 
+/** True nếu chọn dest sẽ trùng lặp với một cụm/điểm-con đã có trong lịch (mục 8: SITE-04 là cụm
+ * điều phối, tránh tính cụm và các điểm con của nó là các lượt tham quan riêng biệt). */
+function isClusterDuplicate(dest, usedIds, usedDests) {
+  if (dest.partOfCluster && usedIds.has(dest.partOfCluster)) return true;
+  if (dest.listingType === 'cluster' && dest.clusterChildren) {
+    return dest.clusterChildren.some((childId) => usedIds.has(childId));
+  }
+  return usedDests.some((u) => (u.partOfCluster && u.partOfCluster === dest.id) || (dest.partOfCluster && dest.partOfCluster === u.id));
+}
+
 function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasMin }) {
   const state = getState();
   const stops = [];
@@ -72,13 +86,15 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
   let totalCost = 0;
   let prevDest = prefs.startPoint;
   const usedIds = new Set();
+  const usedDests = [];
 
   for (const dest of candidates) {
     if (stops.length >= maxStops) break;
     if (usedIds.has(dest.id)) continue;
+    if (isClusterDuplicate(dest, usedIds, usedDests)) continue;
 
-    const travelMin = estimateTravelMin(prevDest, dest);
-    const arriveMin = cursorMin + travelMin;
+    const travel = estimateTravelMin(prevDest, dest);
+    const arriveMin = cursorMin + travel.min;
     const dwell = (dest.suggestedDurationMin || 45) + dwellBiasMin;
     const departMin = arriveMin + dwell;
     if (departMin > budgetEndMin) continue;
@@ -88,25 +104,33 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
     if (!fitsOpeningHours(dest, arriveMin, departMin)) continue;
 
     const booking = findBookableExperience(state, dest, arriveDate, prefs.partySize);
+    const isUnconfirmedExperience = !booking && (dest.listingType === 'experience' || dest.listingType === 'multiStopExperience');
+    const notes = [];
+    if (dest.priceStatus === 'estimated') notes.push('Giá/giờ tại điểm này là ước lượng cho mockup.');
+    if (!travel.known) notes.push('Chưa đủ dữ liệu (thiếu toạ độ) để tối ưu thời gian di chuyển đến điểm này — thời gian hiển thị chỉ là ước tính tạm.');
+    if (isUnconfirmedExperience) notes.push('Đề xuất — cần xác nhận supplier trước khi có thể đặt/thanh toán.');
 
     stops.push({
       destinationId: dest.id,
       name: dest.name,
       category: dest.category,
+      listingType: dest.listingType || null,
       arriveMin,
       departMin,
       dwellMin: dwell,
-      travelMinFromPrev: travelMin,
+      travelMinFromPrev: travel.min,
       travelEstimated: true,
+      travelUnknown: !travel.known,
       experienceId: booking ? booking.exp.id : null,
       slotId: booking ? booking.slot.id : null,
       experienceTitle: booking ? booking.exp.title : null,
       experiencePrice: booking ? booking.exp.price : 0,
-      note: dest.priceStatus === 'estimated' ? 'Giá/giờ tại điểm này là ước lượng cho mockup.' : '',
+      note: notes.join(' '),
     });
     if (booking) totalCost += booking.exp.price * prefs.partySize;
 
     usedIds.add(dest.id);
+    usedDests.push(dest);
     cursorMin = departMin;
     prevDest = dest;
   }
@@ -168,7 +192,11 @@ export function suggestItineraries(prefs) {
   const cultureFirst = [...scored].sort((a, b) => {
     const ga = deriveCategoryVisual(a.category).group;
     const gb = deriveCategoryVisual(b.category).group;
-    const rank = (g) => (g === 'Tôn giáo' || g === 'Bảo tàng / Di tích' ? 0 : g === 'Làng nghề & cộng đồng' ? 1 : 2);
+    const rank = (g) => (
+      ['Tôn giáo', 'Bảo tàng / Di tích', 'Chùa Khmer', 'Bảo tàng', 'Địa điểm văn hóa'].includes(g) ? 0
+        : ['Làng nghề & cộng đồng', 'Thủ công', 'Ẩm thực', 'Âm nhạc và biểu diễn'].includes(g) ? 1
+          : 2
+    );
     return rank(ga) - rank(gb);
   });
   const opt2 = buildOption({
@@ -214,14 +242,15 @@ export function recalcTimeline(itinerary) {
 
   itinerary.stops.forEach((stop) => {
     const dest = state.destinations.find((d) => d.id === stop.destinationId);
-    const travelMin = estimateTravelMin(prevPoint, dest || null);
-    const arriveMin = cursorMin + travelMin;
+    const travel = estimateTravelMin(prevPoint, dest || null);
+    const arriveMin = cursorMin + travel.min;
     const dwell = stop.dwellMin ?? (dest && dest.suggestedDurationMin) ?? 45;
     stop.dwellMin = dwell;
     const departMin = arriveMin + dwell;
 
-    stop.travelMinFromPrev = travelMin;
+    stop.travelMinFromPrev = travel.min;
     stop.travelEstimated = true;
+    stop.travelUnknown = !travel.known;
     stop.arriveMin = arriveMin;
     stop.departMin = departMin;
 
@@ -241,7 +270,7 @@ export function recalcTimeline(itinerary) {
     }
     if (stop.experienceId) totalCost += (stop.experiencePrice || 0) * itinerary.partySize;
 
-    totalTravelMin += travelMin;
+    totalTravelMin += travel.min;
     cursorMin = departMin;
     prevPoint = dest || prevPoint;
   });

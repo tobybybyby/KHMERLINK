@@ -1,6 +1,8 @@
 # Bảng đối chiếu yêu cầu → màn hình/chức năng → trạng thái
 
 > Sản phẩm đã đổi tên thương hiệu thành **KhmerLink** (trước đây "Vĩnh Long Trail/Studio") — xem `PROGRESS.md` mục "Đổi thương hiệu & thiết kế lại giao diện". Bảng dưới đây giữ nguyên cách gọi theo từng phase gốc.
+>
+> **Từ 2026-09-10, phạm vi dữ liệu hiển thị đã thu gọn còn 7 listing pilot Khmer** (xem `PROGRESS.md` mục "PHASE — Thu gọn dữ liệu thành pilot 7 listing Khmer" và `DATA_ISSUES.md`) — các dòng bên dưới mô tả tính năng đối chiếu với bộ 37 địa danh minh hoạ gốc vẫn đúng về mặt CHỨC NĂNG (Khám phá, hồ sơ địa điểm, hành trình, Studio, Cổng quản lý/vận hành đều còn nguyên), chỉ khác PHẠM VI DỮ LIỆU đang hiển thị.
 
 Nguồn yêu cầu: `Prompt-Claude-Vinh-Long.md`. Trạng thái: **Hoạt động (demo)** = thao tác được thật với dữ liệu mẫu · **Mô phỏng** = có luồng nhưng kết quả giả lập rõ nhãn · **Giai đoạn sau** = chưa xây, có trong roadmap.
 

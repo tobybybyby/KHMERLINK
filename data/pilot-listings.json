@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10",
+  "sourceDocument": "data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx",
+  "sourceNote": "Nghiên cứu bàn giao 10/09/2026 — tách rõ dữ kiện đã xác minh, đề xuất sản phẩm và nội dung phải khảo sát thực địa. Không tự thêm số liệu/giá/giờ/trạng thái booking ngoài file nguồn.",
+  "totalListings": 7,
+  "experiencesNeedingPilot": 3,
+  "realSitesOrClusters": 4,
+  "listings": [
+    {
+      "id": "EXP-01",
+      "name": "Pound Your Own Cốm Dẹp",
+      "alternativeName": null,
+      "listingType": "experience",
+      "category": "Ẩm thực",
+      "status": "Ý tưởng sản phẩm — chưa có bằng chứng về lịch bán vé cố định",
+      "readiness": "Ý tưởng sản phẩm",
+      "bookingStatus": "notBookable",
+      "ctaKind": "interested",
+      "supplierRefs": ["sup-tran-tuan-viet", "sup-lang-com-dep-ba-so"],
+      "currentAddress": "Ấp Giồng Thành, xã Nhị Trường, tỉnh Vĩnh Long",
+      "formerAddress": "khu vực Trà Vinh cũ",
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "unavailable",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=L%C3%A0ng+c%E1%BB%91m+d%E1%BA%B9p+Ba+So+Nh%E1%BB%8B+Tr%C6%B0%E1%BB%9Dng+V%C4%A9nh+Long"
+      ],
+      "activities": "Khách thử các công đoạn có rủi ro thấp: rang/nổ lúa nếp đã sơ chế, giã theo nhịp, sàng và trộn cốm; nghe câu chuyện cốm dẹp trong lễ Ok Om Bok.",
+      "shortIntroduction": "Trải nghiệm ẩm thực cộng đồng gắn với nghề quết cốm dẹp truyền thống của người Khmer tại làng Ba So.",
+      "culturalStory": "Cốm dẹp là sản phẩm gắn mạnh với mùa lúa nếp non và lễ hội Ok Om Bok của đồng bào Khmer.",
+      "keyFacts": [
+        "Số hộ làm nghề thay đổi theo năm — các con số cũ không được dùng như năng lực hiện tại của làng nghề.",
+        "Đầu mối khảo sát phù hợp nhất: làng cốm dẹp Ba So; dấu vết nhà sản xuất hiện hành trên cổng nông sản là Hộ kinh doanh Trần Tuấn Việt (chưa xác minh đơn vị này có tiếp khách tại xưởng)."
+      ],
+      "visitorNotes": "Theo mùa; cần hỏi trước về nguyên liệu. Không cho khách vận hành lò/rang nóng nếu chưa có quy trình an toàn.",
+      "openingHours": { "value": "Không công bố — cần xây lịch hẹn", "status": "unavailable" },
+      "price": { "value": null, "status": "unavailable", "note": "Chưa đưa giá mockup vì dự án để budget ở giai đoạn sau." },
+      "representativeImage": "https://khpt.1cdn.vn/2017/10/26/www.khoahocphothong.com.vn-vnt_upload-file-10_2017-_dscn4677.jpg",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://khoahocphothong.vn/mua-quet-com-dep-o-tra-vinh-48961.html",
+          "sourceType": "Báo khoa học phổ thông",
+          "infoUsed": "Hình ảnh và quy trình mùa quết cốm dẹp ở Trà Vinh",
+          "dateOfSource": "2017",
+          "reliability": "Trung bình; dữ liệu nghề mang tính thời điểm",
+          "usageNote": "Không dùng số hộ/sản lượng như số hiện tại"
+        }
+      ],
+      "verificationChecklist": [
+        "Xác minh chủ thể tiếp khách",
+        "Công suất/ngày",
+        "Vệ sinh thực phẩm",
+        "Chỗ đậu xe",
+        "Nhà vệ sinh",
+        "Mùa hoạt động",
+        "Tỷ lệ doanh thu trả hộ dân"
+      ],
+      "relatedListingIds": [],
+      "conclusionNote": "Chỉ công khai sau khi supplier đồng ý và hoàn tất pilot."
+    },
+    {
+      "id": "EXP-02",
+      "name": "Music & Dance Experience",
+      "alternativeName": null,
+      "listingType": "multiStopExperience",
+      "category": "Âm nhạc và biểu diễn",
+      "status": "Thiết kế khả thi, nhưng chưa phải tour đang bán",
+      "readiness": "Chờ khảo sát",
+      "bookingStatus": "notBookable",
+      "ctaKind": "notify",
+      "supplierRefs": ["sup-lam-phen", "sup-lop-nhac-mahori", "sup-doan-anh-binh-minh"],
+      "currentAddress": "Dừng 1: ấp Ba Se A, xã Song Lộc. Dừng 2: khu vực đường Nguyễn Đáng, phường Trà Vinh, tỉnh Vĩnh Long",
+      "formerAddress": null,
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "multiStop",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=%E1%BA%A5p+Ba+Se+A+x%C3%A3+Song+L%E1%BB%99c+V%C4%A9nh+Long",
+        "https://www.google.com/maps/search/?api=1&query=%C4%90o%C3%A0n+Ngh%E1%BB%87+thu%E1%BA%ADt+Khmer+%C3%81nh+B%C3%ACnh+Minh+Tr%C3%A0+Vinh"
+      ],
+      "stops": [
+        {
+          "order": 1,
+          "label": "Dừng 1 (đề xuất)",
+          "place": "Xưởng NNƯT Lâm Phên",
+          "description": "Nhạc cụ/mão/mặt nạ, cách Ao Bà Om khoảng 2 km.",
+          "supplierRef": "sup-lam-phen"
+        },
+        {
+          "order": 2,
+          "label": "Dừng 2 (đề xuất)",
+          "place": "Đoàn Nghệ thuật Khmer Ánh Bình Minh (phần Rô-băm)",
+          "description": "Phương án sinh kế tốt hơn là đoàn cố vấn, nghệ sĩ/câu lạc bộ cộng đồng biểu diễn có trả phí.",
+          "supplierRef": "sup-doan-anh-binh-minh"
+        }
+      ],
+      "activities": "Nhận diện và thử nhạc cụ dưới hướng dẫn; nghe cấu tạo dàn ngũ âm; di chuyển sang điểm diễn; xem trích đoạn Rô-băm và giải thích nhân vật, mặt nạ, động tác.",
+      "shortIntroduction": "Gói trải nghiệm biểu diễn 2 điểm dừng — kết hợp xưởng nhạc cụ/mặt nạ Khmer và một trích đoạn múa Rô-băm.",
+      "culturalStory": "Rô-băm là di sản văn hóa phi vật thể quốc gia (công nhận năm 2018), kết hợp múa, hát, sân khấu, phục trang và mặt nạ; kịch bản thường dựa trên truyện dân gian và Ramayana/Riêm Kê.",
+      "keyFacts": [
+        "Rô-băm được công nhận di sản văn hóa phi vật thể quốc gia năm 2018.",
+        "Đây là sản phẩm 2 điểm dừng; chưa có bằng chứng đang bán như một tour cố định."
+      ],
+      "visitorNotes": "Không biến lớp học cộng đồng miễn phí thành điểm diễn nếu chưa có đồng thuận. Tôn trọng thời gian tập luyện và trả thù lao minh bạch.",
+      "openingHours": { "value": "Theo lịch hẹn của cả 2 đầu mối", "status": "unavailable" },
+      "price": { "value": null, "status": "unavailable" },
+      "representativeImage": "https://baovinhlong.com.vn/file/e7837c027f6ecd14017ffa4e5f2a0e34/092025/a1_20250928151611.jpg",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://baovinhlong.com.vn/nhip-song-dong-bang/202509/nhung-nguoi-tham-lang-bao-ton-van-hoa-khmer-qua-lop-day-nhac-cu-dan-toc-9b41f95/",
+          "sourceType": "Báo địa phương",
+          "infoUsed": "Lớp nhạc từ 07/2025; tối thứ Năm/Sáu; ~10 học viên; địa điểm khóm 20",
+          "dateOfSource": "28/09/2025",
+          "reliability": "Cao cho hoạt động bảo tồn; không phải listing du lịch",
+          "usageNote": "Không công khai pin nhà riêng"
+        },
+        {
+          "url": "https://en.nhandan.vn/robam-dance-a-unique-genre-of-khmer-traditional-theatre-post59655.html",
+          "sourceType": "Báo Nhân Dân",
+          "infoUsed": "Rô-băm được công nhận di sản quốc gia năm 2018; đặc trưng múa, hát, phục trang, mặt nạ; nội dung dựa truyện dân gian/Ramayana",
+          "dateOfSource": "18/04/2018",
+          "reliability": "Cao cho mô tả loại hình",
+          "usageNote": "Không suy ra lịch biểu diễn hiện hành"
+        }
+      ],
+      "verificationChecklist": [
+        "Xác nhận địa điểm biểu diễn",
+        "Repertoire Rô-băm",
+        "Số nghệ sĩ tối thiểu",
+        "Phí tập/diễn",
+        "Thời gian di chuyển",
+        "Quyền quay/chụp",
+        "Phương án mưa"
+      ],
+      "relatedListingIds": ["EXP-03"],
+      "conclusionNote": "Chỉ công khai sau khi supplier đồng ý và hoàn tất pilot."
+    },
+    {
+      "id": "EXP-03",
+      "name": "Make a Mini Khmer Mask",
+      "alternativeName": null,
+      "listingType": "experience",
+      "category": "Thủ công",
+      "status": "Ý tưởng sản phẩm có supplier phù hợp — chưa xác nhận bookable",
+      "readiness": "Chờ liên hệ supplier",
+      "bookingStatus": "notBookable",
+      "ctaKind": "preparing",
+      "supplierRefs": ["sup-lam-phen"],
+      "currentAddress": "Ấp Ba Se A, xã Song Lộc, tỉnh Vĩnh Long",
+      "formerAddress": "trước đây: xã Lương Hòa, huyện Châu Thành, Trà Vinh",
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "private",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=%E1%BA%A5p+Ba+Se+A+x%C3%A3+Song+L%E1%BB%99c+V%C4%A9nh+Long"
+      ],
+      "activities": "Quan sát mẫu mặt nạ; nghe giải thích vai khỉ/chằn và sân khấu; trang trí một phôi mini do nghệ nhân chuẩn bị; mang sản phẩm về.",
+      "shortIntroduction": "Workshop thủ công làm mặt nạ Khmer mini cùng Nghệ nhân ưu tú Lâm Phên.",
+      "culturalStory": "Ông Lâm Phên sinh năm 1951, chính thức làm nhạc cụ từ 1990, tham gia chế tác/phục chế hiện vật bảo tàng từ 1997 và đã truyền nghề cho hơn 200 người. Nghề làm mão, mặt nạ Khmer tại các địa bàn liên quan được đưa vào Danh mục di sản văn hóa phi vật thể quốc gia ngày 27/6/2025.",
+      "keyFacts": [
+        "NNƯT Lâm Phên: sinh năm 1951, làm nhạc cụ từ 1990, truyền nghề cho hơn 200 người.",
+        "Nghề làm mão, mặt nạ Khmer được công nhận di sản văn hóa phi vật thể quốc gia ngày 27/6/2025 (QĐ 2209/QĐ-BVHTTDL)."
+      ],
+      "visitorNotes": "Không sao chép đồ thiêng/đạo cụ nghi lễ thiếu ngữ cảnh. Dùng phôi, sơn và keo an toàn; phải xin phép trước khi công khai địa chỉ nhà.",
+      "openingHours": { "value": "Chỉ theo lịch hẹn", "status": "unavailable" },
+      "price": { "value": null, "status": "unavailable" },
+      "representativeImage": "https://vstatic.vietnam.vn/vietnam/resource/IMAGE/2025/11/04/1762218870531_1762218803.webp",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://baovinhlong.com.vn/phong-su-ky-su/202507/nghe-nhan-lam-phen-miet-mai-giu-gin-ban-sac-dan-toc-khmer-24208a3/",
+          "sourceType": "Báo địa phương",
+          "infoUsed": "Lâm Phên: địa chỉ mới Song Lộc; cách Ao Bà Om ~2 km; nghề từ 1990; >200 người được truyền nghề; quyết định di sản 2209/QĐ-BVHTTDL ngày 27/6/2025",
+          "dateOfSource": "19/07/2025",
+          "reliability": "Cao cho tiểu sử/nghề; không chứng minh đang bán workshop",
+          "usageNote": "Ưu tiên xin ảnh gốc/tự chụp"
+        }
+      ],
+      "verificationChecklist": [
+        "Xin đồng thuận của nghệ nhân",
+        "Thiết kế phôi mini",
+        "Test thời lượng",
+        "Số khách",
+        "Thông gió",
+        "Hóa chất",
+        "Bản quyền mẫu",
+        "Đóng gói",
+        "Chia sẻ doanh thu"
+      ],
+      "relatedListingIds": ["EXP-02"],
+      "conclusionNote": "Chỉ công khai sau khi supplier đồng ý và hoàn tất pilot."
+    },
+    {
+      "id": "SITE-04",
+      "name": "Làng Văn hóa – Du lịch dân tộc Khmer",
+      "alternativeName": null,
+      "listingType": "cluster",
+      "category": "Địa điểm văn hóa",
+      "status": "Có quy hoạch/hình thành; không nên mô tả như một công trình duy nhất đã hoàn thiện",
+      "readiness": "Được công khai",
+      "bookingStatus": "visitFreely",
+      "ctaKind": null,
+      "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
+      "currentAddress": "Phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "formerAddress": "khu vực Trà Vinh cũ",
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "cluster",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=L%C3%A0ng+V%C4%83n+h%C3%B3a+Du+l%E1%BB%8Bch+d%C3%A2n+t%E1%BB%99c+Khmer+Nguy%E1%BB%87t+H%C3%B3a+V%C4%A9nh+Long",
+        "https://www.google.com/maps/search/?api=1&query=Ao+B%C3%A0+Om+Tr%C3%A0+Vinh"
+      ],
+      "activities": "Đi bộ cảnh quan Ao Bà Om; tham quan Chùa Âng và bảo tàng; kết nối hoạt động cộng đồng theo lịch sự kiện.",
+      "shortIntroduction": "Một không gian phát triển du lịch văn hóa Khmer ở phường Nguyệt Hóa, lấy cụm Ao Bà Om – Chùa Âng – Bảo tàng làm hạt nhân.",
+      "culturalStory": "Ao Bà Om — điểm neo dễ nhận diện nhất trên bản đồ của cụm — rộng hơn 300 ha; ao trung tâm 15 ha, sâu khoảng 2 m; có khoảng 500 cây sao/dầu cổ thụ. Ao được xếp hạng di tích quốc gia năm 1994.",
+      "keyFacts": [
+        "Ao Bà Om: hơn 300 ha, ao trung tâm 15 ha sâu khoảng 2 m, khoảng 500 cây sao/dầu cổ thụ.",
+        "Ao Bà Om được xếp hạng di tích quốc gia năm 1994; cải tạo hơn 7 tỷ đồng sau đợt hạn 2016.",
+        "Ao Bà Om là điểm neo, không tự tạo thành một listing riêng trong phạm vi pilot này."
+      ],
+      "visitorNotes": "Thông tin website phải chỉ rõ phần nào đang hoạt động. Không dùng từ \"đã hoàn thiện toàn bộ\" nếu chưa có nghiệm thu/vận hành thống nhất.",
+      "openingHours": { "value": "Không có giờ chung cho toàn khu", "status": "unavailable" },
+      "price": { "value": null, "status": "unavailable", "note": "Không có vé chung được xác minh." },
+      "representativeImage": "https://ik.imagekit.io/tvlk/blog/2022/02/dia-diem-du-lich-tra-vinh-2.jpg?tr=dpr-2%2Cw-675",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://vnexpress.net/loat-co-thu-khoe-re-khung-o-danh-thang-ao-ba-om-4819469.html",
+          "sourceType": "VnExpress",
+          "infoUsed": "Ao Bà Om >300 ha; ao 15 ha, sâu ~2 m; ~500 cây cổ thụ; di tích quốc gia 1994; cải tạo >7 tỷ đồng sau hạn 2016",
+          "dateOfSource": "23/11/2024",
+          "reliability": "Cao cho số liệu Ao Bà Om; ảnh gợi ý từ nguồn thứ ba",
+          "usageNote": "Nên tự chụp ảnh toàn cảnh"
+        }
+      ],
+      "verificationChecklist": [
+        "Lấy ranh giới GIS chính thức",
+        "Danh sách hạng mục đã vận hành",
+        "Đơn vị quản lý",
+        "Bãi xe",
+        "Nhà vệ sinh",
+        "Lịch lễ hội",
+        "Cơ chế phân luồng khi đông"
+      ],
+      "clusterChildren": ["SITE-05", "SITE-06"],
+      "relatedListingIds": ["SITE-05", "SITE-06"],
+      "conclusionNote": "Có thể giới thiệu như một khu/cụm đang phát triển; không mô tả là một công trình duy nhất đã hoàn thiện."
+    },
+    {
+      "id": "SITE-05",
+      "name": "Chùa Âng",
+      "alternativeName": "Wat Angkor Raig Borei",
+      "listingType": "site",
+      "category": "Chùa Khmer",
+      "status": "Điểm tham quan đã xác minh",
+      "readiness": "Được công khai",
+      "bookingStatus": "visitFreely",
+      "ctaKind": null,
+      "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
+      "currentAddress": "Phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "formerAddress": "địa chỉ cũ: phường 8, TP Trà Vinh",
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "sharedCluster",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a+%C3%82ng+Tr%C3%A0+Vinh"
+      ],
+      "activities": "Tham quan kiến trúc, bích họa và cảnh quan; tìm hiểu Phật giáo Nam tông Khmer và nghi thức ứng xử trong chùa.",
+      "shortIntroduction": "Chùa Khmer cổ trong quần thể Ao Bà Om, di tích kiến trúc nghệ thuật cấp quốc gia.",
+      "culturalStory": "Tư liệu báo chí ghi chùa có lịch sử từ năm 990; được xếp hạng di tích cấp quốc gia năm 1994. Đây là niên đại theo hồ sơ/giới thiệu phổ biến, không nên diễn giải là toàn bộ kiến trúc hiện còn nguyên từ thế kỷ X.",
+      "keyFacts": [
+        "Khuôn viên khoảng 4 ha.",
+        "Chánh điện có hệ thống 18 cột gỗ, trong đó 12 cột bên trong được trang trí hình rồng và sơn son thếp vàng.",
+        "Niên đại giới thiệu phổ biến: năm 990 (theo tư liệu báo chí — không phải toàn bộ kiến trúc còn nguyên từ thời điểm này).",
+        "Xếp hạng di tích cấp quốc gia năm 1994."
+      ],
+      "visitorNotes": "Trang phục kín đáo; giữ yên lặng; không thương mại hóa nghi lễ; xin phép trước khi chụp sư và không chạm hiện vật/thờ tự.",
+      "openingHours": { "value": "Chưa tìm thấy lịch mở cửa chính thức ổn định — nên xác nhận với ban quản trị", "status": "needsFieldVerification" },
+      "price": { "value": null, "status": "unavailable", "note": "Không có giá vé chính thức được xác minh." },
+      "representativeImage": "https://cdn.baophapluat.vn/w3840/uploaded/vuhoangviet/2023_11_06/chuaang-1-2919.jpg",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://baophapluat.vn/kham-pha-chua-ang-ngoi-chua-tuyet-dep-hon-1000-nam-tuoi-o-tra-vinh-post494360.html",
+          "sourceType": "Báo Pháp luật Việt Nam",
+          "infoUsed": "Chùa Âng: niên đại giới thiệu 990; khuôn viên ~4 ha; 18 cột gỗ; di tích quốc gia 1994",
+          "dateOfSource": "06/11/2023",
+          "reliability": "Khá; bài tổng hợp, nên đối chiếu hồ sơ di tích khi xuất bản",
+          "usageNote": "Không viết toàn bộ kiến trúc còn nguyên từ năm 990"
+        }
+      ],
+      "verificationChecklist": [
+        "Xác nhận giờ đón khách",
+        "Khu vực không được chụp",
+        "Đầu mối thuyết minh",
+        "Lối tiếp cận người cao tuổi",
+        "Ngày lễ hạn chế tour"
+      ],
+      "partOfCluster": "SITE-04",
+      "relatedListingIds": ["SITE-04", "SITE-06"],
+      "conclusionNote": "Có thể tạo trang địa điểm; vẫn xác minh giờ/giá và quy định đón khách."
+    },
+    {
+      "id": "SITE-06",
+      "name": "Bảo tàng Văn hóa dân tộc Khmer",
+      "alternativeName": null,
+      "listingType": "site",
+      "category": "Bảo tàng",
+      "status": "Điểm tham quan đã xác minh; giờ/giá hiện hành cần gọi lại",
+      "readiness": "Được công khai",
+      "bookingStatus": "visitFreely",
+      "ctaKind": null,
+      "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
+      "currentAddress": "Gần Ao Bà Om và Chùa Âng, phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "formerAddress": "địa chỉ cũ: phường 8, TP Trà Vinh",
+      "coordinates": { "lat": null, "lng": null },
+      "coordinateStatus": "sharedCluster",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o+t%C3%A0ng+V%C4%83n+h%C3%B3a+D%C3%A2n+t%E1%BB%99c+Khmer+Tr%C3%A0+Vinh"
+      ],
+      "activities": "Xem nhạc cụ, mặt nạ, mô hình sân khấu, nông cụ, kiến trúc và đồ dùng; phù hợp làm điểm nền trước workshop hoặc biểu diễn.",
+      "shortIntroduction": "Bảo tàng chuyên đề về văn hóa dân tộc Khmer, gần Ao Bà Om và Chùa Âng.",
+      "culturalStory": "Có hiện vật hơn 100 năm tuổi và tư liệu khảo cổ thế kỷ VII–VIII. Các nguồn lịch sử khác nhau ghi mốc xây dựng/khánh thành/vận hành khác nhau; cần dùng đúng ngữ cảnh từng mốc.",
+      "keyFacts": [
+        "Bảo tàng 2 tầng, diện tích sử dụng hơn 1.700 m².",
+        "Hơn 800 hiện vật, hình ảnh và tư liệu trưng bày chủ yếu trong 4 phòng lớn ở tầng 2.",
+        "4 nhóm trưng bày: tâm linh, vật chất/làng nghề, tinh thần và nghệ thuật trình diễn."
+      ],
+      "visitorNotes": "Không sờ hiện vật; kiểm tra quy định chụp ảnh; bố trí phiên dịch/ngôn ngữ thuyết minh nếu có đoàn quốc tế.",
+      "openingHours": { "value": "Chưa xác minh lịch hiện hành từ nguồn quản lý chính thức", "status": "needsFieldVerification" },
+      "price": { "value": null, "status": "needsFieldVerification", "note": "Chưa xác minh giá vé hiện hành." },
+      "representativeImage": "https://static-images.vnncdn.net/files/publish/2023/10/18/w-bao-tang-khmer-85-1-666.jpg?s=uaMu4ka-8dXIJPnl-jm2HQ&width=1280",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://vietnamnet.vn/800-hien-vat-tu-lieu-co-truyen-cua-dong-bao-khmer-o-tra-vinh-2203450.html",
+          "sourceType": "VietNamNet",
+          "infoUsed": "Bảo tàng 2 tầng, >1.700 m², >800 hiện vật/tư liệu, 4 phòng trưng bày chính",
+          "dateOfSource": "18/10/2023",
+          "reliability": "Cao cho hiện trạng trưng bày thời điểm bài viết",
+          "usageNote": "Giờ/giá phải hỏi bảo tàng"
+        }
+      ],
+      "verificationChecklist": [
+        "Gọi xác nhận giờ/ngày nghỉ",
+        "Giá",
+        "Thuyết minh viên",
+        "Nhóm tối đa",
+        "Điều kiện ảnh/video",
+        "Lối xe lăn",
+        "Tình trạng từng phòng"
+      ],
+      "partOfCluster": "SITE-04",
+      "relatedListingIds": ["SITE-04", "SITE-05"],
+      "conclusionNote": "Có thể tạo trang địa điểm; vẫn xác minh giờ/giá và quy định đón khách."
+    },
+    {
+      "id": "SITE-07",
+      "name": "Chùa Lò Gạch",
+      "alternativeName": "Padumavansa Kompong Thmo",
+      "listingType": "site",
+      "category": "Chùa Khmer",
+      "status": "Điểm tham quan đã xác minh; phải tách rõ hai lớp di tích",
+      "readiness": "Được công khai",
+      "bookingStatus": "visitFreely",
+      "ctaKind": null,
+      "supplierRefs": ["sup-ban-quan-tri-lo-gach"],
+      "currentAddress": "Ấp Ba Se A, xã Song Lộc, tỉnh Vĩnh Long",
+      "formerAddress": "địa chỉ cũ: xã Lương Hòa, huyện Châu Thành, Trà Vinh",
+      "coordinates": { "lat": 9.9175, "lng": 106.295833 },
+      "coordinateStatus": "reference",
+      "mapLinks": [
+        "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a+L%C3%B2+G%E1%BA%A1ch+Kompong+Thmo+Tr%C3%A0+Vinh"
+      ],
+      "activities": "Tham quan chùa, tìm hiểu đời sống cộng đồng và câu chuyện khảo cổ Óc Eo; có thể nối với xưởng Lâm Phên trong cùng khu vực.",
+      "shortIntroduction": "Chùa Khmer tại Ba Se A, cạnh cụm di tích khảo cổ Bờ Lũy — hai lớp di tích cần được giới thiệu tách bạch.",
+      "culturalStory": "Khai quật công bố năm 2017 thực hiện 3 hố thám sát và 7 hố khai quật, tổng 778 m²; phát hiện dấu tích 6 kiến trúc gạch lớn trong phạm vi khoảng 4.500–5.000 m², niên đại thế kỷ VIII–IX. Di tích khảo cổ Bờ Lũy được công nhận cấp quốc gia năm 2018. Chùa Lò Gạch được xếp hạng di tích lịch sử cấp tỉnh ngày 21/11/2022 — đây là hai danh hiệu/đối tượng khác nhau, không được gộp thành một.",
+      "keyFacts": [
+        "Khai quật 2017: 3 hố thám sát + 7 hố khai quật, tổng 778 m².",
+        "Dấu tích 6 kiến trúc gạch lớn trong phạm vi khoảng 4.500–5.000 m², niên đại thế kỷ VIII–IX.",
+        "Di tích khảo cổ Bờ Lũy: công nhận cấp quốc gia năm 2018.",
+        "Chùa Lò Gạch: xếp hạng di tích lịch sử cấp tỉnh ngày 21/11/2022 (danh hiệu riêng, khác với Bờ Lũy)."
+      ],
+      "visitorNotes": "Không đi vào khu khai quật/bảo vệ nếu chưa được phép; không nhặt gạch/hiện vật; tuân thủ quy tắc chùa và xin phép cộng đồng khi tổ chức hoạt động.",
+      "openingHours": { "value": "Chưa có giờ du lịch chính thức", "status": "unavailable" },
+      "price": { "value": null, "status": "unavailable", "note": "Không có giá vé được xác minh." },
+      "representativeImage": "https://images.baodantoc.vn/uploads/2021/Th%C3%A1ng%201/Ng%C3%A0y_15/T%C3%B4%20Ph%E1%BB%A5c%20Hung/IMG_1945.JPG",
+      "images": [],
+      "informationSources": [
+        {
+          "url": "https://baovinhlong.com.vn/nhip-song-dong-bang/201703/cong-bo-ket-qua-khao-co-hoc-khu-di-tich-chua-lo-gach-o-tra-vinh-2794581/",
+          "sourceType": "Báo Vĩnh Long",
+          "infoUsed": "Khai quật 3 hố thám sát + 7 hố khai quật, tổng 778 m²; 6 kiến trúc lớn; 4.500–5.000 m²; thế kỷ VIII–IX",
+          "dateOfSource": "03/2017",
+          "reliability": "Cao cho kết quả khai quật công bố",
+          "usageNote": "Tách khu khảo cổ khỏi chùa"
+        },
+        {
+          "url": "https://nhandan.vn/cong-nhan-bo-luy-la-di-tich-khao-co-cap-quoc-gia-post321520.html",
+          "sourceType": "Báo Nhân Dân",
+          "infoUsed": "Bờ Lũy được công nhận di tích khảo cổ cấp quốc gia năm 2018",
+          "dateOfSource": "16/04/2018",
+          "reliability": "Cao",
+          "usageNote": "Không gán danh hiệu này cho toàn bộ chùa"
+        },
+        {
+          "url": "https://www.vietnam.vn/tra-vinh-di-tich-bo-luy-chua-lo-gach",
+          "sourceType": "Cổng tổng hợp Vietnam.vn",
+          "infoUsed": "Tọa độ tham chiếu 9°55′03″N, 106°17′45″E",
+          "dateOfSource": "04/01/2025",
+          "reliability": "Trung bình; dùng làm pin tham chiếu, không phải đo đạc ranh giới",
+          "usageNote": "Tọa độ thập phân 9.917500, 106.295833"
+        }
+      ],
+      "verificationChecklist": [
+        "Xác minh ranh giới hai di tích",
+        "Lộ trình khách được đi",
+        "Người thuyết minh",
+        "Biển chỉ dẫn",
+        "Giờ chùa",
+        "Lễ chính",
+        "Khả năng đón xe/nhóm lớn"
+      ],
+      "relatedListingIds": ["EXP-03"],
+      "conclusionNote": "Có thể tạo trang địa điểm; vẫn xác minh giờ/giá và quy định đón khách."
+    }
+  ],
+  "addressSystemNote": {
+    "text": "Địa chỉ dùng hệ thống hành chính sau sắp xếp 2025 (phường Nguyệt Hóa, phường Trà Vinh, xã Song Lộc, xã Nhị Trường); địa chỉ cũ được giữ trong ngoặc để đối chiếu nguồn.",
+    "source": "https://xaydungchinhsach.chinhphu.vn/nghi-quyet-so-1687-nq-ubtvqh15-sap-xep-cac-dvhc-cap-xa-cua-tinh-vinh-long-nam-2025-119250617170524623.htm",
+    "dateOfSource": "16/06/2025"
+  }
+}

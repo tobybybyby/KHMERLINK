@@ -1,7 +1,7 @@
 import { getState, getItinerary, saveItinerary, addPassportStamp, setActiveItinerary, addPoints } from '../storage.js';
 import {
   escapeHtml, formatCurrency, formatDurationMin, combineDateTime,
-  categoryEmoji, deriveCategoryVisual, destinationImageSrc, getSimulatedCrowdLevel,
+  categoryEmoji, deriveCategoryVisual, destinationImageSrc, getSimulatedCrowdLevel, ratingDisplay,
   qs, qsa,
 } from '../utils.js';
 import { recalcTimeline } from '../services/aiService.js';
@@ -68,8 +68,12 @@ function bookingBadgeForStop(state, stop) {
 function stopCardHtml(state, itinerary, stop, index, mode) {
   const dest = state.destinations.find((d) => d.id === stop.destinationId);
   const crowd = getSimulatedCrowdLevel(stop.destinationId);
-  const isFree = !stop.experienceId;
+  const isProposedExperience = !stop.experienceId && (stop.listingType === 'experience' || stop.listingType === 'multiStopExperience');
+  const isFree = !stop.experienceId && !isProposedExperience;
   const current = mode.currentIndex === index;
+  const travelText = stop.travelUnknown
+    ? 'chưa đủ dữ liệu để tối ưu tuyến đường (ước tính tạm)'
+    : `${stop.travelMinFromPrev} phút di chuyển từ điểm trước (ước tính)`;
   return `
     <div class="itin-stop ${current ? 'itin-stop--current' : ''}" data-index="${index}">
       <div class="itin-stop__order">${index + 1}</div>
@@ -79,9 +83,11 @@ function stopCardHtml(state, itinerary, stop, index, mode) {
           <strong>${escapeHtml(stop.name)}</strong>
         </div>
         <div class="text-sm text-muted">${categoryEmoji(stop.category)} ${escapeHtml(stop.category)} · ⏱️ ${minToClock(stop.arriveMin)}–${minToClock(stop.departMin)}</div>
-        <div class="text-sm text-faint">🚗 ${stop.travelMinFromPrev} phút di chuyển từ điểm trước (ước tính)</div>
+        <div class="text-sm text-faint">🚗 ${travelText}</div>
         <div class="badge-row" style="margin-top:4px;">
-          ${isFree ? '<span class="badge badge-free">Miễn phí / tự do</span>' : `<span class="badge badge-type">${escapeHtml(stop.experienceTitle)} · ${formatCurrency(stop.experiencePrice)}</span>`}
+          ${isProposedExperience ? '<span class="badge badge-new">Đề xuất — cần xác nhận</span>' : ''}
+          ${isFree ? '<span class="badge badge-free">Miễn phí / tự do</span>' : ''}
+          ${stop.experienceId ? `<span class="badge badge-type">${escapeHtml(stop.experienceTitle)} · ${formatCurrency(stop.experiencePrice)}</span>` : ''}
           ${bookingBadgeForStop(state, stop)}
           <span class="badge" style="background:${crowd.color}22;color:${crowd.color};">● ${escapeHtml(crowd.label)} <span class="text-faint">(mô phỏng)</span></span>
         </div>
@@ -184,7 +190,7 @@ function openAddStopModal(container, itinerary, replaceIndex = null) {
             <img class="place-card__img" src="${destinationImageSrc(d)}" alt="" style="width:56px;height:56px;" />
             <span class="place-card__body">
               <span class="place-card__title">${escapeHtml(d.name)}</span>
-              <span class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ⭐ ${d.rating.toFixed(1)}</span>
+              <span class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ${ratingDisplay(d.rating)}</span>
             </span>
           </button>
         `).join('') || renderEmptyState({ icon: '🔍', title: 'Không tìm thấy', message: 'Thử từ khoá khác.' });
@@ -255,10 +261,12 @@ function applyAddOrReplace(container, itinerary, destinationId, replaceIndex) {
     destinationId: dest.id,
     name: dest.name,
     category: dest.category,
+    listingType: dest.listingType || null,
     arriveMin: 0,
     departMin: 0,
     travelMinFromPrev: 0,
     travelEstimated: true,
+    travelUnknown: false,
     experienceId: null,
     slotId: null,
     experienceTitle: null,

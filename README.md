@@ -6,9 +6,33 @@ Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thá
 
 > Đây là bản demo. Dữ liệu lưu trong `localStorage` của trình duyệt bạn đang dùng — không đồng bộ giữa nhiều người hay nhiều thiết bị. AI, thanh toán, thông báo, bản đồ mật độ, dự báo... đều là mô phỏng, gắn nhãn rõ trong giao diện.
 
+> **Phạm vi hiện tại: pilot 7 listing văn hóa Khmer.** Kể từ 2026-09-10, giao diện chỉ hiển thị 7 listing thật (3 trải nghiệm đề xuất + 4 điểm/cụm tham quan) từ `data/pilot-listings.json`, thay cho bộ 37 địa danh minh hoạ trước đây (đã archive ở `data/archive/`). Xem mục [Pilot 7 listing Khmer](#pilot-7-listing-khmer) bên dưới và `DATA_ISSUES.md` để biết chi tiết.
+
 ## Trạng thái dự án
 
-Đã hoàn thành toàn bộ 6 phase tính năng (nền tảng, dữ liệu địa danh, cá nhân hóa/booking/hậu chuyến đi, Studio, Cổng dữ liệu quản lý + Cổng vận hành) và đang ở phase cuối — chuẩn bị deploy. Xem `PROGRESS.md` (nhật ký chi tiết từng phase, các lỗi đã phát hiện và sửa khi kiểm thử) và `REQUIREMENTS_MATRIX.md` (đối chiếu từng yêu cầu spec → màn hình → trạng thái). Tóm tắt đối chiếu nhanh ở mục [Đối chiếu specification](#đối-chiếu-specification) bên dưới.
+Đã hoàn thành toàn bộ 6 phase tính năng nền tảng (nền tảng, dữ liệu địa danh, cá nhân hóa/booking/hậu chuyến đi, Studio, Cổng dữ liệu quản lý + Cổng vận hành) trên bộ 37 địa danh minh hoạ ban đầu, sau đó thu gọn phạm vi dữ liệu về 7 listing pilot Khmer thật (xem mục riêng bên dưới). Xem `PROGRESS.md` (nhật ký chi tiết từng phase, các lỗi đã phát hiện và sửa khi kiểm thử) và `REQUIREMENTS_MATRIX.md` (đối chiếu từng yêu cầu spec → màn hình → trạng thái). Tóm tắt đối chiếu nhanh ở mục [Đối chiếu specification](#đối-chiếu-specification) bên dưới.
+
+## Pilot 7 listing Khmer
+
+Nguồn dữ liệu chính: `data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx` (nghiên cứu bàn giao 10/09/2026). Đã chuẩn hoá thành `data/pilot-listings.json` (công khai) và `data/pilot-suppliers.json` (chỉ nội bộ — xem `#/ops/pilot` trong Cổng vận hành).
+
+7 listing, phân theo bản chất (`listingType`) — **không coi cả 7 là 7 địa điểm độc lập**:
+
+| ID | Tên | Loại | Ghi chú |
+|---|---|---|---|
+| EXP-01 | Pound Your Own Cốm Dẹp | `experience` | Ý tưởng sản phẩm, chưa bookable |
+| EXP-02 | Music & Dance Experience | `multiStopExperience` | 2 điểm dừng đề xuất, chưa phải tour đang bán |
+| EXP-03 | Make a Mini Khmer Mask | `experience` | Có supplier phù hợp (NNƯT Lâm Phên), chưa xác nhận bookable |
+| SITE-04 | Làng Văn hóa – Du lịch dân tộc Khmer | `cluster` | Cụm điều phối, không phải 1 công trình đã hoàn thiện |
+| SITE-05 | Chùa Âng | `site` | Thuộc cụm SITE-04, đã xác minh |
+| SITE-06 | Bảo tàng Văn hóa dân tộc Khmer | `site` | Thuộc cụm SITE-04, đã xác minh |
+| SITE-07 | Chùa Lò Gạch | `site` | Tách biệt chùa (di tích tỉnh) và khu khảo cổ Bờ Lũy (di tích quốc gia) |
+
+Nguyên tắc đã áp dụng xuyên suốt (chi tiết ở `DATA_ISSUES.md` mục "Pilot 7 listing Khmer"):
+- Không hiển thị EXP-01/02/03 là "đang mở bán"/"đã xác nhận" — không có `experience`/host nào được seed cho các listing này, nên không tồn tại luồng đặt chỗ/thanh toán có thể vô tình kích hoạt.
+- Chỉ 1/7 listing (SITE-07) có toạ độ công khai trên bản đồ; 6 listing còn lại chỉ có nút "Mở trên Google Maps" — không đặt marker giả.
+- Giá/giờ chưa xác minh hiển thị "Đang xác minh"/"Vui lòng kiểm tra trước khi đến", không suy diễn số liệu.
+- Thông tin nội bộ (supplier, checklist xác minh thực địa, rủi ro vận hành, nguồn) chỉ hiển thị ở Cổng vận hành → tab "Pilot Khmer" (`#/ops/pilot`), không công khai cho khách.
 
 ## Đổi thương hiệu & thiết kế lại giao diện
 

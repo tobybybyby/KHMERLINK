@@ -465,3 +465,51 @@ Theo yêu cầu riêng kèm mockup chi tiết + ảnh nền Chùa Âng đã xử
 - Không có lỗi console; `href` của 2 thẻ lựa chọn và link "Cổng quản lý" xác nhận giữ nguyên (`#/trail/explore`, `#/studio`, `#/gateway`) — bấm thử điều hướng đúng, không lỗi.
 - Kiểm tra riêng trang Cổng quản lý (`#/gateway`) — không bị ảnh hưởng, vẫn giữ giao diện gradient phẳng cũ.
 - Chạy server local (`npx serve . -l 5500`) để xem trực tiếp qua trình duyệt trong lúc làm — không cần bước build (đúng kiến trúc site tĩnh sẵn có).
+
+## PHASE — Thu gọn dữ liệu thành pilot 7 listing Khmer — 2026-09-10
+
+Theo yêu cầu riêng kèm file `data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx` (4 sheet: Tổng quan/Hồ sơ website/Supplier & khảo sát/Nguồn & hình ảnh): thay toàn bộ phạm vi dữ liệu du lịch hiện tại (37 địa danh minh hoạ) bằng đúng 7 listing pilot thật, phân biệt rõ bản chất từng listing (`experience`/`site`/`cluster`/`multiStopExperience`), không hiển thị listing chưa bookable là "đang mở bán".
+
+### Dữ liệu & kiến trúc
+- `data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx` (mới) — bản sao file nguồn, đọc đầy đủ cả 4 sheet trước khi chuẩn hoá.
+- `data/pilot-listings.json` (mới) — 7 listing đầy đủ schema yêu cầu (id/name/alternativeName/listingType/category/status/readiness/supplier.../coordinates/coordinateStatus/mapLinks/activities/shortIntroduction/culturalStory/keyFacts/visitorNotes/openingHours/price/bookingStatus/representativeImage/informationSources/verificationChecklist), cộng quan hệ `clusterChildren`/`partOfCluster`/`relatedListingIds`/`stops`. Chỉ 1/7 (SITE-07) có toạ độ thật; các trường giá/giờ chưa xác minh giữ nguyên trạng thái `unavailable`/`needsFieldVerification`, không suy diễn số liệu.
+- `data/pilot-suppliers.json` (mới) — 7 hồ sơ supplier/đầu mối từ sheet "Supplier & khảo sát", chỉ dùng nội bộ (không fetch ở trang công khai).
+- `data/archive/destinations-vinhlong-37.json` (di chuyển từ `data/destinations.json`) + `data/archive/legacy-seed-vinhlong.js.txt` (bản sao `js/data.js` cũ — 5 hộ/5 trải nghiệm/9 đánh giá/1 sự kiện/3 gợi ý ghép cặp gắn với 37 địa danh cũ) — archive đầy đủ, không xoá, có thể khôi phục khi cần mở lại phạm vi.
+- `js/services/destinationsService.js` — viết lại để nạp từ `data/pilot-listings.json` thay vì `data/destinations.json`; giữ nguyên tên hàm `loadDestinations()`/export `DestinationsService` (chỉ nơi duy nhất import là `storage.js`) nên **không cần sửa storage.js hay bất kỳ nơi nào khác đang gọi hàm này** — đổi nguồn dữ liệu mà không phá vỡ luồng nạp đã có.
+- `js/services/pilotSuppliersService.js` (mới) — nạp `data/pilot-suppliers.json`, chỉ dùng ở trang nội bộ `#/ops/pilot`.
+- `js/data.js` — viết lại: `HOSTS`/`buildExperiences()`/`buildEvents()`/`buildReviews()` đưa về rỗng (không listing pilot nào có supplier/host đã xác nhận, không có đánh giá thật cho 7 listing — không tự thêm số liệu ngoài file); `PAIR_SUGGESTIONS` xây lại theo quan hệ thật giữa các listing pilot (chung supplier Lâm Phên: EXP-02+EXP-03; cụm Nguyệt Hóa: SITE-04+05+06).
+- `js/utils.js` — thêm 6 rule đầu (anchor `^...$`) vào `CATEGORY_GROUPS` khớp chính xác 6 category pilot (Chùa Khmer/Bảo tàng/Thủ công/Ẩm thực/Âm nhạc và biểu diễn/Địa điểm văn hóa), đặt trước các rule cũ để tránh bị dò nhầm theo từ khoá rộng (vd "Chùa Khmer" chứa "chùa" lẽ ra bị rule cũ bắt thành nhóm "Tôn giáo"). Thêm `ratingDisplay()` (an toàn khi rating null — 7 listing pilot chưa có đánh giá thật), `listingTypeBadge()`, `ctaLabel()`.
+
+### Giao diện du khách (Trail)
+- `js/trail/explore.js` — tiêu đề "Mạng lưới trải nghiệm văn hóa Khmer (pilot)" + dòng giới thiệu; thống kê hiển thị đúng "7 điểm và trải nghiệm pilot" (hoặc "X/7 ... theo bộ lọc"); bỏ các bộ lọc không còn dữ liệu hỗ trợ (đánh giá, thời lượng, còn chỗ trải nghiệm trả phí, "chỉ mới") — chỉ giữ chip danh mục (tự sinh từ dữ liệu, không hiện danh mục rỗng) và khoảng cách; card thêm nhãn loại hình ("Điểm tham quan"/"Trải nghiệm đề xuất"/"Cụm điểm đến") + nhãn phụ ("Đang xác minh lịch" khi giờ chưa xác minh); tìm kiếm khớp cả `altName` (tên thay thế, vd "Wat Angkor Raig Borei").
+- `js/trail/placeDetail.js` — viết lại theo đúng thứ tự ưu tiên yêu cầu (tên/loại hình → trạng thái sẵn sàng → giới thiệu ngắn → hoạt động → câu chuyện/số liệu → lưu ý → giờ/phí → bản đồ → liên quan); thêm khối riêng cho cụm (`clusterChildrenHtml` — liệt kê điểm con, nhấn mạnh "chưa phải công trình hoàn thiện") và đa điểm dừng (`multiStopHtml` — liệt kê từng điểm, không gộp pin); CTA theo `bookingStatus`/`ctaKind` ("Quan tâm trải nghiệm"/"Đăng ký nhận thông báo"/"Đang chuẩn bị pilot", không có nút "Đặt trải nghiệm" nào hiển thị vì chưa listing nào bookable); ảnh đại diện dùng URL thật có `onerror` tự chuyển về placeholder khi lỗi; mục "Nguồn tham khảo" gọn ở cuối trang; bỏ hẳn phần "Hoạt động trả phí"/booking modal (không còn `state.experiences` nào gắn với listing pilot).
+- `js/services/mapService.js`, `js/trail/explore.js` (renderMarkers) — không sửa, đã sẵn logic chỉ tạo marker khi có `lat`/`lng` — tự động chỉ SITE-07 có marker (đã kiểm thử: đúng 1 marker trên bản đồ Khám phá).
+
+### Hành trình (itinerary)
+- `js/services/aiService.js` — `estimateTravelMin()` đổi từ trả về số phút sang `{min, known}`; khi thiếu toạ độ (`known:false`, đa số 7 listing pilot), timeline vẫn dùng `min` mặc định để LẬP LỊCH nhưng UI hiển thị trung thực "chưa đủ dữ liệu để tối ưu tuyến đường" thay vì trình bày như số đã xác minh. Thêm `isClusterDuplicate()` — chặn thuật toán gợi ý chọn đồng thời SITE-04 và SITE-05/06 (đã kiểm thử trực tiếp bằng cách ưu tiên hoá cả 3 qua `seedIds`: kết quả không bao giờ có SITE-04 cùng SITE-05/06 trong 1 hành trình). Stop ứng với listing `experience`/`multiStopExperience` chưa có booking thật được gắn ghi chú "Đề xuất — cần xác nhận supplier trước khi có thể đặt/thanh toán". Sửa luôn 2 chỗ dò tên nhóm danh mục cũ (`cultureFirst` rank, `lively` heuristic) đang dùng tên nhóm không còn tồn tại sau khi đổi category — cập nhật khớp 6 category pilot.
+- `js/trail/itineraryDetail.js` — badge stop đổi theo `listingType`: "Đề xuất — cần xác nhận" cho trải nghiệm chưa bookable (thay vì "Miễn phí / tự do" gây hiểu nhầm); dòng thời gian di chuyển hiển thị "chưa đủ dữ liệu để tối ưu tuyến đường" khi `travelUnknown`; sửa 1 chỗ `.rating.toFixed()` có thể crash khi rating null (modal thêm địa điểm).
+- `js/trail/placeDetail.js`'s `add-itinerary-btn` — thêm field `listingType`/`travelUnknown` khi tạo stop thủ công, đồng bộ với stop do wizard tạo.
+
+### Cổng vận hành (nội bộ — không công khai)
+- `js/ops/pilot.js` (mới), route `#/ops/pilot`, tab "Pilot Khmer" trong `js/ops/shell.js` — hồ sơ đầy đủ 7 listing: readiness, supplier phù hợp (tra từ `pilot-suppliers.json` qua `supplierRefs`), thông tin còn thiếu, cách tiếp cận đề xuất, rủi ro đạo đức/vận hành, checklist xác minh thực địa, bảng nguồn thông tin, tình trạng quyền ảnh. Đặt ở Cổng vận hành (không phải Cổng dữ liệu quản lý) vì đây là thông tin vận hành/operational, đúng phân quyền đã thiết lập từ trước (Admin chỉ xem tổng hợp/ẩn danh, Ops xem chi tiết vận hành).
+
+### Đã kiểm thử qua trình duyệt thật
+- `state.destinations.length === 7`, đúng 7 id `EXP-01..03`/`SITE-04..07`, đúng `listingType` từng cái (script tự động qua `storage.init()`).
+- 6 chip danh mục hiển thị đúng, không danh mục rỗng, tổng đếm = 7 (2+1+1+1+1+1).
+- Tìm kiếm "Wat Angkor" (tên thay thế của Chùa Âng) trả về đúng 1 kết quả.
+- Trang chi tiết SITE-04 nêu rõ "không nên mô tả như một công trình duy nhất đã hoàn thiện" + liệt kê đúng Chùa Âng/Bảo tàng là điểm con.
+- Trang chi tiết EXP-02 hiển thị đúng "Trải nghiệm đề xuất — 2 điểm dừng", liệt kê đúng 2 điểm dừng, 2 nút "Mở trên Google Maps" riêng biệt (không gộp 1 pin).
+- Trang chi tiết SITE-07 nêu rõ Chùa Lò Gạch (di tích tỉnh 2022) và Bờ Lũy (di tích khảo cổ quốc gia 2018) là hai danh hiệu khác nhau.
+- Bản đồ Khám phá: đúng 1 marker (SITE-07) — không có marker giả cho 6 listing còn lại.
+- Hành trình nháp qua wizard: cả 3 stop tham chiếu EXP-01/02/03 hiển thị badge "Đề xuất — cần xác nhận" (không phải "Miễn phí/tự do"), không có nút "Đặt các hoạt động trả phí" nào xuất hiện (vì không stop nào có `experienceId`) — xác nhận không có đường nào dẫn tới booking/thanh toán cho 3 trải nghiệm chưa xác nhận.
+- Kiểm thử trực tiếp cluster-dedup bằng cách ưu tiên hoá SITE-04+SITE-05+SITE-06 qua `seedIds`: không hành trình nào chứa cả cụm lẫn điểm con.
+- `#/ops/pilot`: mở chi tiết EXP-03 xác nhận hiển thị đúng supplier (Lâm Phên), rủi ro riêng tư, checklist, nguồn — không có toạ độ/pin nhà riêng nào bị lộ (đã xác nhận `lat`/`lng` = null cho EXP-02 dừng 1 và EXP-03 trên toàn site, không chỉ ở trang này).
+- Studio (`#/studio/overview` và các trang khác) không crash dù `state.hosts`/`state.experiences` rỗng — tự hiển thị về 0/rỗng đúng như thiết kế sẵn có (không phải lỗi mới phát sinh).
+- Quét toàn bộ route Admin/Ops còn lại (`#/admin/*`, `#/ops/bookings|content|tickets|quality`) + Trail (`#/trail/passport`, `#/trail/profile`, `#/gateway`) qua script tự động — không lỗi console, không trang nào rỗng bất thường.
+- Không tràn ngang (`scrollWidth === clientWidth`) trên desktop và mobile 375px cho toàn bộ trang đã sửa.
+- Đường dẫn dữ liệu mới (`./data/pilot-listings.json`, `./data/pilot-suppliers.json`) và ảnh (`../assets/...` trong CSS) đều dùng path tương đối — không có path tuyệt đối nào lọt vào, giữ tương thích GitHub Pages subpath.
+
+### Giới hạn đã biết (không giấu)
+- Rating/số lượng đánh giá: cả 7 listing pilot đều **không có** vì Excel không cung cấp — UI hiển thị "Chưa có đánh giá" thay vì ẩn hoàn toàn, để nhất quán với các khối UI khác vẫn còn (mục "Đánh giá tiêu biểu" trên trang chi tiết).
+- Thời lượng gợi ý (`suggestedDurationMin`) không có cho listing nào — thuật toán hành trình dùng mặc định nội bộ 45 phút khi tính lịch (hành vi có từ trước, không đổi trong phase này) nhưng **không** hiển thị con số này như đã xác minh ở bất kỳ đâu trên UI.
+- Chưa thêm supplier/host/experience thật nào vào Studio cho 7 listing pilot — đúng phạm vi phase này (chỉ chuẩn hoá dữ liệu + giao diện hiển thị, chưa vận hành booking thật).

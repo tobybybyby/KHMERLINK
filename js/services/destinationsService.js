@@ -1,10 +1,15 @@
+// Nạp 7 listing pilot Khmer từ data/pilot-listings.json và chuyển sang cấu trúc dùng chung cho
+// UI (Khám phá/hồ sơ chi tiết/bản đồ/hành trình) — tên hàm/biến giữ "destination"/"Destination"
+// để không phải sửa storage.js và các nơi khác đang import, dù bản chất giờ là "listing" đa dạng
+// hơn (experience/site/cluster/multiStopExperience, xem listingType). Trước phase pilot, hàm này
+// nạp từ data/destinations.json (37 địa danh) — bản đó đã lưu ở data/archive/destinations-vinhlong-37.json.
 import { deriveInterests, formatCurrency } from '../utils.js';
 
-const DATA_URL = './data/destinations.json';
+const DATA_URL = './data/pilot-listings.json';
 
 function resolvePrice(priceField) {
   if (!priceField || priceField.value === null || priceField.value === undefined) {
-    return { display: null, isFree: false, status: 'missing' };
+    return { display: null, isFree: false, status: (priceField && priceField.status) || 'unavailable' };
   }
   const { value, status } = priceField;
   if (typeof value === 'number') {
@@ -14,49 +19,86 @@ function resolvePrice(priceField) {
   return { display: text, isFree: /^miễn phí/i.test(text), status };
 }
 
-function transformDestination(d) {
-  const price = resolvePrice(d.price);
+function transformListing(l) {
+  const price = resolvePrice(l.price);
+  const mapLinks = Array.isArray(l.mapLinks) ? l.mapLinks : (l.mapLinks ? [l.mapLinks] : []);
   return {
-    id: d.id,
-    name: d.name,
-    altName: d.altName || null,
-    category: d.category,
-    region: d.region || null,
-    isDemoHost: !!d.isDemoHost,
-    interests: deriveInterests(d.category),
-    lat: d.coordinates && typeof d.coordinates.lat === 'number' ? d.coordinates.lat : null,
-    lng: d.coordinates && typeof d.coordinates.lng === 'number' ? d.coordinates.lng : null,
-    coordinatesStatus: (d.coordinates && d.coordinates.status) || 'missing',
-    address: (d.address && d.address.value) || null,
-    addressStatus: (d.address && d.address.status) || 'missing',
-    mapSearchUrl: d.mapSearchUrl || null,
-    openingHours: (d.openingHours && d.openingHours.value) || null,
-    openingHoursStatus: (d.openingHours && d.openingHours.status) || 'missing',
+    id: l.id,
+    name: l.name,
+    altName: l.alternativeName || null,
+    listingType: l.listingType || 'site',
+    category: l.category,
+    region: null,
+    isDemoHost: false,
+    interests: deriveInterests(l.category),
+
+    lat: l.coordinates && typeof l.coordinates.lat === 'number' ? l.coordinates.lat : null,
+    lng: l.coordinates && typeof l.coordinates.lng === 'number' ? l.coordinates.lng : null,
+    coordinatesStatus: l.coordinateStatus || 'unavailable',
+
+    address: l.currentAddress || null,
+    addressStatus: l.currentAddress ? 'verified' : 'missing',
+    formerAddress: l.formerAddress || null,
+    mapLinks,
+    mapSearchUrl: mapLinks[0] || null,
+
+    openingHours: (l.openingHours && l.openingHours.value) || null,
+    openingHoursStatus: (l.openingHours && l.openingHours.status) || 'unavailable',
+
     priceDisplay: price.display,
     isFreeEntry: price.isFree,
     priceStatus: price.status,
-    suggestedDurationMin: (d.suggestedDurationMin && d.suggestedDurationMin.value) ?? null,
-    durationStatus: (d.suggestedDurationMin && d.suggestedDurationMin.status) || 'missing',
-    rating: (d.rating && d.rating.value) ?? null,
-    ratingCount: (d.rating && d.rating.count) ?? null,
-    ratingStatus: (d.rating && d.rating.status) || 'missing',
-    summary: d.summary || '',
-    activities: d.activities || '',
-    tips: d.tips || '',
-    contact: (d.contact && d.contact.value) || null,
-    contactStatus: (d.contact && d.contact.status) || 'missing',
-    imagePath: (d.imageRef && d.imageRef.localPath) || null,
-    imageRef: d.imageRef || null,
-    // Ảnh đầu (imageRef) luôn là ảnh đại diện; đây là các ảnh BỔ SUNG (nếu có) hiển thị dạng
-    // gallery trên trang chi tiết — cấu trúc sẵn sàng dùng dù dữ liệu hiện tại mỗi địa danh
-    // mới có tối đa 1 ảnh thật.
-    galleryImages: Array.isArray(d.gallery) ? d.gallery.map((g) => g && g.localPath).filter(Boolean) : [],
-    sources: d.sources || [],
-    notes: d.notes || [],
-    recognized: !!(d.badge && d.badge.recognized),
-    recognizedReason: (d.badge && d.badge.note) || '',
-    isNew: !!d.isDemoHost,
-    dataQuality: d.dataQuality || 'unknown',
+    priceNote: (l.price && l.price.note) || null,
+
+    // Chưa có dữ liệu thời lượng/đánh giá cho 7 listing pilot trong nguồn Excel — để trống thay
+    // vì bịa số, UI phải tự xử lý trường hợp null (không gọi .toFixed trực tiếp).
+    suggestedDurationMin: null,
+    durationStatus: 'unavailable',
+    rating: null,
+    ratingCount: null,
+    ratingStatus: 'unavailable',
+
+    summary: l.shortIntroduction || '',
+    activities: l.activities || '',
+    culturalStory: l.culturalStory || '',
+    keyFacts: Array.isArray(l.keyFacts) ? l.keyFacts : [],
+    tips: l.visitorNotes || '',
+    contact: null,
+    contactStatus: 'unavailable',
+
+    // Ảnh: card/list dùng placeholder thống nhất theo loại hình (imagePath để trống) — ảnh thật
+    // (representativeImageUrl) chỉ dùng ở trang chi tiết, có fallback khi URL lỗi (xem placeDetail.js).
+    imagePath: null,
+    representativeImageUrl: l.representativeImage || null,
+    imageRef: l.representativeImage ? { url: l.representativeImage, status: 'external-not-downloaded' } : null,
+    galleryImages: [],
+
+    sources: (l.informationSources || []).map((s) => ({
+      url: s.url,
+      label: [s.sourceType, s.dateOfSource].filter(Boolean).join(' · ') || s.url,
+    })),
+    notes: [],
+
+    recognized: false,
+    recognizedReason: '',
+    isNew: false,
+    dataQuality: 'pilot-2026',
+
+    // Trường nội bộ (Studio/Cổng vận hành) — KHÔNG hiển thị trên giao diện công khai.
+    status: l.status || '',
+    readiness: l.readiness || '',
+    bookingStatus: l.bookingStatus || 'notBookable',
+    ctaKind: l.ctaKind || null,
+    supplierRefs: l.supplierRefs || [],
+    verificationChecklist: l.verificationChecklist || [],
+    informationSourcesFull: l.informationSources || [],
+    conclusionNote: l.conclusionNote || null,
+
+    // Quan hệ giữa các listing (cụm/đa điểm dừng) — xem PHASE spec mục 4.
+    clusterChildren: l.clusterChildren || null,
+    partOfCluster: l.partOfCluster || null,
+    relatedListingIds: l.relatedListingIds || [],
+    stops: l.stops || null,
   };
 }
 
@@ -65,10 +107,10 @@ export async function loadDestinations() {
     const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const raw = await res.json();
-    if (!Array.isArray(raw.destinations)) throw new Error('Cấu trúc destinations.json không hợp lệ');
-    return raw.destinations.map(transformDestination);
+    if (!Array.isArray(raw.listings)) throw new Error('Cấu trúc pilot-listings.json không hợp lệ');
+    return raw.listings.map(transformListing);
   } catch (err) {
-    if (window.console && console.error) console.error('Không tải được data/destinations.json:', err);
+    if (window.console && console.error) console.error('Không tải được data/pilot-listings.json:', err);
     return [];
   }
 }
