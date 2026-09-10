@@ -19,8 +19,9 @@
       "bookingStatus": "notBookable",
       "ctaKind": "interested",
       "supplierRefs": ["sup-tran-tuan-viet", "sup-lang-com-dep-ba-so"],
-      "currentAddress": "Ấp Giồng Thành, xã Nhị Trường, tỉnh Vĩnh Long",
+      "currentAddress": "98/27 Ấp Ba, xã Song Lộc, tỉnh Vĩnh Long",
       "formerAddress": "khu vực Trà Vinh cũ",
+      "addressConflictNote": "Địa chỉ này do người dùng cung cấp 10/09/2026 (khác hẳn xã Nhị Trường/làng Ba So ghi trong hồ sơ Excel gốc, nơi gắn với câu chuyện cốm dẹp Ok Om Bok) — CHƯA đối chiếu lại được, cần xác nhận đây có đúng là cùng một cơ sở hay là hai địa điểm khác nhau trước khi dùng làm pin chính thức. Đã thử tra qua OpenStreetMap Nominatim, không có kết quả (chưa lập bản đồ ở mức ấp).",
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "unavailable",
       "mapLinks": [
@@ -72,7 +73,7 @@
       "bookingStatus": "notBookable",
       "ctaKind": "notify",
       "supplierRefs": ["sup-lam-phen", "sup-lop-nhac-mahori", "sup-doan-anh-binh-minh"],
-      "currentAddress": "Dừng 1: Ấp Ba Se A, xã Song Lộc. Dừng 2: Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh, tỉnh Vĩnh Long",
+      "currentAddress": "Dừng 1: Ấp Ba Se A, xã Song Lộc. Dừng 2: 207A Nguyễn Du, khóm 3, phường Nguyệt Hóa, tỉnh Vĩnh Long",
       "formerAddress": null,
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "multiStop",
@@ -96,10 +97,10 @@
           "label": "Dừng 2 (đề xuất)",
           "place": "Đoàn Nghệ thuật Khmer Ánh Bình Minh (phần Rô-băm)",
           "description": "Phương án sinh kế tốt hơn là đoàn cố vấn, nghệ sĩ/câu lạc bộ cộng đồng biểu diễn có trả phí.",
-          "address": "Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh, tỉnh Vĩnh Long",
-          "coordinates": { "lat": 9.9237755, "lng": 106.3396274 },
-          "coordinateStatus": "geocodedApprox",
-          "coordinateNote": "Toạ độ tự động tra theo tên đường + khóm qua OpenStreetMap Nominatim (khớp đúng Khóm 10, Phường Trà Vinh) — là điểm đại diện trên đoạn đường đó, CHƯA phải toạ độ chính xác của số nhà 507 (OpenStreetMap chưa có dữ liệu số nhà cho đường này). Cần xác minh thực địa trước khi dùng làm pin chính thức.",
+          "address": "207A Nguyễn Du, khóm 3, phường Nguyệt Hóa, tỉnh Vĩnh Long",
+          "coordinates": { "lat": null, "lng": null },
+          "coordinateStatus": "unavailable",
+          "coordinateNote": "Người dùng cung cấp địa chỉ mới (207A Nguyễn Du, khóm 3, Nguyệt Hóa) 10/09/2026, thay cho địa chỉ 507 Nguyễn Đáng/phường Trà Vinh dùng trước đó. Đã thử tra qua OpenStreetMap Nominatim: chỉ tìm thấy MỘT đường 'Nguyễn Du' trong khu vực, nhưng được gắn thuộc Khóm Bến Có, xã Song Lộc — không khớp phường Nguyệt Hóa như địa chỉ mới. Có thể do ranh giới hành chính sau sắp xếp 2025 chưa cập nhật trên OpenStreetMap, hoặc là 2 con đường trùng tên khác nhau — chưa đủ tin cậy để dùng làm pin. Cần mã Plus Code (Google Maps) hoặc toạ độ GPS đo tại thực địa để xác nhận.",
           "supplierRef": "sup-doan-anh-binh-minh"
         }
       ],
@@ -157,10 +158,11 @@
       "bookingStatus": "notBookable",
       "ctaKind": "preparing",
       "supplierRefs": ["sup-lam-phen"],
-      "currentAddress": "Ấp Ba Se A, xã Song Lộc, tỉnh Vĩnh Long",
+      "currentAddress": "Ấp Ba Se A, xã Song Lộc, tỉnh Vĩnh Long (Google Plus Code người dùng cung cấp: W8FH+W3H, QL53, phường Nguyệt Hóa)",
       "formerAddress": "trước đây: xã Lương Hòa, huyện Châu Thành, Trà Vinh",
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "private",
+      "coordinateInternalNote": "Người dùng cung cấp Google Plus Code chính xác (W8FH+W3H, QL53, Nguyệt Hóa) 10/09/2026 — đã giải mã ra toạ độ cụ thể (lưu nội bộ tại data/pilot-suppliers.json, mục sup-lam-phen), CHỦ ĐỘNG KHÔNG đưa vào trường coordinates công khai này vì đây là nhà riêng nghệ nhân — giữ đúng nguyên tắc 'không công khai pin nhà riêng khi chưa có sự đồng thuận' đã thống nhất trước đó. Cần hỏi lại người dùng có muốn công khai hay không trước khi đổi.",
       "mapLinks": [
         "https://www.google.com/maps/search/?api=1&query=%E1%BA%A5p+Ba+Se+A+x%C3%A3+Song+L%E1%BB%99c+V%C4%A9nh+Long"
       ],
@@ -212,10 +214,11 @@
       "bookingStatus": "visitFreely",
       "ctaKind": null,
       "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
-      "currentAddress": "Phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "currentAddress": "68 Nguyễn Du, khóm 3, phường Nguyệt Hóa, tỉnh Vĩnh Long",
       "formerAddress": "khu vực Trà Vinh cũ",
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "cluster",
+      "coordinateNote": "Địa chỉ 68 Nguyễn Du do người dùng cung cấp 10/09/2026 (có thể là văn phòng điều phối/lối vào chính của cụm). Đã thử tra qua OpenStreetMap Nominatim: chỉ tìm thấy MỘT đường 'Nguyễn Du' trong khu vực, gắn thuộc Khóm Bến Có, xã Song Lộc — không khớp phường Nguyệt Hóa, chưa đủ tin cậy để dùng làm pin (xem chi tiết ở DATA_ISSUES.md).",
       "mapLinks": [
         "https://www.google.com/maps/search/?api=1&query=L%C3%A0ng+V%C4%83n+h%C3%B3a+Du+l%E1%BB%8Bch+d%C3%A2n+t%E1%BB%99c+Khmer+Nguy%E1%BB%87t+H%C3%B3a+V%C4%A9nh+Long",
         "https://www.google.com/maps/search/?api=1&query=Ao+B%C3%A0+Om+Tr%C3%A0+Vinh"
@@ -268,10 +271,11 @@
       "bookingStatus": "visitFreely",
       "ctaKind": null,
       "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
-      "currentAddress": "Phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "currentAddress": "QL53, khóm 13, phường Nguyệt Hóa, tỉnh Vĩnh Long",
       "formerAddress": "địa chỉ cũ: phường 8, TP Trà Vinh",
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "sharedCluster",
+      "coordinateNote": "Địa chỉ QL53/khóm 13 do người dùng cung cấp 10/09/2026. Đã thử tra qua OpenStreetMap Nominatim: không tìm thấy 'QL53' theo đúng khóm; tra theo tên tiếng Anh 'National Route 53' khớp với đường Võ Nguyên Giáp ở Khóm 6/Khóm 8 phường Nguyệt Hóa (có thể là tên khác của cùng quốc lộ, hoặc trùng loại đường) nhưng KHÔNG khớp khóm 13 — chưa đủ tin cậy để dùng làm pin.",
       "mapLinks": [
         "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a+%C3%82ng+Tr%C3%A0+Vinh"
       ],
@@ -322,9 +326,10 @@
       "bookingStatus": "visitFreely",
       "ctaKind": null,
       "supplierRefs": ["sup-ban-quan-ly-nguyet-hoa"],
-      "currentAddress": "Gần Ao Bà Om và Chùa Âng, phường Nguyệt Hóa, tỉnh Vĩnh Long",
+      "currentAddress": "Nguyễn Du, khóm 3, phường Nguyệt Hóa, tỉnh Vĩnh Long (gần Ao Bà Om và Chùa Âng)",
       "formerAddress": "địa chỉ cũ: phường 8, TP Trà Vinh",
       "coordinates": { "lat": null, "lng": null },
+      "coordinateNote": "Địa chỉ đường Nguyễn Du do người dùng cung cấp 10/09/2026 — cùng vấn đề với SITE-04/EXP-02 Dừng 2: OpenStreetMap chỉ có 1 đường 'Nguyễn Du' gắn thuộc xã Song Lộc, không khớp phường Nguyệt Hóa, chưa đủ tin cậy để dùng làm pin.",
       "coordinateStatus": "sharedCluster",
       "mapLinks": [
         "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o+t%C3%A0ng+V%C4%83n+h%C3%B3a+D%C3%A2n+t%E1%BB%99c+Khmer+Tr%C3%A0+Vinh"

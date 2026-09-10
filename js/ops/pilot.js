@@ -19,6 +19,7 @@ function readinessBadgeClass(readiness) {
 }
 
 function supplierCardHtml(sup) {
+  const loc = sup.preciseLocationInternal;
   return `
     <div class="activity-card">
       <div class="activity-card__head">
@@ -31,6 +32,13 @@ function supplierCardHtml(sup) {
       <p class="text-sm" style="margin:2px 0;"><strong>Cách tiếp cận đề xuất:</strong> ${escapeHtml(sup.approach || '—')}</p>
       <p class="text-sm" style="margin:2px 0;color:var(--color-danger);"><strong>Rủi ro:</strong> ${escapeHtml(sup.risks || '—')}</p>
       ${sup.source ? `<p class="text-sm text-faint" style="margin:4px 0 0;"><a href="${escapeHtml(sup.source)}" target="_blank" rel="noopener noreferrer">Nguồn</a></p>` : ''}
+      ${loc ? `
+        <div class="demo-note" style="margin-top:6px;border:1px solid var(--color-danger);">
+          🔒 <strong>Toạ độ chính xác — KHÔNG CÔNG KHAI:</strong> ${loc.lat}, ${loc.lng}<br>
+          <span class="text-sm">${escapeHtml(loc.note || '')}</span><br>
+          <span class="text-sm" style="color:var(--color-danger);">${escapeHtml(loc.reason || '')}</span>
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -53,6 +61,18 @@ function listingCardHtml(listing, suppliersById) {
       </summary>
       <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
         <p class="text-sm text-muted" style="margin:0;">${escapeHtml(listing.status || '')}</p>
+
+        <div>
+          <h4 style="margin:0 0 4px;">Địa chỉ & toạ độ</h4>
+          <p class="text-sm" style="margin:0;">📍 ${escapeHtml(listing.address || 'Chưa có')}</p>
+          ${listing.addressConflictNote ? `<p class="text-sm" style="margin:4px 0 0;color:var(--color-danger);">⚠️ ${escapeHtml(listing.addressConflictNote)}</p>` : ''}
+          ${listing.coordinateNote ? `<p class="text-sm text-faint" style="margin:4px 0 0;">${escapeHtml(listing.coordinateNote)}</p>` : ''}
+          ${(listing.stops || []).some((s) => s.coordinateNote) ? `
+            <div style="margin-top:4px;">
+              ${(listing.stops || []).filter((s) => s.coordinateNote).map((s) => `<p class="text-sm text-faint" style="margin:2px 0;"><strong>${escapeHtml(s.label || '')}:</strong> ${escapeHtml(s.coordinateNote)}</p>`).join('')}
+            </div>
+          ` : ''}
+        </div>
 
         <div>
           <h4 style="margin:0 0 4px;">Supplier phù hợp</h4>

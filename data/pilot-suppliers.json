@@ -42,7 +42,15 @@
       "missingInfo": "Liên hệ, lịch, số khách, phí, quyền hình ảnh, an toàn vật liệu",
       "approach": "Qua ngành văn hóa/Bảo tàng; xin đồng thuận trước khi công khai pin",
       "risks": "Nhà riêng; bảo vệ riêng tư và thời gian lao động",
-      "source": "https://baovinhlong.com.vn/phong-su-ky-su/202507/nghe-nhan-lam-phen-miet-mai-giu-gin-ban-sac-dan-toc-khmer-24208a3/"
+      "source": "https://baovinhlong.com.vn/phong-su-ky-su/202507/nghe-nhan-lam-phen-miet-mai-giu-gin-ban-sac-dan-toc-khmer-24208a3/",
+      "preciseLocationInternal": {
+        "note": "Người dùng cung cấp Google Plus Code (W8FH+W3H, QL53, phường Nguyệt Hóa) 10/09/2026. Đã giải mã bằng thư viện Open Location Code chính thức, dùng tâm phường Nguyệt Hóa làm điểm tham chiếu để khôi phục full code — độ chính xác cao (ô ~3m x 3m).",
+        "lat": 9.924813,
+        "lng": 106.327734,
+        "source": "Plus Code do người dùng cung cấp qua chat 10/09/2026",
+        "doNotPublish": true,
+        "reason": "Đây là nhà riêng của nghệ nhân — CHƯA có sự đồng thuận công khai theo đúng nguyên tắc đã thống nhất trong PHASE pilot. KHÔNG đưa vào data/pilot-listings.json hay bất kỳ tính năng bản đồ/chỉ đường công khai nào (EXP-02 Dừng 1, EXP-03) cho tới khi được xác nhận rõ ràng."
+      }
     },
     {
       "id": "sup-lop-nhac-mahori",

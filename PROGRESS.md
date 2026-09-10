@@ -544,3 +544,26 @@ Tải + nén cả 7 ảnh đại diện (đã có URL sẵn từ phase trước)
 - EXP-02: nút riêng cho Dừng 1 (Google Maps tìm kiếm) và Dừng 2 (Chỉ đường, toạ độ gần đúng) hiển thị đúng, có ghi chú toạ độ gần đúng rõ ràng.
 - `#/studio/overview` với cả 7 host: tên hiển thị đúng, số liệu 0/rỗng, không có "(demo)" gắn nhầm cho tên thật; `#/studio/reports` không crash khi không có dữ liệu tháng.
 - Quét lại toàn bộ route (Trail/Studio/Admin/Ops) ở cả 3 độ rộng (≈453px, mobile 375px, desktop) sau khi sửa lỗi tràn nhãn nút — không còn route nào tràn ngang hay lỗi console.
+
+## PHASE — Địa chỉ đợt 2 + giải mã Google Plus Code cho pin bản đồ — 2026-09-10
+
+Người dùng cung cấp thêm địa chỉ chi tiết (đợt 2, qua chat) cho 6/7 listing để cập nhật pin bản đồ.
+
+### Kết quả tra toạ độ (OpenStreetMap Nominatim, không đoán thủ công)
+- **EXP-03**: người dùng cho **Google Plus Code** ("W8FH+W3H, QL53, phường Nguyệt Hóa") — cài tạm `open-location-code` (thư viện chính thức của Google, gỡ ngay sau khi dùng xong, giống cách làm với `xlsx`/`sharp` trước đó), giải mã bằng thuật toán `recoverNearest` (dùng tâm phường Nguyệt Hóa — geocode qua Nominatim — làm điểm tham chiếu để khôi phục full code từ short code), ra toạ độ (9.924813, 106.327734) với ô sai số chỉ ~3m — độ chính xác cao.
+- **5 địa chỉ còn lại** (EXP-01, EXP-02 Dừng 2, SITE-04, SITE-05, SITE-06): đã thử geocode nhưng OpenStreetMap **không có đủ dữ liệu đáng tin cậy** — hoặc không có kết quả, hoặc chỉ khớp tên đường ở SAI phường/xã (vd cả 3 địa chỉ "Nguyễn Du, khóm 3, phường Nguyệt Hóa" đều chỉ khớp được với một đường Nguyễn Du DUY NHẤT mà OSM gắn thuộc xã Song Lộc, không phải Nguyệt Hóa — nghi do ranh giới hành chính sau sắp xếp 2025 chưa cập nhật trên OSM). **Không dùng các kết quả sai-phường này để đặt pin** — đúng nguyên tắc không suy đoán tọa độ.
+
+### Xử lý mâu thuẫn EXP-01 và vấn đề riêng tư EXP-03
+- **EXP-01**: địa chỉ mới ("98/27 Ấp Ba, xã Song Lộc") khác hẳn xã Nhị Trường/làng Ba So trong hồ sơ gốc (nơi gắn với câu chuyện Ok Om Bok) — đã cập nhật theo yêu cầu người dùng nhưng gắn `addressConflictNote` cảnh báo rõ ràng thay vì âm thầm ghi đè, cần người dùng xác nhận lại.
+- **EXP-03**: toạ độ giải mã được trỏ tới **nhà riêng nghệ nhân Lâm Phên** — đúng nguyên tắc đã thống nhất từ đầu phase pilot ("không công khai pin nhà riêng khi chưa có sự đồng thuận"), toạ độ này **KHÔNG** đưa vào `data/pilot-listings.json` (dữ liệu công khai cho Trail) mà chỉ lưu ở `data/pilot-suppliers.json` (`sup-lam-phen.preciseLocationInternal`, cờ `doNotPublish: true`) — chỉ xem được ở `#/ops/pilot` (nội bộ), có cảnh báo 🔒 rõ ràng. Đã hỏi lại người dùng trong phản hồi có muốn công khai hay không trước khi thay đổi quyết định này.
+
+### File đã sửa
+- `data/pilot-listings.json` — cập nhật `currentAddress` cho EXP-01/EXP-02 (Dừng 2)/SITE-04/SITE-05/SITE-06 theo địa chỉ mới; thêm `addressConflictNote` (EXP-01), `coordinateNote` (SITE-04/05/06, EXP-02 Dừng 2) giải thích vì sao chưa geocode được; xoá toạ độ gần đúng cũ của EXP-02 Dừng 2 (địa chỉ đã đổi, toạ độ cũ không còn khớp).
+- `data/pilot-suppliers.json` — thêm `preciseLocationInternal` cho `sup-lam-phen` (toạ độ EXP-03, chỉ nội bộ).
+- `js/services/destinationsService.js` — truyền thêm `addressConflictNote`/`coordinateNote` cấp listing ra ngoài để trang nội bộ dùng được.
+- `js/ops/pilot.js` — thêm khối "Địa chỉ & toạ độ" (hiện `addressConflictNote`/`coordinateNote`/ghi chú theo từng điểm dừng) và khối 🔒 cảnh báo toạ độ nội bộ không công khai trong thẻ supplier.
+
+### Đã kiểm thử qua trình duyệt thật
+- Trang chi tiết EXP-02: đúng nút "🔍 Google Maps — Dừng 1"/"Dừng 2" (không còn nút "Chỉ đường" chính xác vì toạ độ cũ đã bị xoá), hiện đúng ghi chú giải thích vì sao chưa đủ tin cậy.
+- `#/ops/pilot` → mở EXP-03: hiện đúng khối 🔒 toạ độ nội bộ, không xuất hiện ở bất kỳ trang Trail công khai nào (đã kiểm tra `grep` trong `js/trail/` chỉ còn ghi chú cấp điểm-dừng công khai, không có toạ độ/ghi chú riêng tư nào lọt ra).
+- Quét lại toàn bộ route liên quan (7 trang chi tiết, `#/ops/pilot`, `#/studio/overview`, `#/trail/explore`) ở 375px và desktop — không lỗi console, không tràn ngang.

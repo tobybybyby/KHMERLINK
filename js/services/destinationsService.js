@@ -38,7 +38,9 @@ function transformListing(l) {
 
     address: l.currentAddress || null,
     addressStatus: l.currentAddress ? 'verified' : 'missing',
+    addressConflictNote: l.addressConflictNote || null,
     formerAddress: l.formerAddress || null,
+    coordinateNote: l.coordinateNote || null,
     mapLinks,
     mapSearchUrl: mapLinks[0] || null,
 
