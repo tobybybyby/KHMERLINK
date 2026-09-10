@@ -9,26 +9,35 @@ const FLOURISH_SVG = `
 
 export function renderWelcome(container) {
   container.innerHTML = `
-    <div class="welcome-page">
+    <div class="welcome-page welcome-page--hero">
       <div>
         ${FLOURISH_SVG}
-        <div style="font-size:2.4rem;margin:var(--space-3) 0;">🪷</div>
-        <h1 class="welcome-title">Khmer Link</h1>
+        <div style="font-size:2.2rem;margin:var(--space-2) 0;">🪷</div>
+        <h1 class="welcome-title">KhmerLink</h1>
         <p class="welcome-subtitle">Chạm văn hóa, nối hành trình</p>
-        <p style="opacity:0.85;max-width:480px;margin:var(--space-3) auto 0;">Khám phá, kết nối và trải nghiệm cùng cộng đồng du lịch địa phương. Bản demo trình diễn — dữ liệu lưu trên trình duyệt của bạn.</p>
-        ${FLOURISH_SVG}
+        <p class="welcome-tagline" style="margin:var(--space-3) auto 0;">Khám phá, kết nối và trải nghiệm cùng cộng đồng du lịch địa phương. Bản demo trình diễn — dữ liệu lưu trên trình duyệt của bạn.</p>
       </div>
-      <div class="welcome-choices">
-        <a class="welcome-choice" href="#/trail/explore">
-          <strong>🧭 Tôi là du khách</strong>
-          <span class="text-sm" style="opacity:0.8;">Khám phá địa điểm, tạo hành trình, đặt trải nghiệm</span>
-        </a>
-        <a class="welcome-choice" href="#/studio">
-          <strong>🏡 Tôi cung cấp trải nghiệm</strong>
-          <span class="text-sm" style="opacity:0.8;">Dành cho hộ dân, nghệ nhân, đơn vị du lịch</span>
-        </a>
+      <div>
+        <div class="welcome-choices" style="margin:0 auto;">
+          <a class="welcome-choice" href="#/trail/explore">
+            <span class="welcome-choice__icon" aria-hidden="true">🧭</span>
+            <span class="welcome-choice__body">
+              <strong>Tôi là du khách</strong>
+              <span class="text-sm">Khám phá địa điểm, tạo hành trình, đặt trải nghiệm</span>
+            </span>
+            <span class="welcome-choice__arrow" aria-hidden="true">›</span>
+          </a>
+          <a class="welcome-choice" href="#/studio">
+            <span class="welcome-choice__icon" aria-hidden="true">🏡</span>
+            <span class="welcome-choice__body">
+              <strong>Tôi cung cấp trải nghiệm</strong>
+              <span class="text-sm">Dành cho hộ dân, nghệ nhân, đơn vị du lịch</span>
+            </span>
+            <span class="welcome-choice__arrow" aria-hidden="true">›</span>
+          </a>
+        </div>
+        <a class="welcome-gateway-link" href="#/gateway" style="display:inline-block;margin-top:var(--space-4);">Cổng quản lý →</a>
       </div>
-      <a class="welcome-gateway-link" href="#/gateway">Cổng quản lý →</a>
     </div>
   `;
 }

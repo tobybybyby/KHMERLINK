@@ -9,7 +9,7 @@ export function renderTrailShell(root, activeKey) {
   root.innerHTML = `
     <div class="trail-shell">
       <header class="trail-topbar">
-        <a class="trail-topbar__brand" href="#/">🪷 Khmer Link Trail</a>
+        <a class="trail-topbar__brand" href="#/">🪷 KhmerLink Trail</a>
         <nav class="top-tabs" aria-label="Điều hướng Trail">
           ${TABS.map((t) => `<a class="top-tabs__item" href="${t.href}" ${t.key === activeKey ? 'aria-current="page"' : ''}>${t.icon} ${t.label}</a>`).join('')}
         </nav>

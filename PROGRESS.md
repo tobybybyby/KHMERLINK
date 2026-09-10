@@ -1,8 +1,8 @@
-# PROGRESS — Khmer Link (trước đây: Vĩnh Long Trail & Studio)
+# PROGRESS — KhmerLink (trước đây: Vĩnh Long Trail & Studio)
 
-> Đã đổi tên thương hiệu thành **Khmer Link** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
+> Đã đổi tên thương hiệu thành **KhmerLink** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
 
-Cập nhật lần cuối: Đổi thương hiệu Khmer Link + thiết kế lại giao diện — 2026-09-09
+Cập nhật lần cuối: Đổi thương hiệu KhmerLink + thiết kế lại giao diện — 2026-09-09
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -361,7 +361,7 @@ Theo yêu cầu bổ sung: phía trên trang tổng kết hiện lời chúc m�
 
 ## Đổi thương hiệu & thiết kế lại giao diện
 
-Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Link** (trước đây "Vĩnh Long — Chạm văn hóa, nối hành trình"), thiết kế lại giao diện theo phong cách "văn hiến" tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long* — giấy cũ + mực đồng/vàng cổ thay vì tông xanh lá hiện đại ban đầu.
+Theo yêu cầu riêng: đổi tên sản phẩm thành **KhmerLink** (trước đây "Vĩnh Long — Chạm văn hóa, nối hành trình"), thiết kế lại giao diện theo phong cách "văn hiến" tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long* — giấy cũ + mực đồng/vàng cổ thay vì tông xanh lá hiện đại ban đầu.
 
 ### Đổi tên (chỉ đổi thương hiệu, không đổi dữ liệu địa danh thật)
 `index.html` (title/meta), `js/welcome.js` (tiêu đề trang chào), `js/trail/shell.js` + `js/studio/shell.js` (brand Trail/Studio), `package.json` (name/description), `README.md` (tiêu đề + đoạn giới thiệu). `PROGRESS.md`/`REQUIREMENTS_MATRIX.md` giữ nguyên tên cũ ở các mục log trước thời điểm đổi tên (đã thêm ghi chú đầu file), không viết lại lịch sử. Các chỗ "Vĩnh Long" mang nghĩa địa danh thật (địa chỉ, dữ liệu 37 địa danh, tên tỉnh) **giữ nguyên**, không đổi — chỉ đổi tên thương hiệu sản phẩm.
@@ -383,7 +383,7 @@ Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Link** (trước
 - Xác nhận hệ màu chức năng (loại hình địa điểm, mức mật độ khách) không bị ảnh hưởng — badge/marker vẫn đúng màu cũ theo danh mục.
 
 ### Giới hạn đã biết (không giấu)
-- Tên "Khmer Link" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
+- Tên "KhmerLink" gợi hướng văn hoá Khmer, trong khi dữ liệu 37 địa danh bao quát cả di tích Việt, Hoa và làng nghề không riêng Khmer — đây là lựa chọn thương hiệu mang tính gợi mở/thẩm mỹ theo yêu cầu người dùng, không phải mô tả phạm vi nội dung theo nghĩa hẹp.
 - Chưa tích hợp ảnh/hoạ tiết trang trí thật từ nguồn ngoài — mới dùng SVG tự vẽ đơn giản (sóng, hoa sen). Nếu người dùng cung cấp ảnh cụ thể, có thể tích hợp thêm ở phần nền trang chào hoặc header mà không cần đổi lại kiến trúc.
 - Bản đồ Leaflet/OpenStreetMap vẫn dùng tile gốc (không có tuỳ chọn theme màu cho tile bản đồ) — chỉ marker/polyline đổi màu theo bảng mới.
 
@@ -419,3 +419,18 @@ Rà soát toàn bộ 26 route của app (script tự động kiểm tra `scrollW
 **Đã sửa tận gốc** (thay vì vá riêng từng trang): `css/layout.css`, đổi `.trail-topbar` từ `height: var(--topbar-height)` sang `min-height: var(--topbar-height)` kèm padding dọc `var(--space-2)` thay vì `0` — topbar giờ tự giãn cao khi nội dung xuống dòng, không còn giới hạn cứng.
 
 **Đã kiểm thử qua trình duyệt thật**: quét lại toàn bộ 26 route (script tự động, cả desktop và mobile 375px) — không còn route nào bị tràn ngang (`scrollWidth`) hoặc có phần tử con lồi ra ngoài khung topbar. Kiểm tra mắt thường `#/admin/flow` trên mobile — nút "← Cổng quản lý" 2 dòng giờ nằm gọn trong khung, không đè lên thanh dưới.
+
+## Đổi tên "Khmer Link" → "KhmerLink" + thiết kế lại trang chào — 2026-09-10
+
+Theo yêu cầu riêng: viết liền thành một từ **KhmerLink** (trước đó có khoảng trắng "Khmer Link" — sửa theo đúng yêu cầu lần này, không phải lỗi kỹ thuật). Đổi ở toàn bộ 8 file có nhắc tên thương hiệu: `index.html` (title), `package.json` (name/description), `js/welcome.js` (tiêu đề trang chào), `js/trail/shell.js` + `js/studio/shell.js` (brand Trail/Studio — đây chính là chỗ người dùng phát hiện còn sót "Khmer Link Trail" chưa cập nhật ở lượt đổi tên trước), `README.md`/`PROGRESS.md`/`REQUIREMENTS_MATRIX.md`. Rà soát lại bằng grep không phân biệt hoa/thường, không còn chỗ nào sót.
+
+### Thiết kế lại trang chào (`#/`) — tham khảo bố cục ảnh mẫu người dùng cung cấp
+
+Người dùng gửi ảnh mẫu: nền là ảnh chụp cổng đền Khmer mạ vàng, gradient tối phủ để chữ dễ đọc, tiêu đề lớn màu vàng đồng, 2 thẻ lựa chọn dạng viên thuốc (pill) có icon tròn + mũi tên `›`, link "Cổng quản lý" ở cuối. Đã dựng lại `renderWelcome()` theo tinh thần bố cục này (không sao chép y hệt mọi chi tiết trang trí như 2 cột trụ đá chạm khắc ở rìa ảnh — phần đó là hiệu ứng khung ảnh phức tạp, không cần thiết cho một trang demo):
+
+- **Ảnh nền**: dùng lại ảnh **Chùa Vàm Ray** (`assets/images/destinations/chua-vam-ray.webp`) đã có sẵn trong repo — đúng ảnh cổng đền mạ vàng, rất khớp tinh thần ảnh mẫu, và đã có sẵn nhãn "downloaded-demo-use" + khuyến cáo bản quyền trong `DATA_ISSUES.md` nên tái dùng không phát sinh rủi ro bản quyền mới (khác với việc tải ảnh trang trí mới từ nguồn ngoài).
+- **Kỹ thuật ảnh nền + lớp phủ gradient**: dùng 2 pseudo-element (`::before` cho ảnh, `::after` cho gradient tối, xếp lớp qua `z-index`) thay vì gộp chung vào 1 khai báo `background` nhiều lớp (`background-image: linear-gradient(...), url(...)`) — cách gộp nhiều lớp ban đầu bị lỗi không hiển thị ảnh trong khi kiểm thử (chỉ thấy gradient phẳng dù `getComputedStyle` báo đúng cả 2 lớp), đổi sang pseudo-element tách riêng thì hiển thị đúng ổn định.
+- **Thẻ lựa chọn** (`.welcome-choice`): viết lại từ khối chữ đặc trên nền tối sang dạng pill sáng màu kem/vàng nhạt, có icon tròn riêng (`.welcome-choice__icon`), khối chữ (`.welcome-choice__body`), mũi tên `›` (`.welcome-choice__arrow`) — chỉ ảnh hưởng `renderWelcome()`, không đụng `renderGateway()` (Cổng quản lý vẫn dùng `.gateway-item` riêng, không đổi).
+- **Trang Cổng quản lý (`#/gateway`) giữ nguyên** nền gradient phẳng như cũ — chỉ `renderWelcome()` dùng class `.welcome-page--hero` mới (biến thể có ảnh nền), tránh ảnh hưởng lỗi tràn chữ đã sửa ở trang Gateway trước đó.
+
+**Đã kiểm thử qua trình duyệt thật**: trang chào desktop + mobile 375px — ảnh nền hiển thị đúng, chữ rõ trên nền tối, 2 thẻ lựa chọn đúng bố cục pill+icon+mũi tên. Bấm "Tôi là du khách" → xác nhận topbar Trail hiển thị đúng "🪷 KhmerLink Trail" (không còn "Khmer Link" cũ). Quét lại tự động brand text + tràn ngang trên 6 trang đại diện (Trail/Studio/Admin/Ops/Cố vấn cộng đồng/Gateway), cả desktop và mobile — không còn lỗi. Kiểm tra riêng trang Gateway không bị ảnh hưởng bởi thay đổi.

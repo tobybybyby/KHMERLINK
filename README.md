@@ -1,6 +1,6 @@
-# Khmer Link — Chạm văn hóa, nối hành trình
+# KhmerLink — Chạm văn hóa, nối hành trình
 
-> Đổi tên thương hiệu từ "Vĩnh Long — Chạm văn hóa, nối hành trình" sang **Khmer Link** — xem mục [Đổi thương hiệu & thiết kế lại giao diện](#đổi-thương-hiệu--thiết-kế-lại-giao-diện) bên dưới. `PROGRESS.md`/`REQUIREMENTS_MATRIX.md`/`DATA_ISSUES.md` vẫn giữ nguyên tên cũ ở các mục ghi trước thời điểm đổi tên (không viết lại lịch sử).
+> Đổi tên thương hiệu từ "Vĩnh Long — Chạm văn hóa, nối hành trình" sang **KhmerLink** — xem mục [Đổi thương hiệu & thiết kế lại giao diện](#đổi-thương-hiệu--thiết-kế-lại-giao-diện) bên dưới. `PROGRESS.md`/`REQUIREMENTS_MATRIX.md`/`DATA_ISSUES.md` vẫn giữ nguyên tên cũ ở các mục ghi trước thời điểm đổi tên (không viết lại lịch sử).
 
 Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thái du lịch cộng đồng Vĩnh Long: **Trail** (du khách), **Studio** (hộ dân/nghệ nhân), **Cổng dữ liệu quản lý** và **Cổng vận hành** (kèm vai trò **Cố vấn cộng đồng** quyền hạn chế). Toàn bộ yêu cầu gốc nằm trong `Prompt-Claude-Vinh-Long.md`.
 
@@ -12,7 +12,7 @@ Prototype web tĩnh (HTML/CSS/JS, không cần bước build) cho hệ sinh thá
 
 ## Đổi thương hiệu & thiết kế lại giao diện
 
-Theo yêu cầu riêng: đổi tên sản phẩm thành **Khmer Link** và thiết kế lại giao diện theo phong cách "văn hiến" (giấy cũ + mực đồng/vàng cổ, chữ serif trang trọng) thay vì tông xanh lá hiện đại ban đầu — tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long*.
+Theo yêu cầu riêng: đổi tên sản phẩm thành **KhmerLink** và thiết kế lại giao diện theo phong cách "văn hiến" (giấy cũ + mực đồng/vàng cổ, chữ serif trang trọng) thay vì tông xanh lá hiện đại ban đầu — tham khảo bìa sách *Nghìn xưa văn hiến* (NXB Kim Đồng) và bộ slide *Hoàng Thành Thăng Long*.
 
 - **Đổi tên**: tiêu đề trang, brand Trail/Studio, `package.json`, README — chỉ đổi tên thương hiệu, **không đổi** các chỗ "Vĩnh Long" mang nghĩa địa danh thật (địa chỉ, tên tỉnh trong dữ liệu địa danh, các mục lịch sử phase cũ) để không làm sai dữ liệu.
 - **Màu sắc**: đổi toàn bộ 27 biến màu trong `css/tokens.css` (nâu đồng làm màu chính thay xanh lá, giữ nền kem/vàng cổ) — vì mọi nơi trong site đều tham chiếu biến CSS này (không hard-code hex), đổi một chỗ là đổi toàn site, không phải sửa từng file.
