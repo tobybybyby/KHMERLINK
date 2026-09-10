@@ -2,7 +2,7 @@
 
 > Đã đổi tên thương hiệu thành **KhmerLink** — các mục log bên dưới ghi trước thời điểm đổi tên vẫn giữ nguyên tên cũ "Vĩnh Long Trail/Studio" (không viết lại lịch sử), chỉ giao diện thật hiện tại dùng tên mới. Xem mục "Đổi thương hiệu & thiết kế lại giao diện" cuối file.
 
-Cập nhật lần cuối: Đổi thương hiệu KhmerLink + thiết kế lại giao diện — 2026-09-09
+Cập nhật lần cuối: Thiết kế lại trang chào theo mockup "Khmer heritage editorial" — 2026-09-10
 
 Quy ước trạng thái: **Done** (đã thao tác được thật, đã kiểm tra) / **In progress** / **Later** (đúng roadmap, chưa tới lượt).
 
@@ -434,3 +434,34 @@ Người dùng gửi ảnh mẫu: nền là ảnh chụp cổng đền Khmer m�
 - **Trang Cổng quản lý (`#/gateway`) giữ nguyên** nền gradient phẳng như cũ — chỉ `renderWelcome()` dùng class `.welcome-page--hero` mới (biến thể có ảnh nền), tránh ảnh hưởng lỗi tràn chữ đã sửa ở trang Gateway trước đó.
 
 **Đã kiểm thử qua trình duyệt thật**: trang chào desktop + mobile 375px — ảnh nền hiển thị đúng, chữ rõ trên nền tối, 2 thẻ lựa chọn đúng bố cục pill+icon+mũi tên. Bấm "Tôi là du khách" → xác nhận topbar Trail hiển thị đúng "🪷 KhmerLink Trail" (không còn "Khmer Link" cũ). Quét lại tự động brand text + tràn ngang trên 6 trang đại diện (Trail/Studio/Admin/Ops/Cố vấn cộng đồng/Gateway), cả desktop và mobile — không còn lỗi. Kiểm tra riêng trang Gateway không bị ảnh hưởng bởi thay đổi.
+
+## Thiết kế lại trang chào theo mockup "Khmer heritage editorial" — 2026-09-10
+
+Theo yêu cầu riêng kèm mockup chi tiết + ảnh nền Chùa Âng đã xử lý sẵn: dựng lại `renderWelcome()` bám sát mockup, **chỉ sửa trang chào** — không đụng dữ liệu, routing hay logic trang khác (đã xác nhận qua kiểm thử, xem bên dưới).
+
+### File đã sửa
+- `js/welcome.js` — viết lại toàn bộ `renderWelcome()` (giữ nguyên `renderGateway()`): thêm các hằng SVG tự vẽ mới (`LOTUS_ICON`, `SIDE_MARK_LEFT/RIGHT`, `DIAMOND_DIVIDER`, `COMPASS_ICON`, `HOUSE_ICON`, `CHEVRON_ICON`) thay cho emoji, cấu trúc HTML semantic hơn (`<nav aria-label="Chọn vai trò">` bọc 2 thẻ lựa chọn).
+- `css/layout.css` — viết lại khối `.welcome-choice*` (thẻ pill kem + icon tròn + mũi tên) và `.welcome-page--hero` (biến `--khmer-*` màu riêng theo đúng mã màu người dùng cho, `min-height:100dvh`, `env(safe-area-inset-*)`, ảnh nền mới).
+- `assets/images/hero/chua-ang-welcome.webp` (mới) — ảnh nền Chùa Âng người dùng cung cấp, nén sang WebP (167KB, từ PNG gốc 1.9MB, cùng cách làm với `scripts/optimize-images.js` đã dùng cho ảnh địa danh: cài `sharp` tạm thời, nén xong gỡ ngay — không thêm dependency thường trực).
+- `assets/images/hero/originals/chua-ang-welcome.png` (mới) — bản gốc chưa nén, lưu lại theo đúng quy ước đã áp dụng cho ảnh địa danh.
+- `package-lock.json` — chỉ đồng bộ lại `name` theo `package.json` (còn sót "vinh-long-trail" từ trước khi đổi thương hiệu), phát sinh tự động khi cài/gỡ `sharp` tạm thời, không phải thay đổi cố ý riêng.
+
+### Tóm tắt thay đổi giao diện
+- **Ảnh nền**: ảnh Chùa Âng do người dùng cung cấp (khác ảnh Chùa Vàm Ray dùng tạm ở lần trước) — hiển thị qua pseudo-element `::before` (`background-size:cover; background-position:center 42%`), không kéo méo, phần tháp chính của chùa nằm rõ ở giữa màn hình.
+- **Lớp phủ gradient**: pseudo-element `::after` riêng, đúng 2 màu người dùng cho ở đầu/cuối (`rgba(38,20,10,0.85)` trên cùng, `rgba(45,22,8,0.95)` dưới cùng), vùng giữa gần như trong suốt để kiến trúc chùa vẫn sáng rõ.
+- **Icon**: bỏ toàn bộ emoji (🪷🧭🏡), thay bằng SVG tự vẽ (la bàn, ngôi nhà, hoa sen, mũi tên chevron, hoạ tiết đường kẻ) — nhất quán với hoa sen ở favicon đã có, không dùng ảnh/thư viện icon ngoài (dự án chưa có sẵn thư viện icon).
+- **Màu sắc riêng cho trang chào**: khai báo biến CSS cục bộ trong `.welcome-page--hero` (`--khmer-deep-brown`, `--khmer-cocoa-brown`, `--khmer-antique-gold`, `--khmer-warm-ivory`) đúng mã màu người dùng cho — không sửa bộ token màu chung `tokens.css` nên không ảnh hưởng trang khác.
+- **Font chữ**: tiêu đề/tagline tiếp tục dùng `Cormorant Garamond` (đã tải sẵn từ lần trước); phần mô tả/thẻ lựa chọn dùng nguyên `--font-base` (Segoe UI/system-ui) đang dùng toàn site — không thêm Google Font mới (Be Vietnam Pro/Inter) vì font hệ thống đã đủ rõ và đủ dấu tiếng Việt, tránh phát sinh phụ thuộc không cần thiết.
+- **Responsive**: `min-height:100dvh` (thay vì `100vh`, tránh lệch chiều cao trên mobile do thanh địa chỉ trình duyệt), `env(safe-area-inset-top/bottom)` cộng vào padding, giới hạn nội dung tối đa 480px trên desktop/tablet (không kéo full-width), toàn bộ thẻ (không riêng chữ/mũi tên) đều nằm trong 1 thẻ `<a>` nên click được ở bất kỳ đâu trên thẻ.
+- **Accessibility**: `:focus-visible` riêng cho `.welcome-choice` (viền vàng đồng rõ), `aria-hidden` cho toàn bộ SVG trang trí, `<nav aria-label="Chọn vai trò">` bọc 2 lựa chọn chính.
+
+### Sự cố phát hiện + đã sửa trong lúc làm
+- Gộp ảnh nền + gradient chung 1 khai báo `background-image: linear-gradient(...), url(...)` (nhiều lớp) khiến ảnh không hiển thị dù `getComputedStyle` báo đúng — đổi sang 2 pseudo-element `::before`/`::after` riêng biệt thì ổn định.
+- Đường dẫn ảnh nền lúc đầu viết `./assets/...` (sai — CSS resolve theo vị trí file `css/layout.css`, phải là `../assets/...`) — đã sửa.
+- Đổi cấu trúc `<div>` giữa thành `<nav class="welcome-choices">` làm mất tác dụng selector `.welcome-page--hero > div` (chỉ khớp thẻ `div`), khiến nav bị vẽ **sau** (dưới) lớp ảnh/gradient theo thứ tự stacking — sửa selector thành `.welcome-page--hero > *` để áp dụng cho mọi loại thẻ con.
+
+### Đã kiểm thử qua trình duyệt thật
+- Desktop, tablet (768px) và mobile (375px): ảnh nền hiển thị đúng vị trí, không méo, không tràn ngang (`scrollWidth === clientWidth`); nội dung không bị kéo full-width trên desktop/tablet; 2 thẻ lựa chọn đọc rõ, kiến trúc chính của chùa vẫn thấy rõ ở giữa.
+- Không có lỗi console; `href` của 2 thẻ lựa chọn và link "Cổng quản lý" xác nhận giữ nguyên (`#/trail/explore`, `#/studio`, `#/gateway`) — bấm thử điều hướng đúng, không lỗi.
+- Kiểm tra riêng trang Cổng quản lý (`#/gateway`) — không bị ảnh hưởng, vẫn giữ giao diện gradient phẳng cũ.
+- Chạy server local (`npx serve . -l 5500`) để xem trực tiếp qua trình duyệt trong lúc làm — không cần bước build (đúng kiến trúc site tĩnh sẵn có).
