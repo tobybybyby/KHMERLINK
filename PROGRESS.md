@@ -513,3 +513,34 @@ Theo yêu cầu riêng kèm file `data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xls
 - Rating/số lượng đánh giá: cả 7 listing pilot đều **không có** vì Excel không cung cấp — UI hiển thị "Chưa có đánh giá" thay vì ẩn hoàn toàn, để nhất quán với các khối UI khác vẫn còn (mục "Đánh giá tiêu biểu" trên trang chi tiết).
 - Thời lượng gợi ý (`suggestedDurationMin`) không có cho listing nào — thuật toán hành trình dùng mặc định nội bộ 45 phút khi tính lịch (hành vi có từ trước, không đổi trong phase này) nhưng **không** hiển thị con số này như đã xác minh ở bất kỳ đâu trên UI.
 - Chưa thêm supplier/host/experience thật nào vào Studio cho 7 listing pilot — đúng phạm vi phase này (chỉ chuẩn hoá dữ liệu + giao diện hiển thị, chưa vận hành booking thật).
+
+## PHASE — Bổ sung tên/địa chỉ, ảnh thật, toạ độ gần đúng, khôi phục hồ sơ 7 host — 2026-09-10
+
+Theo yêu cầu riêng kèm file `data/source/Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx` (tên hiển thị + địa chỉ hiện hành chi tiết hơn cho 7 listing): cập nhật tên/địa chỉ, tải ảnh thật cho card Khám phá, tra toạ độ khi đủ dữ liệu, và khôi phục hồ sơ "người cung cấp dịch vụ" trong Studio (đã bị đưa về rỗng ở phase trước).
+
+### Dữ liệu
+- `data/source/Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx` (mới) — bản sao file nguồn thứ 2.
+- `data/pilot-listings.json` — cập nhật `name`/`alternativeName` theo tên hiển thị mới (giữ tên tiếng Anh cũ làm `alternativeName` cho 3 EXP); cập nhật `currentAddress` cho EXP-02 (địa chỉ Dừng 2 giờ có số nhà: "Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh"); mỗi `stops[]` của EXP-02 giờ có `address`/`coordinates`/`coordinateStatus` riêng thay vì chỉ ở cấp listing; thêm `localImage` cho cả 7 listing.
+- `data/pilot-suppliers.json` — cập nhật tên đầy đủ "Hộ kinh doanh Trần Tuấn Việt – Cốm Dẹp Tuấn Việt".
+
+### Ảnh thật cho card Khám phá
+Tải + nén cả 7 ảnh đại diện (đã có URL sẵn từ phase trước) về `assets/images/pilot/*.webp` (tổng ~1,4 MB, giảm từ ~9,3 MB gốc — bản gốc lưu ở `assets/images/pilot/originals/`, cùng cách làm `scripts/optimize-images.js` đã dùng cho bộ 37 địa danh cũ). `destinationsService.js` đổi `imagePath` từ `null` sang ảnh đã tải — card Khám phá VÀ ảnh đại diện trang chi tiết giờ dùng ảnh thật thay vì placeholder SVG theo loại hình; `imageRef.status` đổi từ `external-not-downloaded` sang `downloaded-demo-use`, đúng caveat bản quyền "cần xin phép trước khi dùng thương mại" đã áp dụng cho bộ ảnh 37 địa danh cũ.
+
+### Toạ độ — chỉ tra được thêm 1 điểm, có giải thích rõ vì sao 5 điểm còn lại chưa tra được
+Đã thử tra toạ độ cho tất cả địa chỉ chưa có toạ độ qua **OpenStreetMap Nominatim** (dịch vụ geocode công khai, không cần khoá API) — không suy đoán thủ công:
+- **EXP-02 Dừng 2** ("Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh") đủ chi tiết (có tên đường + khóm) — Nominatim trả về đúng đoạn đường Nguyễn Đáng tại Khóm 10, Phường Trà Vinh (khớp chính xác địa chỉ). Đã lưu toạ độ (9.9237755, 106.3396274) với `coordinateStatus: "geocodedApprox"` và `coordinateNote` giải thích rõ: đây là điểm đại diện trên đoạn đường đó (OpenStreetMap chưa có dữ liệu số nhà cho đường này ở khu vực này), **chưa phải vị trí chính xác của số nhà 507**, cần xác minh thực địa trước khi dùng làm pin chính thức. Trang chi tiết EXP-02 hiển thị nút "🧭 Chỉ đường — Dừng 2 (gần đúng)" dùng toạ độ này, tách biệt với Dừng 1 (vẫn chỉ có nút mở Google Maps tìm kiếm).
+- **5 địa chỉ còn lại** (EXP-01, EXP-02 Dừng 1, EXP-03, và cấp ấp/phường của SITE-04/05/06) chỉ ở mức ấp/phường, không có tên đường — đã thử tra qua Nominatim nhưng **không có kết quả** (OpenStreetMap chưa lập bản đồ các ấp này ở mức đủ chi tiết). Không tự suy đoán toạ độ khi không đủ dữ liệu — xem mục "Thông tin cần bổ sung để thêm pin" trong báo cáo gửi người dùng (và `DATA_ISSUES.md`) để biết chính xác cần gì cho từng điểm.
+- Bản đồ Khám phá **không đổi** — vẫn chỉ tạo marker cho toạ độ ở cấp LISTING (`dest.lat`/`dest.lng`), cố tình KHÔNG vẽ marker cho toạ độ cấp-điểm-dừng (`stops[].coordinates`) của EXP-02 để tránh gây hiểu nhầm "cả trải nghiệm diễn ra ở đây" khi thực chất chỉ là 1 trong 2 điểm — toạ độ Dừng 2 chỉ dùng cho nút "Chỉ đường" ở trang chi tiết.
+
+### Studio — khôi phục hồ sơ 7 host (không kèm số liệu tài chính bịa)
+`js/data.js`: thêm lại `HOSTS` — đúng 7 host, mỗi host gắn 1 listing pilot (`destinationId`), dùng tên/vai trò/địa chỉ đã có sẵn trong `data/pilot-suppliers.json` (không bịa thông tin mới). **Cố tình KHÔNG** khôi phục `experiences`/`metrics.monthlyByHost` giả — các host này là tổ chức/cá nhân THẬT (Trần Tuấn Việt, Lâm Phên, ban quản trị các chùa...), chưa xác nhận đồng ý tham gia, nên gắn doanh thu/lịch sử 12 tháng bịa cho họ là không phù hợp dù chỉ là nội bộ. Studio Tổng quan/Báo cáo cho các host này hiển thị đúng "0"/rỗng, có dòng chú thích trung thực thay vì dòng "gồm 11 tháng số liệu minh hoạ" (không còn đúng vì không còn dữ liệu minh hoạ nào) — sửa ở `js/studio/overview.js` và `js/studio/reports.js` (ẩn khối biểu đồ khi không có dữ liệu tháng, tránh gọi Chart.js trên canvas không tồn tại).
+
+### Sự cố phát hiện + đã sửa trong lúc làm
+- Nhãn nút "Chỉ đường"/"Mở Google Maps" ban đầu viết dài (gộp cả "(đề xuất)" và "(chưa có toạ độ xác thực)") gây tràn ngang ở màn hẹp (~453px) và mobile 375px thật — đã rút gọn còn "Dừng N" (chi tiết đã có sẵn trong mô tả từng điểm dừng bên dưới, không cần lặp lại trong nhãn nút).
+
+### Đã kiểm thử qua trình duyệt thật
+- Cả 7 ảnh load đúng (`naturalWidth` > 0, không lỗi 404) trên card Khám phá và trang chi tiết.
+- Tên hiển thị mới đúng trên card, trang chi tiết, mục "Trải nghiệm liên quan", và 2 khối gợi ý ghép cặp.
+- EXP-02: nút riêng cho Dừng 1 (Google Maps tìm kiếm) và Dừng 2 (Chỉ đường, toạ độ gần đúng) hiển thị đúng, có ghi chú toạ độ gần đúng rõ ràng.
+- `#/studio/overview` với cả 7 host: tên hiển thị đúng, số liệu 0/rỗng, không có "(demo)" gắn nhầm cho tên thật; `#/studio/reports` không crash khi không có dữ liệu tháng.
+- Quét lại toàn bộ route (Trail/Studio/Admin/Ops) ở cả 3 độ rộng (≈453px, mobile 375px, desktop) sau khi sửa lỗi tràn nhãn nút — không còn route nào tràn ngang hay lỗi console.

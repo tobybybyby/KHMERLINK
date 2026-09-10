@@ -1,16 +1,17 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-09-10",
   "sourceDocument": "data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx",
-  "sourceNote": "Nghiên cứu bàn giao 10/09/2026 — tách rõ dữ kiện đã xác minh, đề xuất sản phẩm và nội dung phải khảo sát thực địa. Không tự thêm số liệu/giá/giờ/trạng thái booking ngoài file nguồn.",
+  "secondarySourceDocument": "data/source/Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx",
+  "sourceNote": "Nghiên cứu bàn giao 10/09/2026 — tách rõ dữ kiện đã xác minh, đề xuất sản phẩm và nội dung phải khảo sát thực địa. Không tự thêm số liệu/giá/giờ/trạng thái booking ngoài file nguồn. Bổ sung tên hiển thị + địa chỉ chi tiết hơn từ Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx (gửi thêm cùng ngày) — địa chỉ Dừng 2 của EXP-02 (507 Nguyễn Đáng) đủ chi tiết để tra toạ độ gần đúng qua OpenStreetMap Nominatim, xem 'coordinateNote' của stop tương ứng.",
   "totalListings": 7,
   "experiencesNeedingPilot": 3,
   "realSitesOrClusters": 4,
   "listings": [
     {
       "id": "EXP-01",
-      "name": "Pound Your Own Cốm Dẹp",
-      "alternativeName": null,
+      "name": "Trải nghiệm tự tay giã cốm dẹp",
+      "alternativeName": "Pound Your Own Cốm Dẹp",
       "listingType": "experience",
       "category": "Ẩm thực",
       "status": "Ý tưởng sản phẩm — chưa có bằng chứng về lịch bán vé cố định",
@@ -36,6 +37,7 @@
       "openingHours": { "value": "Không công bố — cần xây lịch hẹn", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable", "note": "Chưa đưa giá mockup vì dự án để budget ở giai đoạn sau." },
       "representativeImage": "https://khpt.1cdn.vn/2017/10/26/www.khoahocphothong.com.vn-vnt_upload-file-10_2017-_dscn4677.jpg",
+      "localImage": "./assets/images/pilot/EXP-01.webp",
       "images": [],
       "informationSources": [
         {
@@ -61,8 +63,8 @@
     },
     {
       "id": "EXP-02",
-      "name": "Music & Dance Experience",
-      "alternativeName": null,
+      "name": "Trải nghiệm âm nhạc và múa truyền thống Khmer",
+      "alternativeName": "Music & Dance Experience",
       "listingType": "multiStopExperience",
       "category": "Âm nhạc và biểu diễn",
       "status": "Thiết kế khả thi, nhưng chưa phải tour đang bán",
@@ -70,7 +72,7 @@
       "bookingStatus": "notBookable",
       "ctaKind": "notify",
       "supplierRefs": ["sup-lam-phen", "sup-lop-nhac-mahori", "sup-doan-anh-binh-minh"],
-      "currentAddress": "Dừng 1: ấp Ba Se A, xã Song Lộc. Dừng 2: khu vực đường Nguyễn Đáng, phường Trà Vinh, tỉnh Vĩnh Long",
+      "currentAddress": "Dừng 1: Ấp Ba Se A, xã Song Lộc. Dừng 2: Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh, tỉnh Vĩnh Long",
       "formerAddress": null,
       "coordinates": { "lat": null, "lng": null },
       "coordinateStatus": "multiStop",
@@ -84,6 +86,9 @@
           "label": "Dừng 1 (đề xuất)",
           "place": "Xưởng NNƯT Lâm Phên",
           "description": "Nhạc cụ/mão/mặt nạ, cách Ao Bà Om khoảng 2 km.",
+          "address": "Ấp Ba Se A, xã Song Lộc, tỉnh Vĩnh Long",
+          "coordinates": { "lat": null, "lng": null },
+          "coordinateStatus": "unavailable",
           "supplierRef": "sup-lam-phen"
         },
         {
@@ -91,6 +96,10 @@
           "label": "Dừng 2 (đề xuất)",
           "place": "Đoàn Nghệ thuật Khmer Ánh Bình Minh (phần Rô-băm)",
           "description": "Phương án sinh kế tốt hơn là đoàn cố vấn, nghệ sĩ/câu lạc bộ cộng đồng biểu diễn có trả phí.",
+          "address": "Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh, tỉnh Vĩnh Long",
+          "coordinates": { "lat": 9.9237755, "lng": 106.3396274 },
+          "coordinateStatus": "geocodedApprox",
+          "coordinateNote": "Toạ độ tự động tra theo tên đường + khóm qua OpenStreetMap Nominatim (khớp đúng Khóm 10, Phường Trà Vinh) — là điểm đại diện trên đoạn đường đó, CHƯA phải toạ độ chính xác của số nhà 507 (OpenStreetMap chưa có dữ liệu số nhà cho đường này). Cần xác minh thực địa trước khi dùng làm pin chính thức.",
           "supplierRef": "sup-doan-anh-binh-minh"
         }
       ],
@@ -105,6 +114,7 @@
       "openingHours": { "value": "Theo lịch hẹn của cả 2 đầu mối", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable" },
       "representativeImage": "https://baovinhlong.com.vn/file/e7837c027f6ecd14017ffa4e5f2a0e34/092025/a1_20250928151611.jpg",
+      "localImage": "./assets/images/pilot/EXP-02.webp",
       "images": [],
       "informationSources": [
         {
@@ -138,8 +148,8 @@
     },
     {
       "id": "EXP-03",
-      "name": "Make a Mini Khmer Mask",
-      "alternativeName": null,
+      "name": "Trải nghiệm làm mặt nạ Khmer thu nhỏ",
+      "alternativeName": "Make a Mini Khmer Mask",
       "listingType": "experience",
       "category": "Thủ công",
       "status": "Ý tưởng sản phẩm có supplier phù hợp — chưa xác nhận bookable",
@@ -165,6 +175,7 @@
       "openingHours": { "value": "Chỉ theo lịch hẹn", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable" },
       "representativeImage": "https://vstatic.vietnam.vn/vietnam/resource/IMAGE/2025/11/04/1762218870531_1762218803.webp",
+      "localImage": "./assets/images/pilot/EXP-03.webp",
       "images": [],
       "informationSources": [
         {
@@ -192,7 +203,7 @@
     },
     {
       "id": "SITE-04",
-      "name": "Làng Văn hóa – Du lịch dân tộc Khmer",
+      "name": "Làng Văn hóa – Du lịch dân tộc Khmer và Ao Bà Om",
       "alternativeName": null,
       "listingType": "cluster",
       "category": "Địa điểm văn hóa",
@@ -221,6 +232,7 @@
       "openingHours": { "value": "Không có giờ chung cho toàn khu", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable", "note": "Không có vé chung được xác minh." },
       "representativeImage": "https://ik.imagekit.io/tvlk/blog/2022/02/dia-diem-du-lich-tra-vinh-2.jpg?tr=dpr-2%2Cw-675",
+      "localImage": "./assets/images/pilot/SITE-04.webp",
       "images": [],
       "informationSources": [
         {
@@ -276,6 +288,7 @@
       "openingHours": { "value": "Chưa tìm thấy lịch mở cửa chính thức ổn định — nên xác nhận với ban quản trị", "status": "needsFieldVerification" },
       "price": { "value": null, "status": "unavailable", "note": "Không có giá vé chính thức được xác minh." },
       "representativeImage": "https://cdn.baophapluat.vn/w3840/uploaded/vuhoangviet/2023_11_06/chuaang-1-2919.jpg",
+      "localImage": "./assets/images/pilot/SITE-05.webp",
       "images": [],
       "informationSources": [
         {
@@ -328,6 +341,7 @@
       "openingHours": { "value": "Chưa xác minh lịch hiện hành từ nguồn quản lý chính thức", "status": "needsFieldVerification" },
       "price": { "value": null, "status": "needsFieldVerification", "note": "Chưa xác minh giá vé hiện hành." },
       "representativeImage": "https://static-images.vnncdn.net/files/publish/2023/10/18/w-bao-tang-khmer-85-1-666.jpg?s=uaMu4ka-8dXIJPnl-jm2HQ&width=1280",
+      "localImage": "./assets/images/pilot/SITE-06.webp",
       "images": [],
       "informationSources": [
         {
@@ -383,6 +397,7 @@
       "openingHours": { "value": "Chưa có giờ du lịch chính thức", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable", "note": "Không có giá vé được xác minh." },
       "representativeImage": "https://images.baodantoc.vn/uploads/2021/Th%C3%A1ng%201/Ng%C3%A0y_15/T%C3%B4%20Ph%E1%BB%A5c%20Hung/IMG_1945.JPG",
+      "localImage": "./assets/images/pilot/SITE-07.webp",
       "images": [],
       "informationSources": [
         {

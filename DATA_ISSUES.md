@@ -77,22 +77,28 @@ Chỉ 7 địa danh có giờ mở cửa **verified** (trích dẫn trực tiế
 
 Nguồn: `data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx` (bàn giao 10/09/2026, 4 sheet: Tổng quan/Hồ sơ website/Supplier & khảo sát/Nguồn & hình ảnh). Đã chuẩn hoá tại [`data/pilot-listings.json`](data/pilot-listings.json) (công khai, dùng cho Trail) và [`data/pilot-suppliers.json`](data/pilot-suppliers.json) (chỉ nội bộ, dùng cho `#/ops/pilot`). Không tự thêm số liệu/giá/giờ/trạng thái booking ngoài file nguồn — mọi khoảng trống trong Excel giữ nguyên là khoảng trống trong dữ liệu (status `unavailable`/`needsFieldVerification`), không suy diễn.
 
-### Toạ độ — chỉ 1/7 listing có toạ độ công khai
-Duy nhất **SITE-07 (Chùa Lò Gạch)** có toạ độ tham chiếu công khai (9.917500, 106.295833, `coordinateStatus: reference`, nguồn Cổng tổng hợp Vietnam.vn). 6 listing còn lại **không có marker trên bản đồ** (chỉ hiện trong danh sách + nút "Mở trên Google Maps"), vì lý do khác nhau theo từng listing — không phải cùng một loại "thiếu dữ liệu":
+### Toạ độ — 1/7 listing có toạ độ chính thức, 1 điểm dừng có toạ độ gần đúng tự tra
+Duy nhất **SITE-07 (Chùa Lò Gạch)** có toạ độ tham chiếu công khai (9.917500, 106.295833, `coordinateStatus: reference`, nguồn Cổng tổng hợp Vietnam.vn) — có marker trên bản đồ Khám phá.
+
+**Cập nhật 2026-09-10** (sau khi có địa chỉ chi tiết hơn từ `Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx`): đã thử tra toạ độ cho mọi địa chỉ còn thiếu qua **OpenStreetMap Nominatim** (geocode công khai, không đoán thủ công). Chỉ **EXP-02 Dừng 2** ("Số 507 Nguyễn Đáng, khóm 10, phường Trà Vinh") đủ chi tiết để tra — kết quả khớp đúng đoạn đường Nguyễn Đáng tại Khóm 10, Phường Trà Vinh, lưu toạ độ (9.9237755, 106.3396274) với `coordinateStatus: "geocodedApprox"` và ghi chú rõ đây **chỉ là điểm đại diện trên đoạn đường đó, chưa phải vị trí chính xác của số nhà 507** (OSM chưa có dữ liệu số nhà cho đường này) — dùng cho nút "Chỉ đường" ở trang chi tiết, KHÔNG dùng để vẽ marker trên bản đồ Khám phá (tránh gây hiểu nhầm về vị trí của toàn bộ trải nghiệm 2-điểm-dừng).
+
+6 listing/điểm-dừng còn lại **vẫn không có marker trên bản đồ** (chỉ hiện trong danh sách + nút mở Google Maps), vì lý do khác nhau — không phải cùng một loại "thiếu dữ liệu":
 - **SITE-04**: là cụm/khu, không có một pin duy nhất đại diện đúng (`coordinateStatus: cluster`).
 - **SITE-05, SITE-06**: thuộc cụm Ao Bà Om, dùng chung link bản đồ khu vực thay vì pin riêng (`coordinateStatus: sharedCluster`).
-- **EXP-02**: 2 điểm dừng riêng biệt, chưa có toạ độ cơ sở công bố cho từng điểm (`coordinateStatus: multiStop`) — không được gộp thành một pin.
-- **EXP-03**: liên quan nhà riêng nghệ nhân Lâm Phên — **chủ động không công khai toạ độ** dù có thể suy ra được từ địa chỉ khu vực, để bảo vệ riêng tư (`coordinateStatus: private`).
-- **EXP-01**: chưa có nguồn toạ độ đáng tin cậy được công bố (`coordinateStatus: unavailable`).
+- **EXP-02 Dừng 1**: địa chỉ chỉ ở mức ấp ("Ấp Ba Se A, xã Song Lộc") — Nominatim không có kết quả (OSM chưa lập bản đồ ấp này ở mức đủ chi tiết).
+- **EXP-03**: liên quan nhà riêng nghệ nhân Lâm Phên (cùng ấp với EXP-02 Dừng 1) — **chủ động không tra/không công khai toạ độ** dù có thể geocode gần đúng như EXP-02 Dừng 2, để bảo vệ riêng tư (`coordinateStatus: private`).
+- **EXP-01**: địa chỉ chỉ ở mức ấp ("Ấp Giồng Thành, xã Nhị Trường") — Nominatim không có kết quả.
+
+**Thông tin cần bổ sung để thêm pin chính thức cho từng điểm** (đã báo lại người dùng): EXP-01, EXP-02 Dừng 1, EXP-03 cần **số nhà + tên đường cụ thể** của xưởng/nhà sản xuất (hoặc toạ độ GPS đo tại thực địa); SITE-04 cần ranh giới GIS chính thức từ đơn vị quản lý (hoặc xác nhận dùng pin Ao Bà Om làm điểm neo đại diện); SITE-05, SITE-06 cần địa chỉ đường/số nhà cụ thể của MỖI điểm (hiện chỉ có tới cấp phường, không đủ để phân biệt 2 điểm khác nhau trong cùng khu vực) hoặc GPS đo riêng từng điểm.
 
 ### Giờ mở cửa & giá — 0/7 listing có cả hai trường đã xác minh đầy đủ
 Không listing pilot nào có giá vé chính thức đã xác minh; SITE-06 có giá/giờ trạng thái `needsFieldVerification` (cần gọi lại xác nhận), 6 listing còn lại là `unavailable` (chưa công bố/chưa có lịch cố định). Card và trang chi tiết hiển thị "Đang xác minh giá" / "Vui lòng kiểm tra trước khi đến" thay vì để trống hoặc bịa số — không có trường hợp nào hiển thị giá/giờ cụ thể chưa qua xác minh.
 
 ### Booking — 0/7 listing bookable trong phase này
-EXP-01/02/03 đều ở trạng thái ý tưởng sản phẩm/chờ khảo sát/chờ liên hệ supplier — **không có supplier nào đã xác nhận nhận khách**. `js/data.js` không seed bất kỳ `experience`/host nào gắn với 7 listing pilot (khác hẳn bộ dữ liệu 37 địa danh cũ, vốn có 5 hộ + 5 trải nghiệm demo) — vì vậy không tồn tại luồng đặt chỗ/thanh toán nào có thể vô tình kích hoạt cho các listing chưa sẵn sàng. Khi có supplier xác nhận thật, cần bổ sung `experience` tương ứng qua Studio (không sửa trực tiếp `pilot-listings.json`).
+EXP-01/02/03 đều ở trạng thái ý tưởng sản phẩm/chờ khảo sát/chờ liên hệ supplier — **không có supplier nào đã xác nhận nhận khách**. `js/data.js` **có** seed lại 7 host (khôi phục 2026-09-10, mỗi host gắn 1 listing, dùng tên/vai trò thật từ `pilot-suppliers.json`) để hồ sơ "người cung cấp dịch vụ" trong Studio không còn trống, nhưng **không** seed bất kỳ `experience`/booking/doanh thu giả nào — vì vậy không tồn tại luồng đặt chỗ/thanh toán nào có thể vô tình kích hoạt cho các listing chưa sẵn sàng, và không có số liệu tài chính bịa gắn cho các tổ chức/cá nhân thật chưa xác nhận đồng ý. Khi có supplier xác nhận thật, cần bổ sung `experience` tương ứng qua Studio (không sửa trực tiếp `pilot-listings.json`).
 
-### Ảnh — chưa tải ảnh thật về project (đúng phạm vi phase này)
-`representativeImage` của cả 7 listing vẫn là URL tham khảo từ Excel (báo chí/cổng du lịch), **chưa tải về, chưa xác nhận quyền sử dụng thương mại** — card/danh sách dùng placeholder SVG theo loại hình (nhất quán, không lấy nhầm ảnh từ listing khác); trang chi tiết cố hiển thị URL thật với `onerror` tự chuyển về placeholder nếu URL lỗi. Trường `images: []` đã có sẵn trong schema, sẵn sàng cho phase tải ảnh chính thức sau này.
+### Ảnh — đã tải 7 ảnh đại diện về project (2026-09-10)
+`representativeImage` của cả 7 listing đã được **tải về và nén WebP** tại `assets/images/pilot/*.webp` (bản gốc lưu ở `assets/images/pilot/originals/`) — card Khám phá và ảnh đại diện trang chi tiết đều dùng ảnh thật này thay vì placeholder. **Vẫn chưa xác nhận quyền sử dụng thương mại** — dùng cho demo phi thương mại, cần xin phép đơn vị giữ bản quyền (báo chí/cổng du lịch) trước khi dùng cho production, đúng caveat đã áp dụng cho bộ ảnh 37 địa danh cũ. Trường `images: []` (gallery nhiều ảnh) vẫn để trống — chưa có ảnh phụ nào cho listing nào.
 
 ### SITE-04 và Ao Bà Om
 Ao Bà Om là **điểm neo** của cụm SITE-04, không phải một listing riêng thứ 8 — số liệu Ao Bà Om (>300 ha, ao 15 ha, ~500 cây cổ thụ, di tích quốc gia 1994) được đưa vào phần "Câu chuyện & số liệu nổi bật" của SITE-04, không tạo trang riêng.

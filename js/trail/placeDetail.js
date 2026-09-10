@@ -29,22 +29,31 @@ function factDisplay(value, status, missingText = 'Chưa xác minh') {
   return `${escapeHtml(String(value))}${statusSuffix(status)}`;
 }
 
-/** Trả về mảng {url,label} nút "Mở trên Google Maps" — dùng directions thật nếu có toạ độ công
- * khai, ngược lại dùng link tìm kiếm có sẵn trong dữ liệu (có thể nhiều hơn 1, vd EXP-02 có 2
- * điểm dừng riêng biệt — không được gộp thành một pin). */
+/** Trả về mảng {url,label} nút chỉ đường/mở bản đồ — ưu tiên directions thật khi có toạ độ công
+ * khai (kể cả toạ độ riêng của TỪNG điểm dừng với multiStopExperience, vd EXP-02 dừng 2 đã tra
+ * được toạ độ gần đúng theo địa chỉ đường — xem coordinateNote), phần còn lại dùng link tìm kiếm
+ * có sẵn trong dữ liệu. Không gộp nhiều điểm dừng thành một pin. */
 function directionsLinks(dest) {
+  if (dest.stops && dest.stops.length) {
+    return dest.stops.map((s, i) => {
+      // Nhãn nút cố tình ngắn gọn (chỉ "Dừng N") — chi tiết "(đề xuất)"/"chưa có toạ độ xác
+      // thực" đã có sẵn trong nội dung mô tả từng điểm dừng bên dưới, nhắc lại đầy đủ trong nhãn
+      // nút sẽ quá dài và tràn ngang trên màn hẹp.
+      const short = `Dừng ${s.order || i + 1}`;
+      if (s.coordinates && typeof s.coordinates.lat === 'number' && typeof s.coordinates.lng === 'number') {
+        const approxTag = s.coordinateStatus === 'geocodedApprox' ? ' (gần đúng)' : '';
+        return { url: `https://www.google.com/maps/dir/?api=1&destination=${s.coordinates.lat},${s.coordinates.lng}`, label: `🧭 Chỉ đường — ${short}${approxTag}` };
+      }
+      const link = (dest.mapLinks && dest.mapLinks[i]) || dest.mapSearchUrl;
+      return link ? { url: link, label: `🔍 Google Maps — ${short}` } : null;
+    }).filter(Boolean);
+  }
   if (dest.lat !== null && dest.lng !== null) {
     return [{ url: `https://www.google.com/maps/dir/?api=1&destination=${dest.lat},${dest.lng}`, label: '🧭 Chỉ đường' }];
   }
   const links = dest.mapLinks && dest.mapLinks.length ? dest.mapLinks : (dest.mapSearchUrl ? [dest.mapSearchUrl] : []);
   if (!links.length) return [];
-  if (links.length === 1) return [{ url: links[0], label: '🔍 Mở trên Google Maps (chưa có toạ độ xác thực)' }];
-  // Nhiều link chỉ thật sự là "điểm dừng" riêng biệt khi listing có mảng stops (multiStopExperience,
-  // vd EXP-02) — các trường hợp khác (vd cụm SITE-04 có link khu vực + link điểm neo Ao Bà Om) chỉ
-  // là lựa chọn xem bản đồ khác nhau, không phải các điểm dừng của một hành trình.
-  if (dest.stops && dest.stops.length === links.length) {
-    return links.map((url, i) => ({ url, label: `🔍 Mở trên Google Maps — điểm dừng ${i + 1}` }));
-  }
+  if (links.length === 1) return [{ url: links[0], label: '🔍 Mở trên Google Maps' }];
   return links.map((url, i) => ({ url, label: `🔍 Mở trên Google Maps (lựa chọn ${i + 1})` }));
 }
 
@@ -94,7 +103,10 @@ function sourcesSectionHtml(dest) {
       <ul style="padding-left:18px;font-size:0.85rem;color:var(--color-text-muted);">
         ${dest.sources.map((s) => `<li><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.label)}</a></li>`).join('')}
       </ul>
-      ${dest.imageRef && dest.imageRef.url ? `
+      ${dest.imageRef && dest.imageRef.url && dest.imageRef.status === 'downloaded-demo-use' ? `
+        <p class="text-sm text-faint">Ảnh dùng cho bản demo phi thương mại, tải từ nguồn công khai (<a href="${escapeHtml(dest.imageRef.url)}" target="_blank" rel="noopener noreferrer">xem nguồn gốc</a>) — cần xin phép đơn vị giữ bản quyền trước khi dùng cho production/thương mại.</p>
+      ` : ''}
+      ${dest.imageRef && dest.imageRef.url && dest.imageRef.status !== 'downloaded-demo-use' ? `
         <p class="text-sm text-faint">Ảnh minh hoạ hiện dùng placeholder theo loại hình — có link ảnh nguồn tham khảo (<a href="${escapeHtml(dest.imageRef.url)}" target="_blank" rel="noopener noreferrer">xem</a>), chưa tải về/chưa xác nhận quyền dùng lại cho production.</p>
       ` : ''}
     </section>
@@ -148,12 +160,14 @@ function multiStopHtml(dest) {
   return `
     <section>
       <div class="section-title"><h2>${dest.stops.length} điểm dừng đề xuất</h2></div>
-      <p class="text-sm text-muted">Đây là gói trải nghiệm nhiều điểm dừng — hai địa điểm chưa có toạ độ cơ sở riêng được công bố, không gộp thành một pin. Chưa phải tour đang bán.</p>
+      <p class="text-sm text-muted">Đây là gói trải nghiệm nhiều điểm dừng — mỗi điểm giữ toạ độ/địa chỉ riêng, không gộp thành một pin. Chưa phải tour đang bán.</p>
       <div class="flex-col gap-3" style="margin-top:8px;">
         ${dest.stops.map((s) => `
           <div class="activity-card">
             <div class="activity-card__head"><strong>${escapeHtml(s.label)} — ${escapeHtml(s.place)}</strong></div>
             <p class="text-sm text-muted" style="margin:4px 0 0;">${escapeHtml(s.description || '')}</p>
+            ${s.address ? `<p class="text-sm" style="margin:4px 0 0;">📍 ${escapeHtml(s.address)}</p>` : ''}
+            ${s.coordinateNote ? `<p class="text-sm text-faint" style="margin:4px 0 0;">⚠️ ${escapeHtml(s.coordinateNote)}</p>` : ''}
           </div>
         `).join('')}
       </div>
@@ -189,7 +203,9 @@ export function renderPlaceDetail(container, id) {
   const fav = isFavorite(dest.id);
   const dirs = directionsLinks(dest);
   const typeBadge = listingTypeBadge(dest.listingType);
-  const heroSrc = dest.representativeImageUrl || destinationImageSrc(dest);
+  // Ưu tiên ảnh đã tải về (nhanh, ổn định, không phụ thuộc server ngoài); URL gốc chỉ dùng khi
+  // chưa tải được ảnh nào cho listing này; placeholder theo loại hình là lưới an toàn cuối cùng.
+  const heroSrc = dest.imagePath || dest.representativeImageUrl || destinationImageSrc(dest);
   const heroFallback = placeholderImageDataUri(dest.category, dest.name);
 
   container.innerHTML = `

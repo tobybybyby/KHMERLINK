@@ -2,11 +2,12 @@
   "schemaVersion": 1,
   "generatedAt": "2026-09-10",
   "sourceDocument": "data/source/Du_lieu_7_diem_Khmer_Vinh_Long.xlsx",
+  "secondarySourceDocument": "data/source/Danh_sach_7_dia_diem_Khmer_Vinh_Long.xlsx",
   "sourceNote": "Không coi bài báo về hoạt động bảo tồn là bằng chứng một dịch vụ đang nhận đặt chỗ. Chỉ dùng nội bộ (Studio/Cổng vận hành) — không công khai cho khách.",
   "suppliers": [
     {
       "id": "sup-tran-tuan-viet",
-      "name": "Hộ kinh doanh Trần Tuấn Việt",
+      "name": "Hộ kinh doanh Trần Tuấn Việt – Cốm Dẹp Tuấn Việt",
       "role": "Ứng viên sản xuất/chuẩn bị nguyên liệu cốm dẹp",
       "location": "Ấp Giồng Thành, xã Nhị Trường",
       "listingIds": ["EXP-01"],

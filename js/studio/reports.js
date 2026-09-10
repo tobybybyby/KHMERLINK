@@ -92,16 +92,18 @@ export function renderReports(container, hostId) {
   container.innerHTML = `
     <div>
       <h1 style="margin-bottom:4px;">Báo cáo</h1>
-      <p class="text-sm text-muted">Doanh thu/khách 12 tháng là dữ liệu minh hoạ; riêng tháng hiện tại lấy từ booking thật để khớp với bảng Lịch & Booking.</p>
+      <p class="text-sm text-muted">${monthly.length ? 'Doanh thu/khách 12 tháng là dữ liệu minh hoạ; riêng tháng hiện tại lấy từ booking thật để khớp với bảng Lịch & Booking.' : 'Chưa có dữ liệu minh hoạ cho host này — biểu đồ sẽ hiển thị khi có booking thật phát sinh.'}</p>
     </div>
-    <div class="card" style="padding:20px;">
-      <h3 style="margin-top:0;">Doanh thu 12 tháng</h3>
-      <canvas id="revenue-chart" height="220"></canvas>
-    </div>
-    <div class="card" style="padding:20px;">
-      <h3 style="margin-top:0;">Khách theo tháng</h3>
-      <canvas id="visitors-chart" height="220"></canvas>
-    </div>
+    ${monthly.length ? `
+      <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0;">Doanh thu 12 tháng</h3>
+        <canvas id="revenue-chart" height="220"></canvas>
+      </div>
+      <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0;">Khách theo tháng</h3>
+        <canvas id="visitors-chart" height="220"></canvas>
+      </div>
+    ` : ''}
     ${cpsBlockHtml(cps)}
     <section class="card" style="padding:20px;">
       <h3 style="margin-top:0;">Gợi ý cải thiện</h3>
@@ -118,7 +120,7 @@ export function renderReports(container, hostId) {
     });
   });
 
-  loadChartJs().then((Chart) => {
+  if (monthly.length) loadChartJs().then((Chart) => {
     const labels = displayMonths.map((m) => m.label);
     new Chart(qs('#revenue-chart', container), {
       type: 'bar',

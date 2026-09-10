@@ -66,11 +66,13 @@ function transformListing(l) {
     contact: null,
     contactStatus: 'unavailable',
 
-    // Ảnh: card/list dùng placeholder thống nhất theo loại hình (imagePath để trống) — ảnh thật
-    // (representativeImageUrl) chỉ dùng ở trang chi tiết, có fallback khi URL lỗi (xem placeDetail.js).
-    imagePath: null,
+    // Ảnh: đã tải + nén 7 ảnh đại diện về assets/images/pilot/ (localImage) — card/list VÀ trang
+    // chi tiết đều dùng ảnh thật này; representativeImageUrl (URL gốc) vẫn giữ để tham khảo/nguồn.
+    imagePath: l.localImage || null,
     representativeImageUrl: l.representativeImage || null,
-    imageRef: l.representativeImage ? { url: l.representativeImage, status: 'external-not-downloaded' } : null,
+    imageRef: l.representativeImage
+      ? { url: l.representativeImage, localPath: l.localImage || null, status: l.localImage ? 'downloaded-demo-use' : 'external-not-downloaded' }
+      : null,
     galleryImages: [],
 
     sources: (l.informationSources || []).map((s) => ({

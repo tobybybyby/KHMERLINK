@@ -56,7 +56,7 @@ export function renderOverview(container, hostId) {
       <div class="quick-fact"><span class="quick-fact__label">Điểm sao</span><span class="quick-fact__value">⭐ ${avgRating}</span></div>
       <div class="quick-fact"><span class="quick-fact__label">Booking cần phản hồi</span><span class="quick-fact__value">${pending.length}</span></div>
     </div>
-    <p class="text-sm text-faint" style="margin-top:-6px;">Doanh thu và khách đã phục vụ gồm 11 tháng số liệu minh hoạ (như biểu đồ ở Báo cáo) cộng dồn với booking thật phát sinh trong phiên demo này.</p>
+    ${historicalMonths.length ? `<p class="text-sm text-faint" style="margin-top:-6px;">Doanh thu và khách đã phục vụ gồm 11 tháng số liệu minh hoạ (như biểu đồ ở Báo cáo) cộng dồn với booking thật phát sinh trong phiên demo này.</p>` : `<p class="text-sm text-faint" style="margin-top:-6px;">Chưa có dữ liệu minh hoạ cho host này — số liệu trên chỉ tính từ booking thật phát sinh trong phiên demo.</p>`}
 
     <div class="quick-facts">
       <div class="quick-fact"><span class="quick-fact__label">Tiền chờ nhận (đang giữ)</span><span class="quick-fact__value">${formatMoney(holdingAmount)}</span></div>
