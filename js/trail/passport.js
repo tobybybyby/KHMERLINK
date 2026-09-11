@@ -1,17 +1,21 @@
-import { getState, getPointsBalance, redeemVoucher, useVoucher, addUserReview } from '../storage.js';
+import { getState, getPointsBalance, redeemVoucher, useVoucher, addReview } from '../storage.js';
 import { escapeHtml, formatDateShort, categoryEmoji, destinationImageSrc, qs, qsa } from '../utils.js';
 import { NotificationService } from '../services/notificationService.js';
 import { MapService } from '../services/mapService.js';
+import { tagsForListing } from '../services/reviewsService.js';
 import { openModal, confirmDialog, renderEmptyState } from '../ui.js';
 import { renderTicketListHtml } from './support.js';
+
+const RATING_LABELS = { 1: 'Rất thất vọng', 2: 'Chưa hài lòng', 3: 'Ổn', 4: 'Hài lòng', 5: 'Hoàn hảo' };
 
 function starPickerHtml(name, label) {
   return `
     <div>
       <span class="field-label">${escapeHtml(label)}</span>
-      <div class="stars" data-picker="${name}" data-value="5" style="cursor:pointer;font-size:1.3rem;">
+      <div class="stars" data-picker="${name}" data-value="5" style="cursor:pointer;font-size:1.4rem;">
         ${[1, 2, 3, 4, 5].map((n) => `<span data-star="${n}">★</span>`).join('')}
       </div>
+      <p class="text-sm text-muted" data-rating-label="${name}" style="margin:2px 0 0;">${RATING_LABELS[5]}</p>
     </div>
   `;
 }
@@ -19,7 +23,11 @@ function starPickerHtml(name, label) {
 function wireStarPicker(root, name) {
   const picker = qs(`[data-picker="${name}"]`, root);
   const stars = qsa('[data-star]', picker);
-  const paint = (val) => stars.forEach((s) => { s.textContent = Number(s.dataset.star) <= val ? '★' : '☆'; });
+  const labelEl = qs(`[data-rating-label="${name}"]`, root);
+  const paint = (val) => {
+    stars.forEach((s) => { s.textContent = Number(s.dataset.star) <= val ? '★' : '☆'; });
+    if (labelEl) labelEl.textContent = RATING_LABELS[val] || '';
+  };
   paint(5);
   stars.forEach((s) => s.addEventListener('click', () => { picker.dataset.value = s.dataset.star; paint(Number(s.dataset.star)); }));
 }
@@ -27,16 +35,27 @@ function wireStarPicker(root, name) {
 export function openReviewModal(destinationId, bookingItemId, onSaved) {
   const state = getState();
   const dest = state.destinations.find((d) => d.id === destinationId);
+  const tags = tagsForListing(destinationId);
   const bodyHtml = `
     <form id="review-form" class="flex-col gap-3">
       <p>${dest ? escapeHtml(dest.name) : ''}</p>
       ${starPickerHtml('overall', 'Đánh giá chung')}
-      ${starPickerHtml('quality', 'Chất lượng trải nghiệm')}
-      ${starPickerHtml('welcome', 'Đón tiếp')}
-      ${starPickerHtml('accuracy', 'Đúng mô tả')}
       <div>
-        <label class="field-label" for="rv-comment">Góp ý</label>
-        <textarea class="field-input" id="rv-comment" rows="3" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+        <span class="field-label">Bạn thích điều gì ở đây?</span>
+        <div class="chip-row" id="rv-tags">
+          ${tags.map((t) => `<button type="button" class="chip" data-tag="${escapeHtml(t)}" aria-pressed="false">${escapeHtml(t)}</button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <label class="field-label" for="rv-comment">Chia sẻ thêm</label>
+        <textarea class="field-input" id="rv-comment" rows="3" placeholder="Điều gì khiến chuyến ghé thăm của bạn đáng nhớ?"></textarea>
+      </div>
+      <div>
+        <span class="field-label">Bạn có muốn giới thiệu địa điểm này cho người khác không?</span>
+        <div class="chip-row" id="rv-recommend">
+          <button type="button" class="chip" data-recommend="true" aria-pressed="true">Có</button>
+          <button type="button" class="chip" data-recommend="false" aria-pressed="false">Không</button>
+        </div>
       </div>
       <div class="modal__actions">
         <button type="submit" class="btn btn-primary btn-block">Gửi đánh giá</button>
@@ -44,23 +63,33 @@ export function openReviewModal(destinationId, bookingItemId, onSaved) {
     </form>
   `;
   openModal({
-    title: 'Viết đánh giá',
+    title: 'Cảm nhận chuyến ghé thăm',
     bodyHtml,
     onMount: (modalEl, closeFn) => {
-      ['overall', 'quality', 'welcome', 'accuracy'].forEach((n) => wireStarPicker(modalEl, n));
+      wireStarPicker(modalEl, 'overall');
+      const selectedTags = new Set();
+      qsa('[data-tag]', modalEl).forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const t = chip.dataset.tag;
+          if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
+          chip.setAttribute('aria-pressed', String(selectedTags.has(t)));
+        });
+      });
+      let wouldRecommend = true;
+      qsa('[data-recommend]', modalEl).forEach((chip) => {
+        chip.addEventListener('click', () => {
+          wouldRecommend = chip.dataset.recommend === 'true';
+          qsa('[data-recommend]', modalEl).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        });
+      });
       qs('#review-form', modalEl).addEventListener('submit', (e) => {
         e.preventDefault();
-        const rating = Number(qs('[data-picker="overall"]', modalEl).dataset.value);
-        const categories = {
-          quality: Number(qs('[data-picker="quality"]', modalEl).dataset.value),
-          welcome: Number(qs('[data-picker="welcome"]', modalEl).dataset.value),
-          accuracy: Number(qs('[data-picker="accuracy"]', modalEl).dataset.value),
-        };
+        const overallRating = Number(qs('[data-picker="overall"]', modalEl).dataset.value);
         const comment = qs('#rv-comment', modalEl).value.trim();
-        const r = addUserReview({ destinationId, bookingItemId, rating, comment, categories });
+        const r = addReview({ destinationId, bookingItemId, overallRating, comment, selectedTags: Array.from(selectedTags), wouldRecommend });
         if (!r.ok) { NotificationService.notify(r.reason, 'error'); return; }
         closeFn();
-        NotificationService.notify('Cảm ơn bạn đã đánh giá!', 'success');
+        NotificationService.notify('Cảm ơn bạn đã chia sẻ trải nghiệm', 'success');
         if (onSaved) onSaved();
       });
     },
@@ -69,7 +98,7 @@ export function openReviewModal(destinationId, bookingItemId, onSaved) {
 
 function pendingReviewsHtml(state) {
   const completed = state.bookingItems.filter((bi) => bi.status === 'completed');
-  const pending = completed.filter((bi) => !state.userReviews.some((r) => r.bookingItemId === bi.id));
+  const pending = completed.filter((bi) => !state.reviews.some((r) => r.bookingItemId === bi.id));
   if (!pending.length) return '<p class="text-sm text-faint">Không có trải nghiệm nào đang chờ đánh giá.</p>';
   return pending.map((bi) => {
     const dest = state.destinations.find((d) => d.id === bi.destinationId);

@@ -48,8 +48,8 @@
         "lat": 9.924813,
         "lng": 106.327734,
         "source": "Plus Code do người dùng cung cấp qua chat 10/09/2026",
-        "doNotPublish": true,
-        "reason": "Đây là nhà riêng của nghệ nhân — CHƯA có sự đồng thuận công khai theo đúng nguyên tắc đã thống nhất trong PHASE pilot. KHÔNG đưa vào data/pilot-listings.json hay bất kỳ tính năng bản đồ/chỉ đường công khai nào (EXP-02 Dừng 1, EXP-03) cho tới khi được xác nhận rõ ràng."
+        "doNotPublish": false,
+        "reason": "10/09/2026: đây là nhà riêng của nghệ nhân — ban đầu CHƯA công khai vì chưa có sự đồng thuận rõ ràng. 11/09/2026: người dùng gửi bảng toạ độ pin chính thức cho 7 listing pilot, liệt kê EXP-03 với toạ độ đầy đủ (9.9248125, 106.3276875 — khớp vị trí này) và publicPin:true — đã hiểu là quyết định công khai chính thức cho EXP-03 (xem coordinateInternalNote tại data/pilot-listings.json). Dừng 1 của EXP-02 tại CÙNG địa điểm vẫn KHÔNG được đưa toạ độ công khai vì bảng 11/09/2026 không có dòng riêng cho trường hợp đó — chỉ EXP-03 được xác nhận rõ. Nếu người dùng không thực sự có ý định công khai, cần đổi doNotPublish về true và gỡ publicPin/coordinates khỏi EXP-03 trong pilot-listings.json."
       }
     },
     {

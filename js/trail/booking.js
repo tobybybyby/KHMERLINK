@@ -1,4 +1,4 @@
-import { getState } from '../storage.js';
+import { getState, getItinerary } from '../storage.js';
 import { escapeHtml, formatCurrency, formatDateShort, qs } from '../utils.js';
 import { createBooking, findExperienceAndSlot } from '../services/bookingService.js';
 import { payBooking } from '../services/paymentService.js';
@@ -65,17 +65,54 @@ function paymentStepHtml(booking) {
   `;
 }
 
-function pendingResultHtml(booking) {
+const ITEM_STATUS_LABEL = {
+  pending: 'Chờ hộ xác nhận',
+  accepted: 'Đã xác nhận',
+  rejected: 'Bị từ chối',
+  cancelled: 'Đã huỷ',
+  completed: 'Đã hoàn thành',
+};
+
+/** Màn xác nhận đầy đủ sau khi đặt tour (PHASE "Hoàn thiện hành trình" mục 6) — không được nói
+ * "toàn bộ đã xác nhận" ngay sau khi tạo (mọi item lúc này đều 'pending', chưa có host nào phản
+ * hồi) — luôn hiển thị đúng trạng thái từng hoạt động. */
+function pendingResultHtml(booking, bookingItems, itinerary, paidAmount) {
+  const state = getState();
+  const startDate = itinerary ? new Date(itinerary.date) : null;
+  const startTime = itinerary ? `${String(itinerary.startHour).padStart(2, '0')}:${String(itinerary.startMin).padStart(2, '0')}` : null;
+  const anyPending = bookingItems.some((bi) => bi.status === 'pending');
   return `
     <div class="flex-col gap-3">
-      <p class="badge badge-demo">Chờ hộ xác nhận</p>
-      <p>Đã giữ chỗ và ghi nhận thanh toán. Hộ sẽ chấp nhận hoặc từ chối từng hoạt động trong Studio — bạn sẽ thấy cập nhật ở Hộ chiếu/Hành trình khi hộ phản hồi.</p>
-      <div class="quick-fact">
-        <span class="quick-fact__label">Mã booking</span>
-        <span class="quick-fact__value">${escapeHtml(booking.code)}</span>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem;">✅</div>
+        <h3 style="margin:6px 0 0;">Đặt hành trình thành công</h3>
+        <p class="text-sm text-muted">${anyPending ? 'Đang chờ hộ xác nhận từng hoạt động — chưa phải "đã xác nhận toàn bộ".' : 'Đã ghi nhận, xem trạng thái từng hoạt động bên dưới.'}</p>
+      </div>
+      <div class="quick-facts" style="margin:0;">
+        <div class="quick-fact"><span class="quick-fact__label">Mã booking</span><span class="quick-fact__value">${escapeHtml(booking.code)}</span></div>
+        ${itinerary ? `<div class="quick-fact"><span class="quick-fact__label">Tên hành trình</span><span class="quick-fact__value">${escapeHtml(itinerary.name)}</span></div>` : ''}
+        ${startDate ? `<div class="quick-fact"><span class="quick-fact__label">Ngày</span><span class="quick-fact__value">${formatDateShort(startDate)}</span></div>` : ''}
+        ${startTime ? `<div class="quick-fact"><span class="quick-fact__label">Giờ bắt đầu</span><span class="quick-fact__value">${startTime}</span></div>` : ''}
+        <div class="quick-fact"><span class="quick-fact__label">Số người</span><span class="quick-fact__value">${booking.partySize}</span></div>
+      </div>
+      <div>
+        <p class="field-label" style="margin-bottom:6px;">Các hoạt động</p>
+        <div class="flex-col gap-2">
+          ${bookingItems.map((bi) => `
+            <div class="card flex justify-between items-center gap-2 wrap" style="padding:10px;">
+              <span>${escapeHtml(bi.title)}</span>
+              <span class="badge ${bi.status === 'accepted' || bi.status === 'completed' ? 'badge-free' : bi.status === 'rejected' ? 'badge-recognized' : 'badge-demo'}">${ITEM_STATUS_LABEL[bi.status] || bi.status}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="quick-facts" style="margin:0;">
+        <div class="quick-fact"><span class="quick-fact__label">Tổng tiền</span><span class="quick-fact__value">${formatCurrency(booking.totalAmount)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Đã thanh toán (demo)</span><span class="quick-fact__value">${formatCurrency(paidAmount)}</span></div>
       </div>
       <div class="modal__actions">
-        <button type="button" class="btn btn-primary" id="bk-close-result">Xong</button>
+        ${itinerary ? `<a class="btn btn-primary" href="#/trail/itinerary/${itinerary.id}" id="bk-view-itinerary">Xem hành trình</a>` : ''}
+        <a class="btn btn-secondary" href="#/trail/explore" id="bk-back-explore">Quay lại khám phá</a>
       </div>
     </div>
   `;
@@ -110,14 +147,18 @@ export function openBookingFlow({ items, itineraryId = null, partySize, onDone }
           const r = payBooking(currentBooking.id, kind);
           if (!r.ok) { NotificationService.notify(r.reason, 'error'); return; }
           NotificationService.notify(`Đã thanh toán demo ${formatCurrency(r.amount)}.`, 'success');
-          setBody(pendingResultHtml(currentBooking));
-          qs('#bk-close-result', modalEl).addEventListener('click', () => {
-            closeFn();
-            if (onDone) onDone(currentBooking, currentItems);
-          });
+          showResult(r.amount);
         };
         qs('#bk-pay-deposit', modalEl).addEventListener('click', () => pay('deposit'));
         qs('#bk-pay-full', modalEl).addEventListener('click', () => pay('full'));
+      }
+
+      function showResult(paidAmount) {
+        const itinerary = itineraryId ? getItinerary(itineraryId) : null;
+        setBody(pendingResultHtml(currentBooking, currentItems, itinerary, paidAmount));
+        const finish = () => { if (onDone) onDone(currentBooking, currentItems); };
+        qs('#bk-view-itinerary', modalEl)?.addEventListener('click', () => { finish(); closeFn(); });
+        qs('#bk-back-explore', modalEl)?.addEventListener('click', () => { finish(); closeFn(); });
       }
 
       wireCart();

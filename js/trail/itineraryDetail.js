@@ -120,10 +120,29 @@ function liveBookingActionHtml(state, stop) {
     return '<span class="text-sm text-faint">Hộ sẽ xác nhận hoàn thành trong Studio sau khi bạn tham gia.</span>';
   }
   if (bi.status === 'completed') {
-    const reviewed = state.userReviews.some((r) => r.bookingItemId === bi.id);
+    const reviewed = state.reviews.some((r) => r.bookingItemId === bi.id);
     return reviewed ? '' : `<button type="button" class="btn btn-accent btn-sm" data-act="review" data-bi="${bi.id}" data-dest="${stop.destinationId}">⭐ Viết đánh giá</button>`;
   }
   return '';
+}
+
+/** Trạng thái booking TỔNG của tour, tính từ trạng thái từng bookingItem gắn với các điểm dừng
+ * (PHASE "Hoàn thiện hành trình" mục 6) — không lưu trạng thái này riêng, luôn tính lại từ dữ liệu
+ * hiện có để không bao giờ lệch với trạng thái thật của từng mục. Trả về null khi tour chưa có
+ * booking nào (draft — chỉ là lịch trình nháp, chưa đặt hoạt động trả phí nào). */
+function bookingAggregateStatus(state, itinerary) {
+  const items = itinerary.stops
+    .map((s) => s.bookingItemId)
+    .filter(Boolean)
+    .map((id) => state.bookingItems.find((bi) => bi.id === id))
+    .filter(Boolean);
+  if (!items.length) return null;
+  if (items.every((bi) => bi.status === 'completed')) return { label: 'Đã hoàn thành', cls: 'badge-free' };
+  if (items.every((bi) => bi.status === 'cancelled')) return { label: 'Đã huỷ', cls: 'badge-demo' };
+  if (items.every((bi) => bi.status === 'rejected')) return { label: 'Bị từ chối', cls: 'badge-recognized' };
+  if (items.every((bi) => bi.status === 'accepted' || bi.status === 'completed')) return { label: 'Đã xác nhận', cls: 'badge-free' };
+  if (items.some((bi) => bi.status === 'accepted' || bi.status === 'completed')) return { label: 'Một phần đã xác nhận', cls: 'badge-demo' };
+  return { label: 'Chờ hộ xác nhận', cls: 'badge-demo' };
 }
 
 function summaryHtml(itinerary) {
@@ -376,6 +395,7 @@ export function render(container, id) {
   const isLive = itinerary.status === 'active';
   const editable = itinerary.status === 'selected';
   const currentInfo = isLive ? getCurrentStopIndex(itinerary) : { index: -1, isOngoing: false };
+  const bookingStatus = bookingAggregateStatus(state, itinerary);
 
   container.innerHTML = `
     <div class="place-detail">
@@ -384,7 +404,10 @@ export function render(container, id) {
           <a href="#/trail/itinerary" class="text-sm">← Về danh sách hành trình</a>
           <div class="flex justify-between items-center gap-2 wrap" style="margin-top:8px;">
             <h1 style="margin:0;">${escapeHtml(itinerary.name)}</h1>
-            ${statusBadge(itinerary.status)}
+            <span class="badge-row" style="margin:0;">
+              ${statusBadge(itinerary.status)}
+              ${bookingStatus ? `<span class="badge ${bookingStatus.cls}">Booking: ${escapeHtml(bookingStatus.label)}</span>` : ''}
+            </span>
           </div>
           <p class="text-sm text-muted">${escapeHtml(itinerary.reason || '')}</p>
           <p class="badge badge-demo">Gợi ý tự động — bản demo</p>

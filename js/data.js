@@ -1,18 +1,17 @@
 // Seed dữ liệu người dùng/vận hành (KHÔNG bao gồm listings — 7 listing pilot được nạp riêng từ
 // data/pilot-listings.json qua js/services/destinationsService.js, xem js/storage.js).
 //
-// Ở phase "Thu gọn dữ liệu thành pilot 7 listing Khmer", toàn bộ trải nghiệm có thể đặt
-// (EXPERIENCES)/đánh giá mẫu (REVIEWS)/sự kiện (EVENTS)/gợi ý ghép cặp (PAIR_SUGGESTIONS) của bộ
-// 37 địa danh cũ đã được ĐƯA VỀ RỖNG vì:
-//   - Không listing pilot nào có supplier đã xác nhận nhận khách/bookable (đúng yêu cầu: không
-//     hiển thị EXP-01/02/03 là "đang mở bán"/"đã xác nhận") — nên KHÔNG seed trải nghiệm trả phí
-//     hay booking giả cho các host bên dưới, dù đã có hồ sơ.
-//   - Không có đánh giá/khách thật cho 7 listing pilot — không được tự thêm số liệu ngoài file.
-// HOSTS (bên dưới) đã được khôi phục lại — mỗi host tương ứng 1 trong 7 listing pilot, dùng đúng
-// tên/vai trò/địa chỉ đã có trong data/pilot-suppliers.json (nguồn: 2 file Excel do người dùng
-// cung cấp) để hồ sơ "người cung cấp dịch vụ" trong Studio không còn trống — nhưng KHÔNG kèm
-// doanh thu/lịch sử 12 tháng giả (metrics.monthlyByHost để {} — xem createSeedState) vì đây là
-// tên/tổ chức THẬT, chưa xác nhận đồng ý, gắn số liệu tài chính bịa cho họ là không phù hợp.
+// EXPERIENCES/SLOTS thật (có giá/lịch xác nhận) vẫn để rỗng ở đây — chỉ được tạo khi một host
+// thật sự dùng Studio (`upsertHostExperience`), không seed booking/bookable giả cho 7 listing.
+// HOSTS (bên dưới) mỗi host tương ứng 1 trong 7 listing pilot, dùng đúng tên/vai trò/địa chỉ đã có
+// trong data/pilot-suppliers.json.
+//
+// Dữ liệu HOẠT ĐỘNG mô phỏng (đánh giá/doanh thu/lượt ghé 12 tháng) cho PHASE "Bổ sung dữ liệu mô
+// phỏng liên kết" (11/09/2026) nằm ở data/pilot-seed-data.js — KHÔNG đặt ở đây (metrics.monthlyByHost
+// bên dưới đã hết dùng, chỉ giữ để không phá vỡ shape state cũ; xem js/services/metricsService.js
+// và js/admin/networkMetrics.js là nguồn dữ liệu hoạt động thật sự đang dùng). Người dùng đã được
+// hỏi rõ và xác nhận việc gắn số liệu mô phỏng vào 7 listing/host thật cho mục đích trình diễn —
+// xem DEMO_DATA.md.
 // Bản gốc bộ 37 địa danh cũ (5 hộ demo, 5 trải nghiệm trả phí mẫu, 9 đánh giá mẫu, 1 sự kiện, 3
 // gợi ý ghép cặp) được lưu nguyên vẹn tại data/archive/legacy-seed-vinhlong.js.txt.
 const HOSTS = [
@@ -122,10 +121,11 @@ export function createSeedState() {
     bookings: [],
     bookingItems: [],
     payments: [],
+    // reviews: thống nhất 1 tập dùng chung Trail/Studio/Cổng vận hành từ schema v3 (không còn tách
+    // userReviews riêng) — xem js/services/reviewsService.js. placeImpressions vẫn tách biệt
+    // (cảm nhận tự đánh dấu, không cần booking, không tính vào CPS/average đánh giá chính thức).
     reviews: buildReviews(),
-    userReviews: [],
     placeImpressions: [],
-    travellerReviews: [],
     passportStamps: [],
     pointsLedger: [],
     vouchers: [],
@@ -139,9 +139,13 @@ export function createSeedState() {
     favorites: [],
     viewCounts: {},
     suggestionDecisions: {},
+    // Giỏ hành trình ("+ Thêm vào hành trình" hoạt động như giỏ hàng), trung tâm thông báo và
+    // nhắc lịch — mới từ schema v3, xem PHASE "Hoàn thiện hành trình, booking, thông báo".
+    tripCart: [],
+    notifications: [],
+    reminders: [],
+    notificationsOptIn: false,
     ui: {
-      draftItinerary: [],
-      notifications: [],
       activeItineraryId: null,
       currentHostId: null,
     },

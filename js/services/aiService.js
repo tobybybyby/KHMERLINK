@@ -125,6 +125,14 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
       slotId: booking ? booking.slot.id : null,
       experienceTitle: booking ? booking.exp.title : null,
       experiencePrice: booking ? booking.exp.price : 0,
+      // Phân loại doanh thu (PHASE "Hoàn thiện hành trình") — bookable/price CHỈ true/>0 khi thật
+      // sự khớp được 1 experience+slot còn chỗ (biến `booking` ở trên); revenueType/isCommunityActivity
+      // luôn lấy từ phân loại listing (đúng bản chất listing dù chưa có supplier xác nhận).
+      revenueType: dest.revenueType || 'free_visit',
+      isCommunityActivity: !!dest.isCommunityActivity,
+      providerType: dest.providerType || null,
+      bookable: !!booking,
+      price: booking ? booking.exp.price : 0,
       note: notes.join(' '),
     });
     if (booking) totalCost += booking.exp.price * prefs.partySize;
@@ -139,6 +147,7 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
 
   const totalTravelMin = stops.reduce((s, x) => s + x.travelMinFromPrev, 0);
   const totalDurationMin = stops[stops.length - 1].departMin - (prefs.startHour * 60 + prefs.startMin);
+  const isBookableTour = stops.some((s) => s.bookable && s.revenueType === 'paid_activity' && s.price > 0);
 
   return {
     id,
@@ -148,6 +157,7 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
     totalDurationMin,
     totalTravelMin,
     totalCost,
+    isBookableTour,
     demo: true,
   };
 }
@@ -182,10 +192,17 @@ export function suggestItineraries(prefs) {
 
   const options = [];
 
+  // Tour ngắn (~2 giờ trở xuống): ưu tiên xếp hoạt động cộng đồng (hộ dân/nghệ nhân) lên đầu danh
+  // sách ứng viên trước, để nếu có hoạt động phù hợp thì được chọn trước — tránh kết quả toàn
+  // chùa/điểm miễn phí cho một tour ngắn (PHASE mục 2, quy tắc tour ngắn ~2 giờ).
+  const shortTourCandidates = prefs.availableHours <= 2
+    ? [...scored].sort((a, b) => (b.isCommunityActivity ? 1 : 0) - (a.isCommunityActivity ? 1 : 0))
+    : scored;
+
   const opt1 = buildOption({
     id: 'opt-gon-nhe', name: 'Khám phá gọn nhẹ',
     reason: 'Ưu tiên điểm gần và phù hợp sở thích của bạn, thời gian di chuyển tối thiểu.',
-    candidates: scored, prefs, maxStops: Math.max(2, paceConfig.maxStops - 1), dwellBiasMin: paceConfig.dwellBias - 10,
+    candidates: shortTourCandidates, prefs, maxStops: Math.max(2, paceConfig.maxStops - 1), dwellBiasMin: paceConfig.dwellBias - 10,
   });
   if (opt1) options.push(opt1);
 
@@ -265,6 +282,8 @@ export function recalcTimeline(itinerary) {
         stop.slotId = null;
         stop.experienceTitle = null;
         stop.experiencePrice = 0;
+        stop.bookable = false;
+        stop.price = 0;
         stop.note = 'Giờ đã đổi nên khung giờ trải nghiệm trả phí không còn khớp — hãy chọn lại nếu muốn đặt.';
       }
     }
@@ -280,7 +299,134 @@ export function recalcTimeline(itinerary) {
   itinerary.totalDurationMin = itinerary.stops.length
     ? itinerary.stops[itinerary.stops.length - 1].departMin - (itinerary.startHour * 60 + itinerary.startMin)
     : 0;
+  itinerary.isBookableTour = itinerary.stops.some((s) => s.bookable && s.revenueType === 'paid_activity' && s.price > 0);
   return itinerary;
 }
 
-export const AiService = { suggestItineraries, recalcTimeline, estimateTravelMin, findBookableExperience };
+/**
+ * Xếp lịch từ ĐÚNG các listing khách đã tick trong giỏ hành trình — KHÔNG lọc/loại bớt như
+ * buildOption (không skip theo ngân sách thời gian), chỉ tính giờ và gắn cảnh báo khi lệch giờ mở
+ * cửa; không tự thêm/bớt điểm nào ngoài selectedIds (PHASE "Hoàn thiện hành trình" mục 5).
+ * Thứ tự các điểm: nearest-neighbor tham lam từ điểm xuất phát (nếu có toạ độ), giữ nguyên thứ tự
+ * gốc khi không đủ toạ độ để so khoảng cách.
+ */
+export function buildItineraryFromSelection(state, { selectedIds, date, startHour = 8, startMin = 0, startPoint = null, partySize = 1, dwellBiasMin = 0 }) {
+  const destsById = new Map(state.destinations.map((d) => [d.id, d]));
+  const selected = selectedIds.map((id) => destsById.get(id)).filter(Boolean);
+  if (!selected.length) return null;
+
+  const ordered = [];
+  const remaining = [...selected];
+  let anchor = startPoint;
+  while (remaining.length) {
+    let bestIdx = 0;
+    if (anchor && anchor.lat !== null && anchor.lat !== undefined && anchor.lng !== null && anchor.lng !== undefined) {
+      let bestDist = Infinity;
+      remaining.forEach((d, i) => {
+        if (d.lat === null || d.lng === null) return;
+        const dist = haversineKm(anchor.lat, anchor.lng, d.lat, d.lng);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+      });
+    }
+    const next = remaining.splice(bestIdx, 1)[0];
+    ordered.push(next);
+    anchor = next;
+  }
+
+  let cursorMin = startHour * 60 + startMin;
+  let prevDest = startPoint;
+  let totalCost = 0;
+  const stops = ordered.map((dest) => {
+    const travel = estimateTravelMin(prevDest, dest);
+    const arriveMin = cursorMin + travel.min;
+    const dwell = (dest.suggestedDurationMin || 45) + dwellBiasMin;
+    const departMin = arriveMin + dwell;
+    const arriveDate = new Date(date);
+    arriveDate.setHours(0, arriveMin, 0, 0);
+    const booking = findBookableExperience(state, dest, arriveDate, partySize);
+    const fits = fitsOpeningHours(dest, arriveMin, departMin);
+
+    const notes = [];
+    if (dest.durationStatus === 'estimated') notes.push('Thời lượng ở điểm này là ước lượng cho mockup, chưa phải đo thực địa.');
+    if (!travel.known) notes.push('Chưa đủ dữ liệu (thiếu toạ độ) để tối ưu thời gian di chuyển đến điểm này.');
+    if (!fits) notes.push('Giờ đến có thể nằm ngoài giờ mở cửa đã biết — nên xác nhận lại trước khi đến.');
+    if (!booking && (dest.listingType === 'experience' || dest.listingType === 'multiStopExperience')) {
+      notes.push('Đề xuất — cần xác nhận supplier trước khi có thể đặt/thanh toán.');
+    }
+
+    const stop = {
+      destinationId: dest.id,
+      name: dest.name,
+      category: dest.category,
+      listingType: dest.listingType || null,
+      arriveMin,
+      departMin,
+      dwellMin: dwell,
+      travelMinFromPrev: travel.min,
+      travelEstimated: true,
+      travelUnknown: !travel.known,
+      experienceId: booking ? booking.exp.id : null,
+      slotId: booking ? booking.slot.id : null,
+      experienceTitle: booking ? booking.exp.title : null,
+      experiencePrice: booking ? booking.exp.price : 0,
+      revenueType: dest.revenueType || 'free_visit',
+      isCommunityActivity: !!dest.isCommunityActivity,
+      providerType: dest.providerType || null,
+      bookable: !!booking,
+      price: booking ? booking.exp.price : 0,
+      note: notes.join(' '),
+    };
+    if (booking) totalCost += booking.exp.price * partySize;
+    cursorMin = departMin;
+    prevDest = dest;
+    return stop;
+  });
+
+  const totalTravelMin = stops.reduce((s, x) => s + x.travelMinFromPrev, 0);
+  const totalDurationMin = stops.length ? stops[stops.length - 1].departMin - (startHour * 60 + startMin) : 0;
+  const isBookableTour = stops.some((s) => s.bookable && s.revenueType === 'paid_activity' && s.price > 0);
+
+  return { stops, totalDurationMin, totalTravelMin, totalCost, isBookableTour, demo: true };
+}
+
+/**
+ * Gợi ý tối đa `limit` hoạt động CỘNG ĐỒNG (isCommunityActivity) chưa có trong lựa chọn hiện tại,
+ * ưu tiên: khoảng cách tới điểm gần nhất đã chọn → sở thích → còn slot thật (nếu có) → hộ
+ * dân/nghệ nhân trước tổ chức văn hoá/vé tham quan. Dùng cho panel "Thêm một trải nghiệm cộng
+ * đồng vào hành trình" (PHASE mục 4) khi giỏ chưa có hoạt động trả phí nào hợp lệ.
+ */
+export function suggestCommunityAdditions(state, { excludeIds = [], anchorPoint = null, interests = new Set(), partySize = 1, date = null, limit = 3 }) {
+  const excludeSet = new Set(excludeIds);
+  const candidates = state.destinations.filter((d) => !excludeSet.has(d.id) && d.isCommunityActivity);
+  const arriveDate = date ? new Date(date) : new Date();
+
+  const scored = candidates.map((d) => {
+    let score = 0;
+    if (anchorPoint && anchorPoint.lat !== null && anchorPoint.lat !== undefined && d.lat !== null && d.lng !== null) {
+      const km = haversineKm(anchorPoint.lat, anchorPoint.lng, d.lat, d.lng);
+      score += Math.max(0, 5 - km / 5);
+    }
+    const matched = (d.interests || []).filter((i) => interests.has(i)).length;
+    score += matched * 2;
+    const booking = findBookableExperience(state, d, arriveDate, partySize);
+    if (booking) score += 3;
+    if (d.providerType === 'community_household' || d.providerType === 'artisan') score += 2;
+    return { d, score, booking };
+  }).sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, limit).map(({ d, booking }) => ({
+    destinationId: d.id,
+    name: d.name,
+    category: d.category,
+    providerType: d.providerType,
+    isCommunityActivity: true,
+    bookable: !!booking,
+    price: booking ? booking.exp.price : null,
+    experienceTitle: booking ? booking.exp.title : null,
+  }));
+}
+
+export const AiService = {
+  suggestItineraries, recalcTimeline, estimateTravelMin, findBookableExperience,
+  buildItineraryFromSelection, suggestCommunityAdditions,
+};

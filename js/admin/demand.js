@@ -2,7 +2,7 @@ import { getState } from '../storage.js';
 import { escapeHtml, formatMoney } from '../utils.js';
 import { getSlotRemaining } from '../services/bookingService.js';
 import { filterBarHtml, wireFilterBar, getScopedDestinations, getScopedBookingItems } from './filters.js';
-import { getAggregatedMonthly } from './metrics.js';
+import { getNetworkMonthlyRevenue } from './networkMetrics.js';
 
 function unmetDemandRows(state, scopedDestIds) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -70,7 +70,7 @@ export function renderAdminDemand(container) {
   const unmet = unmetDemandRows(state, scopedDestIds);
   const { rows: concRows, total: concTotal } = concentrationRows(state, scopedBookingItems);
   const opportunities = opportunityRows(state, scopedDestIds);
-  const monthly = getAggregatedMonthly(state);
+  const monthly = getNetworkMonthlyRevenue(state);
 
   container.innerHTML = `
     <div>

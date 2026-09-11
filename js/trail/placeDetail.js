@@ -1,11 +1,13 @@
-import { getState, toggleFavorite, isFavorite, addDraftItineraryItem, saveItinerary, recordDestinationView } from '../storage.js';
+import { getState, toggleFavorite, isFavorite, toggleTripCartItem, isInTripCart, recordDestinationView } from '../storage.js';
 import {
   escapeHtml, formatDateShort, categoryEmoji,
-  destinationImageSrc, placeholderImageDataUri, renderStars, ratingDisplay, listingTypeBadge, ctaLabel,
+  destinationImageSrc, placeholderImageDataUri, renderStars, listingTypeBadge, ctaLabel,
   qs, qsa,
 } from '../utils.js';
 import { NotificationService } from '../services/notificationService.js';
-import { recalcTimeline } from '../services/aiService.js';
+import { getRatingStatsForListing, getDisplayReviewsForListing, formatRatingStats } from '../services/reviewsService.js';
+import { computeOpenStatus, formatPricePerPerson, getNearestSlotAvailability, getOperations, formatWeeklyHoursRows } from '../services/operationsService.js';
+import { openReviewModal } from './passport.js';
 import { initAccordion, renderEmptyState, confirmDialog } from '../ui.js';
 
 function quickFact(label, value) {
@@ -14,6 +16,41 @@ function quickFact(label, value) {
       <span class="quick-fact__label">${escapeHtml(label)}</span>
       <span class="quick-fact__value">${value}</span>
     </div>
+  `;
+}
+
+const OPEN_STATUS_LABEL_CLS = { open: 'badge-free', closing_soon: 'badge-recognized', closed: 'badge-demo', by_appointment: 'badge-type', unknown: 'badge-demo' };
+
+function operationsAccordionHtml(state, dest) {
+  const ops = getOperations(dest.id);
+  if (!ops) {
+    return `
+      <div class="quick-facts" style="margin:0;">
+        ${quickFact('Giờ mở cửa', factDisplay(dest.openingHours, dest.openingHoursStatus, 'Vui lòng kiểm tra trước khi đến'))}
+        ${quickFact('Giá tham quan', factDisplay(dest.priceDisplay, dest.priceStatus, 'Đang xác minh'))}
+      </div>
+    `;
+  }
+  const status = computeOpenStatus(dest.id);
+  const priceText = formatPricePerPerson(ops.pricePerPerson);
+  const avail = (dest.listingType === 'experience' || dest.listingType === 'multiStopExperience') ? getNearestSlotAvailability(state, dest.id) : null;
+  const weekRows = formatWeeklyHoursRows(dest.id);
+  return `
+    <div class="quick-facts" style="margin:0;">
+      <div class="quick-fact"><span class="quick-fact__label">Trạng thái hiện tại</span><span class="quick-fact__value"><span class="badge ${OPEN_STATUS_LABEL_CLS[status.status] || 'badge-demo'}">${escapeHtml(status.label)}</span></span></div>
+      <div class="quick-fact"><span class="quick-fact__label">Giá</span><span class="quick-fact__value">${escapeHtml(priceText)}</span></div>
+      <div class="quick-fact"><span class="quick-fact__label">Thời lượng</span><span class="quick-fact__value">${ops.durationMinutes ? `${ops.durationMinutes} phút` : '—'}</span></div>
+      ${ops.capacityPerSlot ? `<div class="quick-fact"><span class="quick-fact__label">Sức chứa mỗi lượt</span><span class="quick-fact__value">${ops.capacityPerSlot} người</span></div>` : ''}
+    </div>
+    ${avail ? `<p class="text-sm" style="margin-top:8px;">🎟️ ${escapeHtml(avail.label)} (${escapeHtml(avail.dateLabel)})</p>` : ''}
+    ${ops.openingNote ? `<p class="text-sm text-faint" style="margin-top:6px;">${escapeHtml(ops.openingNote)}</p>` : ''}
+    <details style="margin-top:8px;">
+      <summary class="text-sm" style="cursor:pointer;">Xem giờ cả tuần</summary>
+      <div class="flex-col gap-1" style="margin-top:6px;">
+        ${weekRows.map((r) => `<p class="text-sm text-muted" style="margin:0;display:flex;justify-content:space-between;gap:8px;"><span>${escapeHtml(r.label)}</span><span>${escapeHtml(r.value)}</span></p>`).join('')}
+      </div>
+    </details>
+    <p class="text-sm text-faint" style="margin-top:10px;">Thông tin vận hành trong giai đoạn pilot, vui lòng kiểm tra khi đặt lịch.</p>
   `;
 }
 
@@ -58,14 +95,18 @@ function directionsLinks(dest) {
 }
 
 function reviewItemHtml(rv) {
+  const tagsHtml = (rv.selectedTags || []).length
+    ? `<p class="text-sm text-faint" style="margin:4px 0 0;">${rv.selectedTags.map((t) => `<span class="badge badge-type" style="margin-right:4px;">${escapeHtml(t)}</span>`).join('')}</p>`
+    : '';
   return `
     <div class="review-item">
       <div class="review-item__head">
-        <span>${escapeHtml(rv.author)}</span>
-        <span class="stars" aria-label="${rv.rating} trên 5 sao">${renderStars(rv.rating)}</span>
+        <span>${escapeHtml(rv.travellerName || 'Khách')}</span>
+        <span class="stars" aria-label="${rv.overallRating} trên 5 sao">${renderStars(rv.overallRating)}</span>
       </div>
       <p class="text-sm text-muted" style="margin:6px 0 0;">${escapeHtml(rv.comment)}</p>
-      <p class="text-faint text-sm" style="margin:2px 0 0;">${formatDateShort(rv.date)}</p>
+      ${tagsHtml}
+      <p class="text-faint text-sm" style="margin:2px 0 0;">${formatDateShort(rv.createdAt)}</p>
     </div>
   `;
 }
@@ -191,16 +232,16 @@ export function renderPlaceDetail(container, id) {
 
   recordDestinationView(dest.id);
 
-  const reviews = [
-    ...state.reviews.filter((r) => r.destinationId === dest.id),
-    ...state.userReviews.filter((r) => r.destinationId === dest.id),
-  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const ratingStats = getRatingStatsForListing(state, dest.id);
+  const reviews = getDisplayReviewsForListing(state, dest.id);
 
   const related = (dest.relatedListingIds || [])
     .map((rid) => state.destinations.find((d) => d.id === rid))
     .filter(Boolean);
 
   const fav = isFavorite(dest.id);
+  const inCart = isInTripCart(dest.id);
+  const reviewableBookingItem = state.bookingItems.find((bi) => bi.destinationId === dest.id && bi.status === 'completed' && !state.reviews.some((r) => r.bookingItemId === bi.id));
   const dirs = directionsLinks(dest);
   const typeBadge = listingTypeBadge(dest.listingType);
   // Ưu tiên ảnh đã tải về (nhanh, ổn định, không phụ thuộc server ngoài); URL gốc chỉ dùng khi
@@ -219,6 +260,7 @@ export function renderPlaceDetail(container, id) {
             <span class="badge ${typeBadge.cls}">${categoryEmoji(dest.category)} ${escapeHtml(typeBadge.label)}</span>
             <span class="badge badge-type">${escapeHtml(dest.category)}</span>
           </div>
+          <p class="text-sm text-muted" style="margin:4px 0 0;">${formatRatingStats(ratingStats)}</p>
           ${readinessNoteHtml(dest)}
           <p style="margin-top:12px;">${escapeHtml(dest.summary)}</p>
         </div>
@@ -226,8 +268,9 @@ export function renderPlaceDetail(container, id) {
         <div class="cta-row">
           ${dirs.map((d) => `<a class="btn btn-secondary" href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer">${d.label}</a>`).join('')}
           ${ctaSectionHtml(dest)}
-          <button type="button" class="btn btn-primary" id="add-itinerary-btn">➕ Thêm vào hành trình</button>
+          <button type="button" class="btn ${inCart ? 'btn-secondary' : 'btn-primary'}" id="add-itinerary-btn" data-active="${inCart}">${inCart ? '✓ Đã thêm' : '➕ Thêm vào hành trình'}</button>
           <button type="button" class="btn btn-fav" id="save-place-btn" data-active="${fav}">${fav ? '♥ Đã lưu' : '♡ Lưu địa điểm'}</button>
+          ${reviewableBookingItem ? '<button type="button" class="btn btn-accent" id="pd-review-btn">⭐ Viết đánh giá</button>' : ''}
         </div>
 
         ${dest.activities ? `
@@ -250,13 +293,7 @@ export function renderPlaceDetail(container, id) {
 
         <section class="accordion" id="place-accordion">
           ${accordionItem('acc-before', 'Lưu ý trước khi đến', `<p>${escapeHtml(dest.tips || 'Chưa có lưu ý cụ thể.')}</p>`, true)}
-          ${accordionItem('acc-hours', 'Giờ và phí', `
-            <div class="quick-facts" style="margin:0;">
-              ${quickFact('Giờ mở cửa', factDisplay(dest.openingHours, dest.openingHoursStatus, 'Vui lòng kiểm tra trước khi đến'))}
-              ${quickFact('Giá tham quan', factDisplay(dest.priceDisplay, dest.priceStatus, 'Đang xác minh'))}
-            </div>
-            ${dest.priceNote ? `<p class="text-sm text-faint" style="margin-top:6px;">${escapeHtml(dest.priceNote)}</p>` : ''}
-          `)}
+          ${accordionItem('acc-hours', 'Giờ và phí', operationsAccordionHtml(state, dest))}
           ${accordionItem('acc-address', 'Địa chỉ', `
             <p>${factDisplay(dest.address, dest.addressStatus)}</p>
             ${dest.formerAddress ? `<p class="text-sm text-faint">Địa chỉ trước sắp xếp 2025 (để đối chiếu nguồn): ${escapeHtml(dest.formerAddress)}</p>` : ''}
@@ -296,38 +333,43 @@ export function renderPlaceDetail(container, id) {
     NotificationService.notify(active ? 'Đã lưu địa điểm vào danh sách yêu thích.' : 'Đã bỏ lưu địa điểm.', 'success');
   });
 
+  qs('#pd-review-btn', container)?.addEventListener('click', () => {
+    openReviewModal(dest.id, reviewableBookingItem.id, () => renderPlaceDetail(container, id));
+  });
+
   qs('#pd-interest-btn', container)?.addEventListener('click', () => {
     NotificationService.notify('Đã ghi nhận quan tâm — trải nghiệm này đang chờ khảo sát/xác nhận supplier trước khi mở bán.', 'info');
   });
 
-  qs('#add-itinerary-btn', container).addEventListener('click', () => {
-    const editableItinerary = state.itineraries.find((it) => it.status === 'selected');
-    if (editableItinerary) {
+  qs('#add-itinerary-btn', container).addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    const wasActive = btn.dataset.active === 'true';
+    if (wasActive) {
+      // Bấm lại khi đã thêm: cho chọn mở giỏ hành trình hoặc gỡ khỏi giỏ (PHASE mục 3.6).
       confirmDialog({
-        title: 'Thêm vào hành trình?',
-        message: `Thêm "${dest.name}" vào hành trình "${editableItinerary.name}" đang chỉnh sửa?`,
-        confirmLabel: 'Thêm vào',
-      }).then((ok) => {
-        if (!ok) return;
-        editableItinerary.stops.push({
-          destinationId: dest.id, name: dest.name, category: dest.category,
-          arriveMin: 0, departMin: 0, travelMinFromPrev: 0, travelEstimated: true, travelUnknown: false,
-          experienceId: null, slotId: null, experienceTitle: null, experiencePrice: 0,
-          note: '', selfVisitedAt: null, bookingItemId: null,
-        });
-        recalcTimeline(editableItinerary);
-        saveItinerary(editableItinerary);
-        NotificationService.notify('Đã thêm vào hành trình — giờ và chi phí đã cập nhật.', 'success');
-        window.location.hash = `#/trail/itinerary/${editableItinerary.id}`;
+        title: 'Địa điểm đã có trong giỏ hành trình',
+        message: `"${dest.name}" đang ở trong giỏ hành trình của bạn. Mở giỏ hành trình hay gỡ địa điểm này ra?`,
+        confirmLabel: 'Mở giỏ hành trình',
+        cancelLabel: 'Gỡ khỏi giỏ',
+      }).then((openCart) => {
+        if (openCart) {
+          window.location.hash = '#/trail/itinerary';
+          return;
+        }
+        toggleTripCartItem(dest.id);
+        btn.dataset.active = 'false';
+        btn.textContent = '➕ Thêm vào hành trình';
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+        NotificationService.notify(`Đã gỡ "${dest.name}" khỏi giỏ hành trình.`, 'info');
       });
       return;
     }
-    const added = addDraftItineraryItem(dest.id);
-    NotificationService.notify(
-      added
-        ? 'Đã lưu vào danh sách gợi ý — vào "Hành trình" để tạo hành trình đầy đủ, danh sách này sẽ được dùng làm gợi ý ban đầu.'
-        : 'Địa điểm này đã có trong danh sách gợi ý ban đầu.',
-      'info',
-    );
+    toggleTripCartItem(dest.id);
+    btn.dataset.active = 'true';
+    btn.textContent = '✓ Đã thêm';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-secondary');
+    NotificationService.notify(`Đã thêm ${dest.name} vào hành trình của bạn.`, 'success');
   });
 }

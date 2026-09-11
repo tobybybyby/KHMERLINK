@@ -1,14 +1,28 @@
 import { createSeedState } from './data.js';
 import { loadDestinations } from './services/destinationsService.js';
 
-export const SCHEMA_VERSION = 2;
-const STORAGE_KEY = 'vlt_user_state';
+export const SCHEMA_VERSION = 4;
+export const STORAGE_KEY = 'vlt_user_state';
 
-// Nội dung/catalog (destinations, hosts, experiences, events, reviews mẫu, metrics) được nạp
-// lại mới mỗi lần khởi động — không lưu vào localStorage — để cập nhật data/destinations.json
-// luôn có hiệu lực ngay, không cần người dùng "khôi phục dữ liệu mẫu". Chỉ dữ liệu do người
-// dùng thao tác (yêu thích, hành trình nháp, booking...) mới được lưu.
-const CONTENT_KEYS = ['destinations', 'hosts', 'experiences', 'slots', 'events', 'reviews', 'voucherCatalog', 'metrics'];
+// Nội dung/catalog (destinations, hosts, experiences, events, metrics) được nạp lại mới mỗi lần
+// khởi động — không lưu vào localStorage — để cập nhật data/pilot-listings.json luôn có hiệu lực
+// ngay. Chỉ dữ liệu do người dùng thao tác (yêu thích, hành trình, booking, review, giỏ hành
+// trình...) mới được lưu. LƯU Ý: 'reviews' đã bỏ khỏi danh sách này từ schema v3 — trước đó
+// review thật của khách bị nạp đè/mất vì buildReviews() luôn trả về [] mỗi lần tải trang; review
+// thật giờ nằm hoàn toàn trong dữ liệu người dùng (persist qua addReview), xem migrateV2ToV3().
+const CONTENT_KEYS = ['destinations', 'hosts', 'experiences', 'slots', 'events', 'voucherCatalog', 'metrics'];
+
+/** Bắn sự kiện dùng chung để các trang/dashboard đang mở tự render lại phần dữ liệu liên quan
+ * (PHASE "Hoàn thiện hành trình" mục 10) — KHÔNG reload toàn bộ app, chỉ là tín hiệu "có gì đó
+ * vừa đổi". app.js lắng nghe sự kiện này (cùng tab) và sự kiện `storage` (khác tab) để re-render
+ * route hiện tại từ state mới nhất. */
+export function notifyDataChanged(entity, action) {
+  try {
+    window.dispatchEvent(new CustomEvent('khmerlink:data-changed', { detail: { entity, action } }));
+  } catch (err) {
+    // môi trường không hỗ trợ CustomEvent (không nên xảy ra trên trình duyệt hiện đại) — bỏ qua an toàn
+  }
+}
 
 let state = null;
 
@@ -26,13 +40,71 @@ function defaultUserData() {
   return userData;
 }
 
+/** v2 -> v3: thêm tripCart/notifications/reminders, gộp userReviews (đánh giá gắn booking, kiểu
+ * cũ) vào reviews (kiểu thống nhất mới dùng chung Trail/Studio/Ops) — KHÔNG xoá/nhân đôi dữ liệu
+ * cũ, KHÔNG cộng lại điểm thưởng/passport (những cái đó đã persist nguyên trạng, không đụng tới).
+ * placeImpressions KHÔNG gộp vào đây — vẫn là tính năng "cảm nhận tự đánh dấu" tách biệt như cũ. */
+function migrateV2ToV3(parsed) {
+  const migrated = { ...parsed };
+
+  const oldDraft = (parsed.ui && parsed.ui.draftItinerary) || [];
+  if (!Array.isArray(migrated.tripCart)) {
+    migrated.tripCart = oldDraft.map((d) => ({
+      destinationId: d.destinationId,
+      addedAt: d.addedAt || new Date().toISOString(),
+      selected: true,
+      partySize: 1,
+    }));
+  }
+
+  if (!Array.isArray(migrated.notifications)) migrated.notifications = [];
+  if (!Array.isArray(migrated.reminders)) migrated.reminders = [];
+
+  if (!Array.isArray(migrated.reviews)) {
+    const oldReviews = Array.isArray(parsed.userReviews) ? parsed.userReviews : [];
+    migrated.reviews = oldReviews.map((r) => ({
+      id: `review-${r.id}`,
+      bookingId: null, // bản cũ không lưu bookingId trực tiếp trên review — chỉ có bookingItemId
+      bookingItemId: r.bookingItemId,
+      listingId: r.destinationId,
+      hostId: null, // suy ra lại ở init() bằng destinationId, không suy đoán số liệu mới ở đây
+      travellerId: 'traveller-demo-self',
+      overallRating: r.rating,
+      categoryRatings: {
+        experience: (r.categories && r.categories.quality) ?? r.rating,
+        hospitality: (r.categories && r.categories.welcome) ?? r.rating,
+        accuracy: (r.categories && r.categories.accuracy) ?? r.rating,
+      },
+      comment: r.comment || '',
+      createdAt: r.date || new Date().toISOString(),
+      status: 'published',
+    }));
+  }
+
+  migrated.schemaVersion = 3;
+  return migrated;
+}
+
+/** v3 -> v4: PHASE "Bổ sung dữ liệu mô phỏng liên kết" — historicalMetrics/reviewAggregates/
+ * reviewTags/visitMetrics/providerMetrics (baseline đánh giá, giờ/giá, doanh thu & lượt ghé 12
+ * tháng) đều là dữ liệu NỘI DUNG tĩnh đọc trực tiếp từ data/pilot-seed-data.js mỗi lần tải trang
+ * (không lưu vào localStorage, giống destinations/hosts) — vì vậy KHÔNG có gì trong state đã lưu
+ * cần biến đổi hình dạng ở đây. Chỉ tăng version để đánh dấu đã áp dụng quy ước mới; booking/review/
+ * hành trình/toạ độ/yêu thích của người dùng giữ nguyên hoàn toàn, không cộng lại gì cả. */
+function migrateV3ToV4(parsed) {
+  return { ...parsed, schemaVersion: SCHEMA_VERSION };
+}
+
 function loadUserData() {
   try {
     const text = window.localStorage.getItem(STORAGE_KEY);
     if (!text) return null;
-    const parsed = JSON.parse(text);
-    if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION) return null;
-    return parsed;
+    let parsed = JSON.parse(text);
+    if (!parsed) return null;
+    if (parsed.schemaVersion === SCHEMA_VERSION) return parsed;
+    if (parsed.schemaVersion === 2) parsed = migrateV2ToV3(parsed);
+    if (parsed.schemaVersion === 3) return migrateV3ToV4(parsed);
+    return parsed.schemaVersion === SCHEMA_VERSION ? parsed : null; // version không xác định/quá cũ — không có đường migration đã định nghĩa
   } catch (err) {
     return null;
   }
@@ -71,6 +143,16 @@ export async function init() {
     }
   });
 
+  // Backfill hostId cho review migrate từ schema v2 (lúc migrate chưa có danh sách hosts —
+  // hosts là CONTENT_KEY, chỉ có sẵn ở đây) — không suy đoán gì thêm ngoài tra cứu 1-1 theo
+  // destinationId, và không ghi đè hostId đã có (review tạo mới sau migration đã có hostId đúng).
+  (state.reviews || []).forEach((r) => {
+    if (r.hostId === null || r.hostId === undefined) {
+      const host = state.hosts.find((h) => h.destinationId === r.listingId);
+      r.hostId = host ? host.id : null;
+    }
+  });
+
   persist();
   return state;
 }
@@ -88,6 +170,30 @@ export function upsertHostExperience(experience) {
 
   persist();
   return experience;
+}
+
+/** Đồng bộ state trong bộ nhớ từ localStorage — dùng khi TAB KHÁC vừa ghi dữ liệu (sự kiện
+ * `storage`, xem app.js). Viết localStorage không tự cập nhật biến `state` đang giữ trong bộ nhớ
+ * của tab hiện tại (mỗi tab có bản sao module JS riêng) — phải đọc lại và merge thủ công. Chỉ ghi
+ * đè các key KHÔNG phải CONTENT_KEYS (nội dung tĩnh không đổi giữa các tab). Trả về false nếu
+ * chưa init/không đọc được — nơi gọi tự bỏ qua an toàn. */
+export function syncFromLocalStorage() {
+  if (!state) return false;
+  try {
+    const text = window.localStorage.getItem(STORAGE_KEY);
+    if (!text) return false;
+    const parsed = JSON.parse(text);
+    if (!parsed) return false;
+    let userData = parsed;
+    if (parsed.schemaVersion === 2) userData = migrateV2ToV3(parsed);
+    else if (parsed.schemaVersion !== SCHEMA_VERSION) return false;
+    Object.keys(userData).forEach((key) => {
+      if (!CONTENT_KEYS.includes(key)) state[key] = userData[key];
+    });
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 export function getState() {
@@ -132,17 +238,6 @@ export function isFavorite(destinationId) {
   return getState().favorites.includes(destinationId);
 }
 
-export function addDraftItineraryItem(destinationId) {
-  const s = getState();
-  if (!Array.isArray(s.ui.draftItinerary)) s.ui.draftItinerary = [];
-  const already = s.ui.draftItinerary.some((it) => it.destinationId === destinationId);
-  if (!already) {
-    s.ui.draftItinerary.push({ destinationId, addedAt: new Date().toISOString() });
-    persist();
-  }
-  return !already;
-}
-
 // ---------- Hành trình ----------
 export function saveItinerary(itinerary) {
   const s = getState();
@@ -150,6 +245,7 @@ export function saveItinerary(itinerary) {
   if (idx >= 0) s.itineraries[idx] = itinerary;
   else s.itineraries.push(itinerary);
   persist();
+  notifyDataChanged('itinerary', idx >= 0 ? 'updated' : 'created');
   return itinerary;
 }
 
@@ -168,6 +264,213 @@ export function setActiveItinerary(id) {
   const s = getState();
   s.ui.activeItineraryId = id;
   persist();
+}
+
+// ---------- Giỏ hành trình (tripCart) — "Thêm vào hành trình" hoạt động như giỏ hàng ----------
+// item: { destinationId, addedAt, selected: boolean, partySize: number }. `selected` là trạng
+// thái tick trong trang "Hành trình của tôi" — KHÔNG đồng nghĩa với có trong giỏ hay không (bỏ
+// tick vẫn giữ trong giỏ, chỉ ảnh hưởng việc có được đưa vào lộ trình khi bấm "Tạo lộ trình từ
+// các điểm đã chọn" hay không — đúng PHASE mục 3/12).
+export function getTripCart() {
+  return getState().tripCart;
+}
+
+export function isInTripCart(destinationId) {
+  return getState().tripCart.some((it) => it.destinationId === destinationId);
+}
+
+export function getTripCartCount() {
+  return getState().tripCart.length;
+}
+
+export function addToTripCart(destinationId) {
+  const s = getState();
+  if (s.tripCart.some((it) => it.destinationId === destinationId)) return { ok: true, added: false };
+  s.tripCart.push({ destinationId, addedAt: new Date().toISOString(), selected: true, partySize: 1 });
+  persist();
+  notifyDataChanged('tripCart', 'created');
+  return { ok: true, added: true };
+}
+
+export function removeFromTripCart(destinationId) {
+  const s = getState();
+  const before = s.tripCart.length;
+  s.tripCart = s.tripCart.filter((it) => it.destinationId !== destinationId);
+  if (s.tripCart.length !== before) {
+    persist();
+    notifyDataChanged('tripCart', 'deleted');
+  }
+  return { ok: true };
+}
+
+/** Bấm nút "+ Thêm vào hành trình" khi listing đã có trong giỏ → gỡ khỏi giỏ (toggle add/remove,
+ * đúng hành vi nút đổi thành "✓ Đã thêm" rồi bấm lại để xoá — PHASE mục 3.5-3.6). */
+export function toggleTripCartItem(destinationId) {
+  if (isInTripCart(destinationId)) {
+    removeFromTripCart(destinationId);
+    return { added: false };
+  }
+  addToTripCart(destinationId);
+  return { added: true };
+}
+
+export function setTripCartItemSelected(destinationId, selected) {
+  const s = getState();
+  const item = s.tripCart.find((it) => it.destinationId === destinationId);
+  if (!item) return null;
+  item.selected = !!selected;
+  persist();
+  notifyDataChanged('tripCart', 'updated');
+  return item;
+}
+
+export function setTripCartAllSelected(selected) {
+  const s = getState();
+  s.tripCart.forEach((it) => { it.selected = !!selected; });
+  persist();
+  notifyDataChanged('tripCart', 'updated');
+}
+
+export function removeTripCartSelected() {
+  const s = getState();
+  s.tripCart = s.tripCart.filter((it) => !it.selected);
+  persist();
+  notifyDataChanged('tripCart', 'deleted');
+}
+
+export function setTripCartPartySize(destinationId, partySize) {
+  const s = getState();
+  const item = s.tripCart.find((it) => it.destinationId === destinationId);
+  if (!item) return null;
+  item.partySize = Math.max(1, Number(partySize) || 1);
+  persist();
+  notifyDataChanged('tripCart', 'updated');
+  return item;
+}
+
+// ---------- Trung tâm thông báo (notification center) ----------
+// notification: { id, type, title, message, bookingId, itineraryId, createdAt, read }
+export function addNotification({ type, title, message, bookingId = null, itineraryId = null }) {
+  const s = getState();
+  const notif = {
+    id: uidLocal('notif'),
+    type,
+    title,
+    message,
+    bookingId,
+    itineraryId,
+    createdAt: new Date().toISOString(),
+    read: false,
+  };
+  s.notifications.unshift(notif); // mới nhất lên đầu
+  persist();
+  notifyDataChanged('notifications', 'created');
+  return notif;
+}
+
+export function getNotifications() {
+  return getState().notifications;
+}
+
+export function getUnreadNotificationCount() {
+  return getState().notifications.filter((n) => !n.read).length;
+}
+
+export function markNotificationRead(id) {
+  const s = getState();
+  const n = s.notifications.find((x) => x.id === id);
+  if (!n || n.read) return null;
+  n.read = true;
+  persist();
+  notifyDataChanged('notifications', 'updated');
+  return n;
+}
+
+export function markAllNotificationsRead() {
+  const s = getState();
+  let changed = false;
+  s.notifications.forEach((n) => { if (!n.read) { n.read = true; changed = true; } });
+  if (changed) {
+    persist();
+    notifyDataChanged('notifications', 'updated');
+  }
+}
+
+// ---------- Nhắc lịch (reminders) — website tĩnh nên KHÔNG có gì chạy khi tab đã đóng; chỉ kiểm
+// tra reminder đến hạn mỗi khi app được mở/focus lại (xem checkDueReminders(), gọi từ app.js) ----------
+// reminder: { id, bookingId, itineraryId, kind: '24h'|'2h', triggerAt (ISO), message, sentAt }
+const TIMEZONE = 'Asia/Ho_Chi_Minh';
+
+/** Tạo 2 reminder (24 giờ và 2 giờ trước giờ khởi hành) cho 1 booking — gọi ngay sau khi booking
+ * được tạo. `startAt` là Date giờ khởi hành thật (điểm dừng sớm nhất có slot), do nơi gọi
+ * (bookingService) tính sẵn — storage.js không tự suy luận slot để tránh phụ thuộc vòng. Nếu
+ * `startAt` null (chưa xác định được giờ) thì không tạo reminder nào — không bịa giờ. */
+export function scheduleBookingReminders(booking, itineraryId, startAt) {
+  if (!startAt) return [];
+  const s = getState();
+  const created = [];
+  [
+    { kind: '24h', hoursBefore: 24 },
+    { kind: '2h', hoursBefore: 2 },
+  ].forEach(({ kind, hoursBefore }) => {
+    const triggerAt = new Date(startAt.getTime() - hoursBefore * 3600000);
+    if (triggerAt.getTime() <= Date.now()) return; // mốc đã qua ngay lúc tạo booking — bỏ qua, không gửi trễ
+    const reminder = {
+      id: uidLocal('reminder'),
+      bookingId: booking.id,
+      itineraryId: itineraryId || booking.itineraryId || null,
+      kind,
+      triggerAt: triggerAt.toISOString(),
+      message: kind === '24h'
+        ? `Ngày mai bạn có hành trình KhmerLink lúc ${startAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: TIMEZONE })}. Hãy kiểm tra lại điểm gặp và những điều cần chuẩn bị.`
+        : `Còn 2 giờ nữa hành trình của bạn bắt đầu. Kiểm tra lại địa điểm và giờ hẹn nhé.`,
+      sentAt: null,
+    };
+    s.reminders.push(reminder);
+    created.push(reminder);
+  });
+  if (created.length) persist();
+  return created;
+}
+
+/** Gọi mỗi khi app mở/được focus lại (app.js) — biến mọi reminder đã tới hạn và CHƯA gửi
+ * (`sentAt` null) thành 1 notification, rồi đánh dấu sentAt để không gửi lặp lại. Idempotent: gọi
+ * nhiều lần liên tiếp không tạo thêm notification nào ngoài các reminder thật sự mới tới hạn. */
+export function checkDueReminders() {
+  const s = getState();
+  const now = Date.now();
+  const due = s.reminders.filter((r) => !r.sentAt && new Date(r.triggerAt).getTime() <= now);
+  if (!due.length) return [];
+  due.forEach((r) => {
+    r.sentAt = new Date().toISOString();
+    addNotification({
+      type: 'booking_reminder',
+      title: r.kind === '24h' ? 'Nhắc lịch — còn 1 ngày' : 'Nhắc lịch — sắp bắt đầu',
+      message: r.message,
+      bookingId: r.bookingId,
+      itineraryId: r.itineraryId,
+    });
+    if (s.notificationsOptIn && typeof window !== 'undefined' && 'Notification' in window && window.Notification.permission === 'granted') {
+      try {
+        // eslint-disable-next-line no-new
+        new window.Notification('KhmerLink', { body: r.message });
+      } catch (err) {
+        // trình duyệt chặn/không hỗ trợ — bỏ qua, notification trong app vẫn đã lưu ở trên
+      }
+    }
+  });
+  persist();
+  return due;
+}
+
+export function setNotificationsOptIn(optIn) {
+  const s = getState();
+  s.notificationsOptIn = !!optIn;
+  persist();
+}
+
+export function getNotificationsOptIn() {
+  return !!getState().notificationsOptIn;
 }
 
 // ---------- Passport / điểm thưởng ----------
@@ -249,28 +552,45 @@ export function useVoucher(voucherId) {
 }
 
 // ---------- Đánh giá của khách (viết sau khi hoàn thành booking) ----------
-export function addUserReview({ destinationId, bookingItemId, rating, comment, categories }) {
+// Nguồn dữ liệu THỐNG NHẤT cho cả Trail/Studio/Cổng vận hành (PHASE "Hoàn thiện hành trình" mục
+// 8-9) — chỉ một tập state.reviews, không tách riêng bản Trail và bản Studio. Chỉ booking item đã
+// `completed` mới được đánh giá; 1 booking item chỉ có tối đa 1 review (demo 1 traveller duy nhất
+// nên dedup theo bookingItemId là đủ tương đương "1 review/traveller/booking item").
+export function addReview({ destinationId, bookingId = null, bookingItemId, overallRating, categoryRatings, comment, selectedTags = [], wouldRecommend = null }) {
   const s = getState();
-  if (s.userReviews.some((r) => r.bookingItemId === bookingItemId)) {
+  if (s.reviews.some((r) => r.bookingItemId === bookingItemId)) {
     return { ok: false, reason: 'Booking này đã được đánh giá.' };
   }
+  const bi = s.bookingItems.find((x) => x.id === bookingItemId);
+  if (!bi || bi.status !== 'completed') {
+    return { ok: false, reason: 'Chỉ có thể đánh giá hoạt động đã hoàn thành.' };
+  }
+  const host = s.hosts.find((h) => h.destinationId === destinationId);
   const review = {
-    id: uidLocal('urv'),
-    destinationId,
+    id: uidLocal('review'),
+    bookingId: bookingId || bi.bookingId || null,
     bookingItemId,
-    author: 'Bạn',
-    rating,
-    categories: categories || {},
-    comment,
-    date: new Date().toISOString(),
+    listingId: destinationId,
+    hostId: host ? host.id : null,
+    travellerId: 'traveller-demo-self', // bản demo 1 traveller, chưa có tài khoản đa người dùng thật
+    travellerName: 'Bạn',
+    overallRating,
+    categoryRatings: categoryRatings || {},
+    selectedTags,
+    wouldRecommend,
+    comment: comment || '',
+    createdAt: new Date().toISOString(),
+    status: 'published',
+    source: 'live_demo',
   };
-  s.userReviews.push(review);
+  s.reviews.push(review);
   persist();
+  notifyDataChanged('reviews', 'created');
   return { ok: true, review };
 }
 
 // ---------- Cảm nhận nhanh sau khi tự đánh dấu "Đã ghé thăm" (không cần booking) ----------
-// Tách khỏi userReviews (vốn yêu cầu bookingItemId, dùng cho CPS/host) vì đây là tín hiệu tự
+// Tách khỏi reviews (vốn yêu cầu bookingItemId, dùng cho CPS/host) vì đây là tín hiệu tự
 // khai báo cho các điểm miễn phí — không tính vào CPS, không thay thế đánh giá booking chính
 // thức. Chống trùng theo stopKey (một lượt "đã ghé thăm" chỉ tạo được một cảm nhận).
 export function addPlaceImpression({ destinationId, itineraryId = null, stopKey = null, rating, tags = [], comment = '', recommend = null }) {

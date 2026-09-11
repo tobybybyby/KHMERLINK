@@ -3,6 +3,7 @@
 // hộ đang chọn — không có trang nào lộ CPS ra phía khách/Trail).
 import { getState } from '../storage.js';
 import { getSlotRemaining } from './bookingService.js';
+import { getRatingStatsForListingIds } from './reviewsService.js';
 
 export const CPS_WEIGHTS = { response: 0.3, completion: 0.4, rating: 0.3 };
 export const NEW_SPOTLIGHT_MIN_BOOKINGS = 3;
@@ -67,8 +68,7 @@ export function computeCps(hostId) {
   const completionRate = acceptedOrLater.length ? completed.length / acceptedOrLater.length : null;
 
   const destIds = hostDestinationIds(state, hostId);
-  const allReviews = [...state.reviews, ...state.userReviews].filter((r) => destIds.includes(r.destinationId));
-  const avgRating = allReviews.length ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length : null;
+  const { averageRating: avgRating } = getRatingStatsForListingIds(state, destIds);
 
   const NEUTRAL = 0.7;
   const normResponse = responseRate;

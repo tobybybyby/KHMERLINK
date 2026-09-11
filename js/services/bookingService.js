@@ -1,7 +1,23 @@
 // Adapter giữ chỗ/booking — mô phỏng trên state cục bộ (không có backend thật).
 // Triển khai thật cần backend khoá chỗ nguyên tử để tránh overbooking giữa nhiều thiết bị/tab.
-import { getState, persist, addPassportStamp, addPoints } from '../storage.js';
+import { getState, persist, addPassportStamp, addPoints, addNotification, scheduleBookingReminders, notifyDataChanged } from '../storage.js';
 import { uid, generateBookingCode } from '../utils.js';
+
+/** Giờ khởi hành thật = giờ điểm dừng sớm nhất có slot trong booking (không phải giờ tạo booking).
+ * Dùng cho cả nhắc lịch (24h/2h trước) lẫn chính sách hoàn tiền (computeRefundAmount) — cùng một
+ * cách tính để không lệch giữa 2 chỗ dùng. Trả về null nếu không có item nào có slot hợp lệ. */
+function computeEarliestItemDateTime(items) {
+  let earliest = null;
+  items.forEach((bi) => {
+    const { slot } = findExperienceAndSlot(bi.experienceId, bi.slotId);
+    if (!slot) return;
+    const slotDay = new Date(slot.date);
+    const [h, m] = slot.startTime.split(':').map(Number);
+    const dt = new Date(slotDay.getFullYear(), slotDay.getMonth(), slotDay.getDate(), h, m);
+    if (!earliest || dt < earliest) earliest = dt;
+  });
+  return earliest;
+}
 
 export const HOLD_TTL_MINUTES = 15;
 
@@ -111,6 +127,23 @@ export function createBooking({ itineraryId = null, partySize, items }) {
   s.bookings.push(booking);
   s.bookingItems.push(...bookingItems);
   persist();
+
+  // Thông báo + nhắc lịch (PHASE "Hoàn thiện hành trình" mục 6-7) — đặt ở lớp dữ liệu (đúng yêu
+  // cầu "triển khai event tại lớp dữ liệu thay vì gọi rải rác trong từng component") thay vì gọi
+  // từ booking.js (UI). startAt tính từ điểm dừng sớm nhất có slot thật — không bịa giờ khi thiếu.
+  const startAt = computeEarliestItemDateTime(bookingItems);
+  addNotification({
+    type: 'booking_created',
+    title: 'Hành trình đã được ghi nhận',
+    message: startAt
+      ? `Hành trình sẽ bắt đầu lúc ${startAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' })}, ngày ${startAt.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}. Mã booking ${booking.code}.`
+      : `Đã ghi nhận booking ${booking.code} — đang chờ hộ xác nhận.`,
+    bookingId: booking.id,
+    itineraryId,
+  });
+  scheduleBookingReminders(booking, itineraryId, startAt);
+  notifyDataChanged('bookings', 'created');
+
   return { ok: true, booking, bookingItems };
 }
 
@@ -155,6 +188,25 @@ export function respondToBooking(bookingId, decisions) {
   booking.depositAmount = Math.round((booking.totalAmount * 0.3) / 1000) * 1000;
 
   persist();
+
+  // Thông báo cho khách theo đúng trạng thái tổng vừa tính — KHÔNG nói "đã xác nhận toàn bộ" khi
+  // vẫn còn item pending hoặc chỉ partially_confirmed (PHASE mục 6).
+  const statusMessage = {
+    confirmed: `Hộ đã xác nhận toàn bộ hoạt động trong booking ${booking.code}.`,
+    partially_confirmed: `Một phần hoạt động trong booking ${booking.code} đã được xác nhận — một số mục vẫn đang chờ hoặc đã bị từ chối, xem chi tiết trong Hành trình.`,
+    rejected: `Rất tiếc, hộ đã từ chối toàn bộ hoạt động trong booking ${booking.code}. Bạn có thể xem hoạt động cộng đồng thay thế ở Khám phá.`,
+  }[booking.status];
+  if (statusMessage) {
+    addNotification({
+      type: booking.status === 'rejected' ? 'booking_rejected' : 'booking_confirmed',
+      title: booking.status === 'rejected' ? 'Hộ đã từ chối booking' : (booking.status === 'confirmed' ? 'Booking đã được xác nhận' : 'Booking đã được xác nhận một phần'),
+      message: statusMessage,
+      bookingId: booking.id,
+      itineraryId: booking.itineraryId,
+    });
+  }
+  notifyDataChanged('bookings', 'updated');
+
   return { ok: true, booking, items };
 }
 
@@ -185,6 +237,7 @@ export function completeBookingItem(bookingItemId) {
   if (firstTimeWithHost) addPoints(5, `host-${bi.destinationId}-${bi.id}`, bi.bookingId);
 
   persist();
+  notifyDataChanged('bookingItems', 'updated');
   return { ok: true, bookingItem: bi, booking };
 }
 

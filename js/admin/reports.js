@@ -8,14 +8,14 @@ const MIN_OBSERVATIONS = 3;
 const NETWORK_COMMISSION_RATE = 0.1; // cấu hình minh hoạ — có thể chỉnh
 
 function anonymizedFeedback(state, scopedDestIds) {
-  const reviews = [...state.reviews, ...state.userReviews].filter((r) => scopedDestIds.has(r.destinationId));
+  const reviews = state.reviews.filter((r) => r.status === 'published' && scopedDestIds.has(r.listingId));
   const byGroup = {};
   reviews.forEach((r) => {
-    const dest = state.destinations.find((d) => d.id === r.destinationId);
+    const dest = state.destinations.find((d) => d.id === r.listingId);
     const group = categoryGroup(dest?.category);
     if (!byGroup[group]) byGroup[group] = { count: 0, sum: 0 };
     byGroup[group].count += 1;
-    byGroup[group].sum += r.rating;
+    byGroup[group].sum += Number(r.overallRating);
   });
   return Object.entries(byGroup).map(([group, v]) => ({ group, count: v.count, avg: v.count ? (v.sum / v.count).toFixed(1) : null }));
 }

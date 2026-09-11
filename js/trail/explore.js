@@ -1,13 +1,15 @@
-import { getState } from '../storage.js';
+import { getState, toggleTripCartItem, isInTripCart } from '../storage.js';
 import {
   escapeHtml, matchesQuery, haversineKm,
   categoryEmoji, deriveCategoryVisual, debounce, qs, qsa,
-  destinationImageSrc, getSimulatedCrowdLevel, ratingDisplay, listingTypeBadge,
+  destinationImageSrc, getSimulatedCrowdLevel, listingTypeBadge, formatDurationMin,
 } from '../utils.js';
 import { PAIR_SUGGESTIONS } from '../data.js';
 import { MapService } from '../services/mapService.js';
 import { NotificationService } from '../services/notificationService.js';
 import { openModal, renderEmptyState, renderErrorState } from '../ui.js';
+import { getRatingStatsForListing, formatRatingStats } from '../services/reviewsService.js';
+import { computeOpenStatus, formatPricePerPerson, getNearestSlotAvailability, getOperations } from '../services/operationsService.js';
 
 // Bộ lọc thu gọn cho phạm vi pilot 7 listing — chỉ còn loại hình (chip danh mục, tự sinh từ dữ
 // liệu nên không hiện danh mục rỗng) và khoảng cách (khi có vị trí). Các bộ lọc cũ (đánh giá,
@@ -21,6 +23,7 @@ const filterState = {
 
 let mapInstance = null;
 let markerLayer = null;
+let markersById = new Map();
 let userMarker = null;
 let userPoint = null;
 let manualPickMode = false;
@@ -126,6 +129,12 @@ function estimatedTag(status) {
 }
 
 function priceBadge(d) {
+  const ops = getOperations(d.id);
+  if (ops) {
+    const priceText = formatPricePerPerson(ops.pricePerPerson);
+    const cls = ops.pricePerPerson === 0 ? 'badge-free' : ops.pricePerPerson ? 'badge-type' : 'badge-demo';
+    return `<span class="badge ${cls}">${escapeHtml(priceText)}</span>`;
+  }
   if (d.priceStatus === 'missing' || d.priceStatus === 'unavailable' || !d.priceDisplay) {
     return '<span class="badge badge-demo">Đang xác minh giá</span>';
   }
@@ -133,45 +142,59 @@ function priceBadge(d) {
   return `<span class="badge ${cls}">${escapeHtml(d.priceDisplay)}</span>${estimatedTag(d.priceStatus)}`;
 }
 
+function openStatusBadge(d) {
+  const status = computeOpenStatus(d.id);
+  const cls = { open: 'badge-free', closing_soon: 'badge-recognized', closed: 'badge-demo', by_appointment: 'badge-type', unknown: 'badge-demo' }[status.status] || 'badge-demo';
+  return `<span class="badge ${cls}">🕒 ${escapeHtml(status.label)}</span>`;
+}
+
+function operationsMetaHtml(state, d) {
+  const ops = getOperations(d.id);
+  const parts = [];
+  if (ops?.durationMinutes) parts.push(`<span class="text-sm text-muted">${escapeHtml(formatDurationMin(ops.durationMinutes))}</span>`);
+  if (d.listingType === 'experience' || d.listingType === 'multiStopExperience') {
+    const avail = getNearestSlotAvailability(state, d.id);
+    if (avail) parts.push(`<span class="text-sm text-muted">${escapeHtml(avail.label)}</span>`);
+  }
+  return parts.length ? `<span class="place-card__meta">${parts.join(' · ')}</span>` : '';
+}
+
 function crowdBadgeHtml(destinationId) {
   const crowd = getSimulatedCrowdLevel(destinationId);
   return `<span class="badge" style="background:${crowd.color}22;color:${crowd.color};">● ${escapeHtml(crowd.label)}</span>`;
 }
 
-/** Nhãn phụ theo trạng thái listing — "Cần đặt trước" (khi thật sự bookable), "Đang xác minh
- * lịch" (giờ mở cửa chưa xác minh/chưa công bố) — cộng thêm bên cạnh nhãn loại hình chính. */
-function statusBadgesHtml(d) {
-  const badges = [];
-  if (d.bookingStatus === 'bookable') badges.push('<span class="badge badge-new">Cần đặt trước</span>');
-  if (d.openingHoursStatus === 'needsFieldVerification' || d.openingHoursStatus === 'unavailable') {
-    badges.push('<span class="badge badge-demo">🕒 Đang xác minh lịch</span>');
-  }
-  return badges.join('');
-}
-
 function cardHtml(d) {
+  const state = getState();
   const img = destinationImageSrc(d);
   const noCoords = d.lat === null || d.lng === null;
   const typeBadge = listingTypeBadge(d.listingType);
   return `
-    <button type="button" class="place-card" data-id="${d.id}" data-selected="${d.id === selectedId}">
-      <img class="place-card__img" src="${img}" alt="" loading="lazy" />
-      <span class="place-card__body">
-        <span class="place-card__title">${escapeHtml(d.name)}${d.altName ? ` <span class="text-faint text-sm">(${escapeHtml(d.altName)})</span>` : ''}</span>
-        <span class="place-card__meta">
-          <span class="badge ${typeBadge.cls}">${categoryEmoji(d.category)} ${escapeHtml(typeBadge.label)}</span>
-          <span class="badge badge-type">${escapeHtml(d.category)}</span>
-          ${statusBadgesHtml(d)}
-          ${noCoords ? '<span class="badge badge-demo">📍 Chưa có toạ độ</span>' : ''}
-          ${heatmapOn ? crowdBadgeHtml(d.id) : ''}
+    <div class="place-card" data-id="${d.id}" data-selected="${d.id === selectedId}">
+      <button type="button" class="place-card__main" data-id="${d.id}" aria-label="Xem ${escapeHtml(d.name)} trên bản đồ">
+        <img class="place-card__img" src="${img}" alt="" loading="lazy" />
+        <span class="place-card__body">
+          <span class="place-card__title">${escapeHtml(d.name)}${d.altName ? ` <span class="text-faint text-sm">(${escapeHtml(d.altName)})</span>` : ''}</span>
+          <span class="place-card__meta">
+            <span class="badge ${typeBadge.cls}">${categoryEmoji(d.category)} ${escapeHtml(typeBadge.label)}</span>
+            <span class="badge badge-type">${escapeHtml(d.category)}</span>
+            ${openStatusBadge(d)}
+            ${noCoords ? '<span class="badge badge-demo">📍 Chưa có toạ độ</span>' : ''}
+            ${heatmapOn ? crowdBadgeHtml(d.id) : ''}
+          </span>
+          <span class="place-card__meta">
+            <span class="rating-inline">${formatRatingStats(getRatingStatsForListing(state, d.id))}</span>
+            ${priceBadge(d)}
+          </span>
+          ${operationsMetaHtml(state, d)}
+          <span class="place-card__desc">${escapeHtml(d.summary)}</span>
         </span>
-        <span class="place-card__meta">
-          <span class="rating-inline">${ratingDisplay(d.rating)}</span>
-          ${priceBadge(d)}
-        </span>
-        <span class="place-card__desc">${escapeHtml(d.summary)}</span>
+      </button>
+      <span class="place-card__actions">
+        <button type="button" class="place-card__cart-btn" data-cart-toggle="${d.id}" data-active="${isInTripCart(d.id)}" aria-label="${isInTripCart(d.id) ? 'Đã thêm vào hành trình — bấm để gỡ' : 'Thêm vào hành trình'}" title="${isInTripCart(d.id) ? '✓ Đã thêm' : '+ Thêm vào hành trình'}">${isInTripCart(d.id) ? '✓' : '+'}</button>
+        <button type="button" class="place-card__detail-btn" data-detail="${d.id}" aria-label="Xem chi tiết ${escapeHtml(d.name)}" title="Xem chi tiết">→</button>
       </span>
-    </button>
+    </div>
   `;
 }
 
@@ -192,9 +215,52 @@ function renderList(container, visible) {
     return;
   }
   body.innerHTML = `<div class="place-grid">${visible.map((d) => cardHtml(d)).join('')}</div>`;
-  qsa('.place-card', body).forEach((card) => {
-    card.addEventListener('click', () => { window.location.hash = `#/trail/place/${card.dataset.id}`; });
+  qsa('.place-card__main', body).forEach((btn) => {
+    btn.addEventListener('click', () => selectAndFocus(container, btn.dataset.id));
   });
+  qsa('.place-card__detail-btn', body).forEach((btn) => {
+    btn.addEventListener('click', () => { window.location.hash = `#/trail/place/${btn.dataset.detail}`; });
+  });
+  qsa('.place-card__cart-btn', body).forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.cartToggle;
+      const dest = getState().destinations.find((d) => d.id === id);
+      const { added } = toggleTripCartItem(id);
+      btn.dataset.active = String(added);
+      btn.textContent = added ? '✓' : '+';
+      btn.title = added ? '✓ Đã thêm' : '+ Thêm vào hành trình';
+      btn.setAttribute('aria-label', added ? 'Đã thêm vào hành trình — bấm để gỡ' : 'Thêm vào hành trình');
+      NotificationService.notify(
+        added ? `Đã thêm ${dest ? dest.name : ''} vào hành trình của bạn.` : `Đã gỡ ${dest ? dest.name : ''} khỏi giỏ hành trình.`,
+        added ? 'success' : 'info',
+      );
+    });
+  });
+}
+
+/** Chọn 1 card: highlight card + (nếu có marker công khai) pan/zoom bản đồ tới marker và mở
+ * popup — đồng bộ card→marker theo yêu cầu PHASE "Cập nhật đầy đủ 7 pin". Điều hướng sang trang
+ * chi tiết vẫn có riêng qua nút mũi tên (place-card__detail-btn), không gộp vào đây để người
+ * dùng xem trên bản đồ mà không rời khỏi trang Khám phá. */
+function selectAndFocus(container, id) {
+  selectedId = id;
+  highlightCard(container, id);
+  const marker = markersById.get(id);
+  if (!marker || !mapInstance) {
+    NotificationService.notify('Địa điểm này chưa có toạ độ công khai để hiện trên bản đồ.', 'info');
+    return;
+  }
+  const openAndPan = () => {
+    mapInstance.panTo(marker.getLatLng());
+    marker.openPopup();
+  };
+  if (markerLayer && typeof markerLayer.zoomToShowLayer === 'function') {
+    markerLayer.zoomToShowLayer(marker, openAndPan);
+  } else {
+    mapInstance.setView(marker.getLatLng(), Math.max(mapInstance.getZoom(), 15), { animate: true });
+    openAndPan();
+  }
 }
 
 function resetFilters() {
@@ -226,7 +292,7 @@ function miniCardHtml(d) {
     <button type="button" class="mini-card" data-id="${d.id}">
       <img class="mini-card__img" src="${destinationImageSrc(d)}" alt="" loading="lazy" />
       <span class="mini-card__title">${escapeHtml(d.name)}</span>
-      <span class="text-sm text-muted">${ratingDisplay(d.rating)}</span>
+      <span class="text-sm text-muted">${formatRatingStats(getRatingStatsForListing(getState(), d.id))}</span>
     </button>
   `;
 }
@@ -383,14 +449,19 @@ function popupSummary(text) {
 function buildPopupHtml(d) {
   const priceText = d.priceDisplay ? `${escapeHtml(d.priceDisplay)}${d.priceStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giá</span>';
   const hoursText = d.openingHours ? `${escapeHtml(d.openingHours)}${d.openingHoursStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giờ mở cửa</span>';
+  const roleLabel = d.markerRole && MapService.MARKER_ROLE_LABEL[d.markerRole];
+  const dirUrl = (d.lat !== null && d.lng !== null) ? `https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lng}` : null;
   return `
     <div class="popup-title">${escapeHtml(d.name)}</div>
-    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ${ratingDisplay(d.rating)}</div>
+    <div class="text-sm text-muted">${categoryEmoji(d.category)} ${escapeHtml(d.category)} · ${formatRatingStats(getRatingStatsForListing(getState(), d.id))}</div>
+    <div class="text-sm text-muted" style="margin:2px 0;">${escapeHtml(listingTypeBadge(d.listingType).label)}${roleLabel ? ` · <strong>${escapeHtml(roleLabel)}</strong>` : ''}</div>
+    ${d.address ? `<div class="text-sm" style="margin:2px 0;">📍 ${escapeHtml(d.address)}</div>` : ''}
     ${d.summary ? `<p class="text-sm" style="margin:4px 0;">${escapeHtml(popupSummary(d.summary))}</p>` : ''}
     <div class="text-sm" style="margin:2px 0;">💰 ${priceText}</div>
     <div class="text-sm" style="margin:2px 0 6px;">🕒 ${hoursText}</div>
     <div class="popup-actions">
       <button type="button" class="btn btn-primary btn-sm" data-action="view-detail">Xem chi tiết</button>
+      ${dirUrl ? `<a class="btn btn-secondary btn-sm" href="${dirUrl}" target="_blank" rel="noopener noreferrer">🧭 Chỉ đường</a>` : ''}
     </div>
   `;
 }
@@ -399,18 +470,28 @@ function renderMarkers(container, visible) {
   if (!mapInstance || !markerLayer || !window.L) return;
   const L = window.L;
   markerLayer.clearLayers();
+  markersById.clear();
   visible
-    .filter((dest) => dest.lat !== null && dest.lng !== null)
+    .filter((dest) => dest.publicPin === true && dest.lat !== null && dest.lng !== null)
     .forEach((dest) => {
-      const marker = L.marker([dest.lat, dest.lng], { icon: MapService.categoryDivIcon(L, dest.category) });
+      const marker = L.marker([dest.lat, dest.lng], { icon: MapService.destinationDivIcon(L, dest) });
       marker.bindPopup(buildPopupHtml(dest));
       marker.on('popupopen', (e) => {
         const el = e.popup.getElement();
         const btn = el && el.querySelector('[data-action="view-detail"]');
         if (btn) btn.addEventListener('click', () => { window.location.hash = `#/trail/place/${dest.id}`; });
       });
-      marker.on('click', () => { selectedId = dest.id; highlightCard(container, dest.id); });
+      marker.on('click', () => {
+        selectedId = dest.id;
+        highlightCard(container, dest.id);
+        const panel = qs('#explore-panel', container);
+        if (panel) panel.dataset.expanded = 'true';
+        panelExpanded = true;
+        const cardEl = container.querySelector(`.place-card[data-id="${dest.id}"]`);
+        if (cardEl) cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
       markerLayer.addLayer(marker);
+      markersById.set(dest.id, marker);
     });
 }
 
@@ -485,7 +566,15 @@ async function initMap(container) {
       maxZoom: 18,
     }).addTo(mapInstance);
 
-    markerLayer = L.layerGroup();
+    // SITE-04/05/06 (cụm Nguyệt Hóa) nằm rất sát nhau — dùng Leaflet.markercluster để gom/spiderfy
+    // khi trùng ở mức zoom thấp (mục "Điều chỉnh Leaflet" #9). Nếu plugin tải lỗi (mạng chậm), rơi
+    // về layerGroup thường như trước — bản đồ vẫn hoạt động, chỉ không gom cụm.
+    try {
+      await MapService.loadMarkerCluster();
+      markerLayer = L.markerClusterGroup({ maxClusterRadius: 60, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
+    } catch (clusterErr) {
+      markerLayer = L.layerGroup();
+    }
     markerLayer.addTo(mapInstance);
 
     mapInstance.on('click', (e) => {
@@ -500,10 +589,16 @@ async function initMap(container) {
     renderMarkers(container, computeVisible());
 
     const state = getState();
-    const withCoords = state.destinations.filter((d) => d.lat !== null && d.lng !== null);
-    if (withCoords.length) {
-      const bounds = L.latLngBounds(withCoords.map((d) => [d.lat, d.lng]));
-      mapInstance.fitBounds(bounds, { padding: [32, 32] });
+    const pinned = state.destinations.filter((d) => d.publicPin === true && d.lat !== null && d.lng !== null);
+    if (pinned.length) {
+      const bounds = L.latLngBounds(pinned.map((d) => [d.lat, d.lng]));
+      const isMobile = window.innerWidth < 768;
+      // Padding phải/dưới lớn hơn trên mobile để bottom-sheet danh sách không che marker.
+      mapInstance.fitBounds(bounds, {
+        padding: [50, 50],
+        paddingBottomRight: isMobile ? [50, 220] : [50, 50],
+        maxZoom: 15,
+      });
     }
 
     setTimeout(() => mapInstance && mapInstance.invalidateSize(), 200);
@@ -528,6 +623,7 @@ function renderAll(container) {
 export function renderExplore(container) {
   mapInstance = null;
   markerLayer = null;
+  markersById = new Map();
   userMarker = null;
   manualPickMode = false;
   panelExpanded = false;

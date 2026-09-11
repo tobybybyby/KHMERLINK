@@ -1,9 +1,13 @@
-import { getState, saveItinerary } from '../storage.js';
-import { escapeHtml, uid, categoryEmoji, formatCurrency, formatDurationMin, qs, qsa } from '../utils.js';
-import { suggestItineraries, recalcTimeline } from '../services/aiService.js';
+import {
+  getState, saveItinerary,
+  getTripCart, setTripCartItemSelected, setTripCartAllSelected, removeTripCartSelected,
+  removeFromTripCart, setTripCartPartySize,
+} from '../storage.js';
+import { escapeHtml, uid, categoryEmoji, formatCurrency, formatDurationMin, listingTypeBadge, destinationImageSrc, qs, qsa } from '../utils.js';
+import { suggestItineraries, recalcTimeline, buildItineraryFromSelection, suggestCommunityAdditions } from '../services/aiService.js';
 import { INTEREST_OPTIONS } from '../data.js';
 import { NotificationService } from '../services/notificationService.js';
-import { renderErrorState } from '../ui.js';
+import { renderErrorState, openModal, confirmDialog } from '../ui.js';
 
 const STATUS_LABELS = {
   selected: 'Đã chọn — chưa bắt đầu',
@@ -12,10 +16,230 @@ const STATUS_LABELS = {
   cancelled: 'Đã huỷ',
 };
 
+function cartItemHtml(item, dest) {
+  if (!dest) return '';
+  const typeBadge = listingTypeBadge(dest.listingType);
+  const priceNote = dest.revenueType === 'free_visit' ? 'Miễn phí — không cần đặt trước' : 'Hoạt động có phí — cần đặt trước khi có supplier xác nhận';
+  return `
+    <div class="card flex items-center gap-2 wrap" style="padding:10px;" data-cart-item="${item.destinationId}">
+      <input type="checkbox" class="cart-item-check" data-check="${item.destinationId}" ${item.selected ? 'checked' : ''} aria-label="Chọn ${escapeHtml(dest.name)}">
+      <img src="${destinationImageSrc(dest)}" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+      <div style="flex:1;min-width:160px;">
+        <strong style="display:block;">${escapeHtml(dest.name)}</strong>
+        <span class="text-sm text-muted">${escapeHtml(typeBadge.label)} · ${escapeHtml(priceNote)}</span>
+      </div>
+      <label class="text-sm text-muted flex items-center gap-1">Số người
+        <input type="number" min="1" max="20" class="field-input" style="width:56px;padding:6px;" data-party="${item.destinationId}" value="${item.partySize}">
+      </label>
+      <a class="btn btn-ghost btn-sm" href="#/trail/place/${dest.id}">Xem</a>
+      <button type="button" class="btn btn-ghost btn-sm" data-remove="${item.destinationId}" aria-label="Xoá khỏi giỏ hành trình">✕</button>
+    </div>
+  `;
+}
+
+function cartSectionHtml(state) {
+  const cart = getTripCart();
+  const selectedCount = cart.filter((it) => it.selected).length;
+  if (!cart.length) {
+    return `
+      <section class="card" style="padding:20px;">
+        <h2 style="margin-top:0;">Giỏ hành trình của tôi</h2>
+        <p class="text-sm text-muted">Chưa có địa điểm nào trong giỏ — vào Khám phá và bấm "+ Thêm vào hành trình" ở các địa điểm bạn quan tâm.</p>
+        <a class="btn btn-secondary" href="#/trail/explore">🧭 Về Khám phá</a>
+      </section>
+    `;
+  }
+  return `
+    <section class="card" style="padding:20px;">
+      <div class="flex justify-between items-center gap-2 wrap">
+        <h2 style="margin:0;">Giỏ hành trình của tôi</h2>
+        <span class="text-sm text-muted">${cart.length} địa điểm · ${selectedCount} đang chọn</span>
+      </div>
+      <div class="cta-row" style="margin:10px 0;">
+        <button type="button" class="btn btn-secondary btn-sm" id="cart-select-all">Chọn tất cả</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="cart-deselect-all">Bỏ chọn tất cả</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="cart-remove-selected" ${selectedCount ? '' : 'disabled'}>Xoá mục đã chọn</button>
+      </div>
+      <div class="flex-col gap-2" id="cart-list">
+        ${cart.map((item) => cartItemHtml(item, state.destinations.find((d) => d.id === item.destinationId))).join('')}
+      </div>
+      <button type="button" class="btn btn-primary btn-block" id="cart-build-btn" style="margin-top:12px;" ${selectedCount ? '' : 'disabled'}>Tạo lộ trình từ các điểm đã chọn (${selectedCount})</button>
+    </section>
+  `;
+}
+
+function wireCartSection(container) {
+  qsa('[data-check]', container).forEach((cb) => {
+    cb.addEventListener('change', () => {
+      setTripCartItemSelected(cb.dataset.check, cb.checked);
+      renderItineraryHome(container);
+    });
+  });
+  qsa('[data-party]', container).forEach((input) => {
+    input.addEventListener('change', () => {
+      setTripCartPartySize(input.dataset.party, input.value);
+    });
+  });
+  qsa('[data-remove]', container).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      removeFromTripCart(btn.dataset.remove);
+      NotificationService.notify('Đã gỡ khỏi giỏ hành trình.', 'info');
+      renderItineraryHome(container);
+    });
+  });
+  qs('#cart-select-all', container)?.addEventListener('click', () => {
+    setTripCartAllSelected(true);
+    renderItineraryHome(container);
+  });
+  qs('#cart-deselect-all', container)?.addEventListener('click', () => {
+    setTripCartAllSelected(false);
+    renderItineraryHome(container);
+  });
+  qs('#cart-remove-selected', container)?.addEventListener('click', () => {
+    confirmDialog({ title: 'Xoá các mục đã chọn?', message: 'Các địa điểm đang tick sẽ bị xoá khỏi giỏ hành trình.', confirmLabel: 'Xoá', danger: true }).then((ok) => {
+      if (!ok) return;
+      removeTripCartSelected();
+      renderItineraryHome(container);
+    });
+  });
+  qs('#cart-build-btn', container)?.addEventListener('click', () => {
+    const selectedIds = getTripCart().filter((it) => it.selected).map((it) => it.destinationId);
+    if (!selectedIds.length) return;
+    openBuildFromSelectionModal(container, selectedIds);
+  });
+}
+
+/** Bước 1: hỏi ngày/giờ/số người tối thiểu để xếp lịch. Bước 2 (chỉ khi chưa có hoạt động cộng
+ * đồng trả phí hợp lệ): panel gợi ý thêm hoạt động cộng đồng, cho chọn thêm hoặc tạo lịch tham
+ * quan tự do — KHÔNG tự ý thêm gì khi chưa được khách bấm đồng ý (PHASE mục 4). */
+function openBuildFromSelectionModal(container, selectedIds) {
+  const today = new Date().toISOString().slice(0, 10);
+  const formHtml = `
+    <div class="flex-col gap-3">
+      <div><label class="field-label" for="bfs-date">Ngày đi</label><input type="date" class="field-input" id="bfs-date" value="${today}"></div>
+      <div><label class="field-label" for="bfs-time">Giờ bắt đầu</label><input type="time" class="field-input" id="bfs-time" value="08:00"></div>
+      <div><label class="field-label" for="bfs-party">Số người (mặc định cho các mục chưa chỉnh riêng)</label><input type="number" min="1" max="20" class="field-input" id="bfs-party" value="2"></div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn-primary btn-block" id="bfs-next">Xếp lịch →</button>
+      </div>
+    </div>
+  `;
+  const close = openModal({
+    title: 'Tạo lộ trình từ các điểm đã chọn',
+    bodyHtml: formHtml,
+    onMount: (modalEl, closeFn) => {
+      const setBody = (html) => { qs('.modal__body', modalEl).innerHTML = html; };
+
+      qs('#bfs-next', modalEl).addEventListener('click', () => {
+        const date = qs('#bfs-date', modalEl).value || today;
+        const [h, m] = (qs('#bfs-time', modalEl).value || '08:00').split(':').map(Number);
+        const partySize = Number(qs('#bfs-party', modalEl).value) || 2;
+        runBuild({ date, startHour: h, startMin: m, partySize, extraIds: [] });
+      });
+
+      function runBuild({ date, startHour, startMin, partySize, extraIds }) {
+        const state = getState();
+        const allIds = [...selectedIds, ...extraIds];
+        const built = buildItineraryFromSelection(state, { selectedIds: allIds, date, startHour, startMin, partySize });
+        if (!built) {
+          setBody('<p class="text-sm text-faint">Không xếp được lịch từ các mục đã chọn.</p>');
+          return;
+        }
+        if (built.isBookableTour || extraIds.length) {
+          finalize(built, date, startHour, startMin, partySize);
+          return;
+        }
+        renderSuggestionPanel(built, { date, startHour, startMin, partySize });
+      }
+
+      function renderSuggestionPanel(built, ctx) {
+        const anchor = built.stops[0] ? state_destById(built.stops[0].destinationId) : null;
+        const suggestions = suggestCommunityAdditions(getState(), {
+          excludeIds: selectedIds,
+          anchorPoint: anchor && anchor.lat !== null ? { lat: anchor.lat, lng: anchor.lng } : null,
+          partySize: ctx.partySize,
+          date: ctx.date,
+          limit: 3,
+        });
+        setBody(`
+          <div class="flex-col gap-3">
+            <p class="demo-note">Hiện chưa có hoạt động cộng đồng phù hợp trong lựa chọn của bạn. Thêm một trải nghiệm cộng đồng vào hành trình?</p>
+            ${suggestions.length ? `
+              <div class="flex-col gap-2">
+                ${suggestions.map((s) => `
+                  <div class="activity-card">
+                    <div class="activity-card__head">
+                      <strong>${escapeHtml(s.name)}</strong>
+                      ${s.bookable ? `<span class="activity-card__price">${formatCurrency(s.price)}</span>` : '<span class="badge badge-demo">Chưa bookable</span>'}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" data-add-suggestion="${s.destinationId}" style="margin-top:6px;">+ Thêm vào hành trình</button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<p class="text-sm text-faint">Không có hoạt động cộng đồng nào phù hợp với thời gian/lịch hiện tại.</p>'}
+            <div class="modal__actions">
+              <button type="button" class="btn btn-ghost" id="bfs-free-visit">Tạo lịch tham quan tự do</button>
+            </div>
+          </div>
+        `);
+        qsa('[data-add-suggestion]', modalEl).forEach((btn) => {
+          btn.addEventListener('click', () => {
+            runBuild({ ...ctx, extraIds: [btn.dataset.addSuggestion] });
+          });
+        });
+        qs('#bfs-free-visit', modalEl).addEventListener('click', () => {
+          finalize(built, ctx.date, ctx.startHour, ctx.startMin, ctx.partySize);
+        });
+      }
+
+      function finalize(built, date, startHour, startMin, partySize) {
+        const itinerary = {
+          id: uid('itin'),
+          name: built.isBookableTour ? 'Hành trình từ giỏ hành trình' : 'Lịch tham quan tự do',
+          reason: 'Xếp từ các địa điểm bạn đã chọn trong giỏ hành trình.',
+          createdAt: new Date().toISOString(),
+          status: 'selected',
+          date,
+          startHour,
+          startMin,
+          availableHours: Math.max(1, Math.round(built.totalDurationMin / 60) || 1),
+          partySize,
+          startPoint: null,
+          pace: 'vua-phai',
+          priority: 'linh-hoat',
+          transport: 'xe-may',
+          hasChildren: false,
+          accessibilityNeeds: false,
+          stops: built.stops.map((s) => ({ ...s, selfVisitedAt: null, bookingItemId: null })),
+          totalDurationMin: built.totalDurationMin,
+          totalTravelMin: built.totalTravelMin,
+          totalCost: built.totalCost,
+          isBookableTour: built.isBookableTour,
+          isFreeVisitPlan: !built.isBookableTour,
+        };
+        recalcTimeline(itinerary);
+        saveItinerary(itinerary);
+        closeFn();
+        NotificationService.notify(
+          built.isBookableTour ? 'Đã tạo hành trình từ các điểm đã chọn.' : 'Đã tạo lịch tham quan tự do từ các điểm đã chọn.',
+          'success',
+        );
+        window.location.hash = `#/trail/itinerary/${itinerary.id}`;
+      }
+
+      function state_destById(id) {
+        return getState().destinations.find((d) => d.id === id) || null;
+      }
+    },
+  });
+  return close;
+}
+
 export function renderItineraryHome(container) {
   const state = getState();
   container.innerHTML = `
     <div class="profile-page">
+      ${cartSectionHtml(state)}
       <section class="card" style="padding:20px;text-align:center;">
         <h2 style="margin-top:0;">Hành trình của bạn</h2>
         <p class="text-sm text-muted">Tạo hành trình cá nhân hoá dựa trên sở thích, thời gian và số người trong đoàn.</p>
@@ -36,6 +260,7 @@ export function renderItineraryHome(container) {
       ` : ''}
     </div>
   `;
+  wireCartSection(container);
 }
 
 const wizardState = {
@@ -249,9 +474,14 @@ function optionCardHtml(option, index) {
     <div class="card" style="padding:18px;">
       <h3 style="margin-top:0;">${escapeHtml(option.name)}</h3>
       <p class="text-sm text-muted">${escapeHtml(option.reason)}</p>
-      <p class="badge badge-demo">Gợi ý tự động — bản demo</p>
+      <div class="badge-row" style="margin:0;">
+        <span class="badge badge-demo">Gợi ý tự động — bản demo</span>
+        ${option.isBookableTour
+          ? '<span class="badge badge-new" title="Chi tiêu trực tiếp hỗ trợ đơn vị cung cấp trải nghiệm">🏘️ Có hoạt động cộng đồng</span>'
+          : '<span class="badge badge-type">📍 Lịch tham quan tự do</span>'}
+      </div>
       <div class="flex-col gap-2" style="margin:12px 0;">
-        ${option.stops.map((s) => `<div class="text-sm">${categoryEmoji(s.category)} ${escapeHtml(s.name)} <span class="text-faint">(${Math.floor(s.arriveMin / 60)}:${String(s.arriveMin % 60).padStart(2, '0')}–${Math.floor(s.departMin / 60)}:${String(s.departMin % 60).padStart(2, '0')})</span>${s.experienceId ? ` — ${escapeHtml(s.experienceTitle)}` : ''}</div>`).join('')}
+        ${option.stops.map((s) => `<div class="text-sm">${categoryEmoji(s.category)} ${escapeHtml(s.name)} <span class="text-faint">(${Math.floor(s.arriveMin / 60)}:${String(s.arriveMin % 60).padStart(2, '0')}–${Math.floor(s.departMin / 60)}:${String(s.departMin % 60).padStart(2, '0')})</span>${s.experienceId ? ` — ${escapeHtml(s.experienceTitle)}` : ''}${s.isCommunityActivity && s.bookable ? ' <span class="badge badge-new text-sm">Hoạt động cộng đồng</span>' : ''}</div>`).join('')}
       </div>
       <div class="quick-facts">
         <div class="quick-fact"><span class="quick-fact__label">Tổng thời gian</span><span class="quick-fact__value">${formatDurationMin(option.totalDurationMin)}</span></div>
@@ -267,7 +497,7 @@ function generateAndRenderResults(container) {
   const state = getState();
   const seedIds = new Set([
     ...state.favorites,
-    ...(state.ui.draftItinerary || []).map((d) => d.destinationId),
+    ...state.tripCart.filter((it) => it.selected).map((it) => it.destinationId),
   ]);
   const [startH, startM] = wizardState.startTime.split(':').map(Number);
   const prefs = {
@@ -296,11 +526,13 @@ function generateAndRenderResults(container) {
     return;
   }
 
+  const anyBookable = result.itineraries.some((o) => o.isBookableTour);
   container.innerHTML = `
     <div class="profile-page">
       <a href="#/trail/itinerary" class="text-sm">← Về danh sách hành trình</a>
       <h2>Chọn một hành trình</h2>
       <p class="text-sm text-muted">${result.label} — dựa trên sở thích và thời gian bạn vừa nhập.</p>
+      ${!anyBookable ? '<div class="demo-note">Hiện chưa có hoạt động cộng đồng phù hợp với thời gian và lịch bạn chọn. Các lựa chọn dưới đây là lịch tham quan tự do (miễn phí, không qua bước đặt/thanh toán) — bạn có thể thử đổi thời gian/ngày ở bước trước, hoặc xem trực tiếp các hoạt động cộng đồng đang chờ khảo sát ở Khám phá.</div>' : ''}
       <div class="flex-col gap-4">
         ${result.itineraries.map(optionCardHtml).join('')}
       </div>
@@ -330,6 +562,7 @@ function generateAndRenderResults(container) {
         totalDurationMin: option.totalDurationMin,
         totalTravelMin: option.totalTravelMin,
         totalCost: option.totalCost,
+        isBookableTour: option.isBookableTour,
       };
       recalcTimeline(itinerary);
       saveItinerary(itinerary);

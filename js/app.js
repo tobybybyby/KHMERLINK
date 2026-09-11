@@ -9,6 +9,7 @@ import { renderItineraryHome, renderItineraryWizard } from './trail/itinerary.js
 import { renderItineraryDetail } from './trail/itineraryDetail.js';
 import { renderItinerarySummary } from './trail/itinerarySummary.js';
 import { renderPassport } from './trail/passport.js';
+import { renderNotifications } from './trail/notifications.js';
 import { renderStudioShell } from './studio/shell.js';
 import { renderOverview } from './studio/overview.js';
 import { renderExperiences } from './studio/experiences.js';
@@ -66,6 +67,7 @@ const ROUTES = [
   { pattern: /^#\/trail\/itinerary\/([\w-]+)$/, handler: (m) => mountTrailPage('itinerary', (el) => renderItineraryDetail(el, m[1])) },
   { pattern: /^#\/trail\/itinerary$/, handler: () => mountTrailPage('itinerary', renderItineraryHome) },
   { pattern: /^#\/trail\/passport$/, handler: () => mountTrailPage('passport', renderPassport) },
+  { pattern: /^#\/trail\/notifications$/, handler: () => mountTrailPage('notifications', renderNotifications) },
   { pattern: /^#\/trail\/profile$/, handler: () => mountTrailPage('profile', renderProfile) },
   { pattern: /^#\/trail\/?$/, handler: () => { window.location.hash = '#/trail/explore'; } },
 
@@ -93,16 +95,22 @@ const ROUTES = [
   { pattern: /^#\/ops\/?$/, handler: () => { window.location.hash = '#/ops/bookings'; } },
 ];
 
-function render() {
+function matchRoute(hash) {
+  for (const route of ROUTES) {
+    const match = hash.match(route.pattern);
+    if (match) return { route, match };
+  }
+  return null;
+}
+
+function renderCurrent({ scrollTop = false } = {}) {
   const hash = window.location.hash || '#/';
   try {
-    for (const route of ROUTES) {
-      const match = hash.match(route.pattern);
-      if (match) {
-        route.handler(match);
-        window.scrollTo(0, 0);
-        return;
-      }
+    const found = matchRoute(hash);
+    if (found) {
+      found.route.handler(found.match);
+      if (scrollTop) window.scrollTo(0, 0);
+      return;
     }
     window.location.hash = '#/';
   } catch (err) {
@@ -121,7 +129,35 @@ function render() {
   }
 }
 
+function render() {
+  renderCurrent({ scrollTop: true });
+}
+
+// Render lại route hiện tại (KHÔNG cuộn lên đầu, KHÔNG reload toàn bộ app) khi dữ liệu vừa đổi —
+// dùng chung cho sự kiện cùng-tab (khmerlink:data-changed, phát ra từ storage.js/bookingService.js
+// sau mỗi thay đổi) lẫn khác-tab (storage, phát tự động khi tab khác ghi localStorage). Debounce
+// ngắn vì 1 thao tác (vd tạo booking) có thể bắn nhiều sự kiện liên tiếp (bookings + notifications).
+let rerenderTimer = null;
+function scheduleRerender() {
+  clearTimeout(rerenderTimer);
+  rerenderTimer = setTimeout(() => renderCurrent({ scrollTop: false }), 80);
+}
+
 window.addEventListener('hashchange', render);
+window.addEventListener('khmerlink:data-changed', scheduleRerender);
+window.addEventListener('storage', (e) => {
+  // e.key null nghĩa là localStorage.clear() (vd tab khác bấm "Khôi phục dữ liệu mẫu") — vẫn cần
+  // đồng bộ lại. Phải đọc lại localStorage vào state trong bộ nhớ TRƯỚC khi render lại — ghi
+  // localStorage ở tab khác không tự cập nhật biến state của tab này (xem syncFromLocalStorage()).
+  if (e.key === Storage.STORAGE_KEY || e.key === null) {
+    Storage.syncFromLocalStorage();
+    scheduleRerender();
+  }
+});
+window.addEventListener('focus', () => {
+  Storage.checkDueReminders();
+});
+
 window.addEventListener('DOMContentLoaded', async () => {
   appRoot.innerHTML = `
     <div class="page-generic">
@@ -133,6 +169,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   `;
   try {
     await Storage.init();
+    Storage.checkDueReminders();
   } catch (err) {
     if (window.console && console.error) console.error(err);
   }

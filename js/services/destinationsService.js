@@ -35,6 +35,10 @@ function transformListing(l) {
     lat: l.coordinates && typeof l.coordinates.lat === 'number' ? l.coordinates.lat : null,
     lng: l.coordinates && typeof l.coordinates.lng === 'number' ? l.coordinates.lng : null,
     coordinatesStatus: l.coordinateStatus || 'unavailable',
+    plusCode: l.plusCode || null,
+    markerRole: l.markerRole || null,
+    publicPin: l.publicPin === true,
+    archaeologicalReferenceCoordinates: l.archaeologicalReferenceCoordinates || null,
 
     address: l.currentAddress || null,
     addressStatus: l.currentAddress ? 'verified' : 'missing',
@@ -52,13 +56,30 @@ function transformListing(l) {
     priceStatus: price.status,
     priceNote: (l.price && l.price.note) || null,
 
-    // Chưa có dữ liệu thời lượng/đánh giá cho 7 listing pilot trong nguồn Excel — để trống thay
-    // vì bịa số, UI phải tự xử lý trường hợp null (không gọi .toFixed trực tiếp).
-    suggestedDurationMin: null,
-    durationStatus: 'unavailable',
+    // Chưa có dữ liệu đánh giá thật cho 7 listing pilot — average tính động từ reviews thật (xem
+    // reviewsService.computeRatingStats), không lấy từ trường tĩnh này (giữ null để UI không gọi
+    // .toFixed trực tiếp — xem ratingDisplay()).
     rating: null,
     ratingCount: null,
     ratingStatus: 'unavailable',
+
+    // Thời lượng: dùng giá trị ước lượng khai báo trong revenue.durationMinutes (PHASE "Hoàn thiện
+    // hành trình") thay vì bịa số cứng — luôn gắn durationStatus:'estimated' khi có, UI phải hiển
+    // thị rõ đây là ước lượng, không phải đo thực địa.
+    suggestedDurationMin: (l.revenue && typeof l.revenue.durationMinutes === 'number') ? l.revenue.durationMinutes : null,
+    durationStatus: (l.revenue && l.revenue.durationEstimated) ? 'estimated' : 'unavailable',
+
+    // Phân loại khả năng tạo doanh thu (PHASE "Hoàn thiện hành trình, booking, thông báo và liên
+    // kết dữ liệu") — nguồn duy nhất là data/pilot-listings.json, không suy đoán/bịa thêm ở đây.
+    // bookable/revenuePriceValue chỉ đúng cho các trường hợp có supplier đã xác nhận nhận khách và
+    // có giá thật; hiện cả 7 listing đều false/null vì chưa có supplier nào xác nhận — hoạt động
+    // trả phí THẬT trong app (nếu có) đến từ state.experiences do host tạo qua Studio, không phải
+    // trường này (xem aiService.findBookableExperience).
+    revenueType: (l.revenue && l.revenue.type) || 'free_visit',
+    providerType: (l.revenue && l.revenue.providerType) || 'public_site',
+    isCommunityActivity: !!(l.revenue && l.revenue.isCommunityActivity),
+    bookable: !!(l.revenue && l.revenue.bookable),
+    revenuePriceValue: (l.revenue && typeof l.revenue.priceValue === 'number') ? l.revenue.priceValue : null,
 
     summary: l.shortIntroduction || '',
     activities: l.activities || '',

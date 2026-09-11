@@ -112,3 +112,23 @@ Chùa Lò Gạch (di tích lịch sử cấp **tỉnh**, 21/11/2022) và khu kh�
 - Xin đồng thuận NNƯT Lâm Phên trước khi công khai bất kỳ toạ độ nào liên quan EXP-02 (dừng 1)/EXP-03.
 - Liên hệ xin phép sử dụng ảnh trước khi chuyển từ URL tham khảo sang tải về chính thức (phase sau, chưa thực hiện theo đúng yêu cầu phase này).
 - "Cù lao An Bình" (Phase 1, mục tổng quan vùng) hiện trùng lặp nội dung một phần với 4 địa danh cụ thể hơn trên cùng cù lao (Chùa Tiên Châu, Nhà cổ Cai Cường, Nhà dừa CocoHome, Khu du lịch Vinh Sang) — cân nhắc gộp thành một trang "vùng" liên kết tới các điểm cụ thể ở phase sau, thay vì hai lớp thông tin song song.
+
+## Cập nhật 2026-09-11 — Toạ độ pilot: từ 1/7 lên 7/7 có pin công khai
+
+Người dùng cung cấp bảng toạ độ đầy đủ (xác nhận qua Google Maps listing/Plus Code) cho cả 7 listing, thay thế toàn bộ trạng thái "chưa đủ tin cậy qua Nominatim" ghi nhận ở mục "Pilot 7 listing Khmer" phía trên. Cập nhật lại tình trạng từng mục:
+
+| id | Toạ độ trước (2026-09-10) | Toạ độ sau (2026-09-11) | Nguồn |
+|---|---|---|---|
+| EXP-01 | `null` (Nominatim không có kết quả) | 9.9153125, 106.2945625 | Google Maps listing + Plus Code `6PX8W78V+4R` |
+| EXP-02 (meetingPoint = Dừng 2) | `null` (đường không khớp phường) | 9.9147744, 106.3060206 | Google Maps, khớp `addressMatched` |
+| EXP-02 Dừng 1 (xưởng Lâm Phên) | `null` | **vẫn `null`** — không có trong bảng mới, giữ riêng tư | — |
+| EXP-03 | `null` công khai (có toạ độ riêng tư nội bộ, `doNotPublish:true`) | 9.9248125, 106.3276875, `publicPin:true` | Google Maps + Plus Code `6PX8W8FH+W3H` — **đổi từ riêng tư sang công khai theo yêu cầu mới, xem cảnh báo ở PROGRESS.md** |
+| SITE-04 | `null` (đường không khớp phường) | 9.9174375, 106.3015625 (`markerRole: clusterAnchor`) | Google Maps + Plus Code `6PX8W882+XJ` |
+| SITE-05 | `null` (QL53 không khớp khóm) | 9.9158125, 106.3035625 | Google Maps + Plus Code `6PX8W883+8C` |
+| SITE-06 | `null` (đường không khớp phường) | 9.9161875, 106.3049375 | Google Maps + Plus Code `6PX8W883+FX` |
+| SITE-07 | 9.917500, 106.295833 (`reference`, thực ra là toạ độ khảo cổ Bờ Lũy chứ không phải pin chùa) | 9.9171875, 106.2955625 (pin chùa đúng); 9.917500, 106.295833 giữ lại riêng ở `archaeologicalReferenceCoordinates` | Google Maps + Plus Code `6PX8W78W+V6P` (pin chùa); vietnam.vn (tham chiếu khảo cổ) |
+
+**Vấn đề còn tồn đọng, cần người dùng xác nhận lại:**
+1. **EXP-03 công khai toạ độ nhà riêng nghệ nhân** — xem cảnh báo chi tiết ở `PROGRESS.md` mục PHASE 11/09/2026. Nếu không đúng chủ đích, cần báo lại để gỡ `publicPin`/`coordinates` và khôi phục `doNotPublish:true`.
+2. **EXP-02 Dừng 1** (cùng địa điểm với EXP-03) vẫn chưa có pin công khai — nếu người dùng đã đồng ý công khai vị trí này qua quyết định EXP-03, có thể cân nhắc áp dụng toạ độ tương tự cho Dừng 1 ở phase sau (hiện chưa tự suy diễn, cần xác nhận rõ).
+3. Các toạ độ mới đều dán nhãn nguồn "Google Maps listing/Plus Code do người dùng cung cấp" — chưa phải đo GPS thực địa hay đối chiếu hồ sơ di tích chính thức; vẫn nên đưa vào `verificationChecklist` khảo sát thực địa trước khi listing chuyển sang "Sẵn sàng pilot" có booking thật.

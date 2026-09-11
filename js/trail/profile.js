@@ -2,11 +2,12 @@ import { getState, resetSample, getPointsBalance } from '../storage.js';
 import { qs } from '../utils.js';
 import { confirmDialog } from '../ui.js';
 import { NotificationService } from '../services/notificationService.js';
+import { DEMO_DATA_NOTE } from '../../data/pilot-seed-data.js';
 
 export function renderProfile(container) {
   const state = getState();
   const favCount = state.favorites.length;
-  const draftCount = (state.ui.draftItinerary || []).length;
+  const draftCount = state.tripCart.length;
   const itineraryCount = state.itineraries.length;
   const points = getPointsBalance();
 
@@ -17,11 +18,12 @@ export function renderProfile(container) {
         <p class="text-muted">Bản demo chưa có tài khoản thật — đây là hồ sơ dùng chung trên trình duyệt này.</p>
         <div class="flex gap-4 wrap" style="margin-top:12px;">
           <div><strong>${favCount}</strong> <span class="text-muted text-sm">địa điểm đã lưu</span></div>
-          <div><strong>${draftCount}</strong> <span class="text-muted text-sm">gợi ý ban đầu</span></div>
+          <div><strong>${draftCount}</strong> <span class="text-muted text-sm">trong giỏ hành trình</span></div>
           <div><strong>${itineraryCount}</strong> <span class="text-muted text-sm">hành trình</span></div>
           <div><strong>${points}</strong> <span class="text-muted text-sm">điểm thưởng</span></div>
         </div>
         <a class="btn btn-secondary btn-sm" href="#/trail/passport" style="margin-top:12px;">Xem Hộ chiếu du khách →</a>
+        <a class="btn btn-secondary btn-sm" href="#/trail/notifications" style="margin-top:12px;">🔔 Thông báo & nhắc lịch →</a>
       </section>
 
       <section class="card" style="padding:20px;">
@@ -36,6 +38,7 @@ export function renderProfile(container) {
           <li>Gợi ý hành trình dùng thuật toán rule-based minh bạch (không gọi AI thật); thanh toán, mật độ khách, phản hồi của hộ đều là mô phỏng, gắn nhãn rõ khi xuất hiện.</li>
           <li>Ngoài Trail (bạn đang xem) còn có Studio (kênh dành cho hộ), Cổng dữ liệu quản lý và Cổng vận hành — mở qua liên kết "Cổng quản lý" ở trang chào, xem chi tiết ở PROGRESS.md.</li>
         </ul>
+        <p class="text-sm text-faint" style="margin-top:10px;">${DEMO_DATA_NOTE} Chi tiết các giả định dữ liệu (giờ mở cửa, giá, đánh giá, doanh thu, lượt ghé) xem ở <code>DEMO_DATA.md</code> trong mã nguồn dự án.</p>
       </section>
 
       <section class="card" style="padding:20px;">

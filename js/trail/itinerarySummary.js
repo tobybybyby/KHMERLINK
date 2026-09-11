@@ -17,7 +17,7 @@ function stopSummaryCardHtml(state, itinerary, stop) {
   const dest = state.destinations.find((d) => d.id === stop.destinationId);
   const impression = impressionForStop(state, itinerary.id, stop.destinationId);
   const bi = stop.bookingItemId ? state.bookingItems.find((x) => x.id === stop.bookingItemId) : null;
-  const needsBookingReview = bi && bi.status === 'completed' && !state.userReviews.some((r) => r.bookingItemId === bi.id);
+  const needsBookingReview = bi && bi.status === 'completed' && !state.reviews.some((r) => r.bookingItemId === bi.id);
 
   return `
     <div class="itin-stop" data-dest="${stop.destinationId}">

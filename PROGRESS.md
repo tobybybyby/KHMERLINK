@@ -566,4 +566,177 @@ Người dùng cung cấp thêm địa chỉ chi tiết (đợt 2, qua chat) cho
 ### Đã kiểm thử qua trình duyệt thật
 - Trang chi tiết EXP-02: đúng nút "🔍 Google Maps — Dừng 1"/"Dừng 2" (không còn nút "Chỉ đường" chính xác vì toạ độ cũ đã bị xoá), hiện đúng ghi chú giải thích vì sao chưa đủ tin cậy.
 - `#/ops/pilot` → mở EXP-03: hiện đúng khối 🔒 toạ độ nội bộ, không xuất hiện ở bất kỳ trang Trail công khai nào (đã kiểm tra `grep` trong `js/trail/` chỉ còn ghi chú cấp điểm-dừng công khai, không có toạ độ/ghi chú riêng tư nào lọt ra).
+
+## PHASE — Cập nhật đầy đủ 7 pin trên bản đồ pilot — 2026-09-11
+
+Người dùng gửi bảng toạ độ đầy đủ (`PILOT_MAP_LOCATIONS`, đã xác nhận qua Google Maps/Plus Code) cho cả 7 listing pilot, kèm yêu cầu chi tiết về chuẩn hoá schema toạ độ, icon/markerRole riêng cho điểm gặp và điểm neo cụm, fitBounds, và đồng bộ card↔marker hai chiều trên bản đồ Khám phá.
+
+### Dữ liệu — cả 7/7 listing giờ có `coordinates` + `plusCode` + `coordinateStatus` + `markerRole` + `publicPin`
+- `data/pilot-listings.json`: điền toạ độ thật (giữ nguyên 6 số thập phân) cho EXP-01, EXP-02 (cấp listing = điểm gặp/meetingPoint tại Dừng 2, VÀ cập nhật riêng `stops[1].coordinates`), EXP-03, SITE-04 (markerRole `clusterAnchor`), SITE-05, SITE-06, SITE-07. Không còn listing nào giữ `coordinates: {lat:null,lng:null}` ở cấp công khai (trừ `stops[0]` của EXP-02 — xem mục riêng tư bên dưới). Trường `coordinateStatus` dùng đúng các giá trị người dùng cung cấp (`verifiedGoogleMapsListing`/`addressMatched`/`plusCodeConverted`), không đổi tên field `coordinates.lat/lng` sang `latitude/longitude` vì toàn bộ code hiện có (explore.js, placeDetail.js, itineraryDetail.js...) đã dùng quy ước `lat`/`lng` nhất quán — đổi tên chỉ ở JSON nguồn không mang lại lợi ích, chỉ tăng rủi ro; coi đây là đã "chuẩn hoá" đúng tinh thần yêu cầu (luôn là object 2 số, không còn khi thì null khi thì thiếu trường).
+- SITE-07: toạ độ pin chùa (9.9171875, 106.2955625) tách biệt khỏi toạ độ tham chiếu khu khảo cổ Bờ Lũy (9.917500, 106.295833, nguồn vietnam.vn) — toạ độ khảo cổ chuyển sang trường mới `archaeologicalReferenceCoordinates`, không còn dùng làm pin chùa.
+- EXP-02 Dừng 1 (xưởng NNƯT Lâm Phên) **vẫn giữ `coordinates: null`** — bảng toạ độ người dùng gửi không có dòng riêng cho điểm dừng này (chỉ có 1 dòng "EXP-02" = điểm gặp Dừng 2), nên không tự suy diễn/sao chép toạ độ từ EXP-03 (dù thực tế cùng một địa điểm) để giữ đúng nguyên tắc chỉ công khai đúng những gì được xác nhận rõ.
+
+### Quyết định riêng tư quan trọng — EXP-03 (xưởng NNƯT Lâm Phên) chuyển từ "nội bộ" sang "công khai"
+Toạ độ EXP-03 (9.9248125, 106.3276875) trùng vị trí với toạ độ đã giải mã Plus Code trước đó (9.924813, 106.327734) — chính là **nhà riêng/xưởng của nghệ nhân**, từng được chủ động giữ `doNotPublish: true` ở phase trước theo nguyên tắc "không công khai pin nhà riêng khi chưa có sự đồng thuận". Bảng toạ độ lần này của người dùng liệt kê rõ EXP-03 với toạ độ đầy đủ + `publicPin: true`, cùng dòng nhắc "không công khai thêm địa chỉ nhà riêng... ngoài dữ liệu được cung cấp" — hiểu đây là xác nhận có chủ đích cho đúng dữ liệu trong bảng. Đã cập nhật `coordinates`/`publicPin` công khai cho EXP-03 và đổi `doNotPublish` → `false` ở `data/pilot-suppliers.json` (mục `sup-lam-phen.preciseLocationInternal`), **có ghi chú audit trail đầy đủ ngày giờ hai quyết định** (giữ riêng tư 10/09 → công khai 11/09) tại cả hai file, kèm hướng dẫn cách hoàn tác nếu đây không đúng chủ đích người dùng. **Đề nghị người dùng xác nhận lại rõ ràng** trong phản hồi — đây là dữ liệu của một cá nhân thật, việc đảo ngược sau khi đã push lên GitHub công khai sẽ khó gỡ hoàn toàn (có thể còn trong lịch sử git).
+
+### Bản đồ Khám phá (`js/trail/explore.js`, `js/services/mapService.js`)
+- Marker giờ lọc theo `dest.publicPin === true` (không chỉ theo có toạ độ hay không) — đúng 7 marker hiển thị, khớp `PILOT_MAP_LOCATIONS`.
+- Thêm `MapService.destinationDivIcon()`: icon riêng cho `markerRole === 'meetingPoint'` (🤝, viền nổi bật) và `clusterAnchor` (🗺️, viền nổi bật) — các markerRole còn lại (`experienceLocation`/`siteLocation`) dùng icon màu theo category như cũ.
+- Thêm `MapService.loadMarkerCluster()` — tải Leaflet.markercluster qua CDN (cùng cơ chế fallback-khi-lỗi-mạng như Leaflet chính), dùng `L.markerClusterGroup()` thay `L.layerGroup()` để tự gom/spiderfy SITE-04/05/06 (cụm Nguyệt Hóa, cách nhau 160–280m) khi trùng ở mức zoom thấp; rơi về `layerGroup` thường nếu plugin tải lỗi.
+- `fitBounds` dùng đúng tập `publicPin === true`, `padding:[50,50]`, `maxZoom:15`; thêm `paddingBottomRight` lớn hơn trên mobile (`<768px`) để bottom-sheet danh sách không che marker.
+- Popup: thêm dòng loại hình + nhãn markerRole ("Điểm gặp"/"Điểm neo của cụm"), địa chỉ, và nút "🧭 Chỉ đường" tạo động từ `lat/lng` (bên cạnh nút "Xem chi tiết" cũ) — không dùng địa chỉ text làm destination khi đã có toạ độ.
+- Đồng bộ card ↔ marker hai chiều: tách card thành `place-card__main` (chọn card → pan/zoom tới marker, mở popup, highlight — không rời trang Khám phá) + nút mũi tên riêng `place-card__detail-btn` (điều hướng sang trang chi tiết, giữ đúng hành vi cũ). Click marker → highlight card tương ứng + tự mở bottom-sheet danh sách + cuộn card vào khung nhìn. Bộ lọc (`filterState`) không bị reset ở cả hai chiều.
+- `destinationsService.js` truyền thêm `plusCode`/`markerRole`/`publicPin`/`archaeologicalReferenceCoordinates` ra đối tượng listing dùng chung cho UI.
+
+### Không cần migration localStorage
+`destinations` nằm trong `CONTENT_KEYS` của `storage.js` — luôn được nạp lại mới từ `data/pilot-listings.json` mỗi lần tải trang, **không** lưu vào `localStorage`. Vì vậy toạ độ mới có hiệu lực ngay cho mọi người dùng (kể cả người đã mở site từ trước) mà không cần tăng `SCHEMA_VERSION` hay viết migration — dữ liệu người dùng thật sự cần giữ lại (yêu thích, hành trình, booking...) nằm ở các key khác, không bị ảnh hưởng.
+
+### Đã kiểm thử qua trình duyệt thật
+- `node -e "JSON.parse(...)"` xác nhận `data/pilot-listings.json` và `data/pilot-suppliers.json` vẫn là JSON hợp lệ sau khi sửa.
+- `#/trail/explore`: đúng 7 marker trên bản đồ (đếm qua DOM: 3 marker đơn + 2 cụm gồm 2 marker mỗi cụm = 7; ở màn hẹp/mobile 375px cả 7 gom vào 1 cụm ghi rõ "7") — không listing nào còn badge "📍 Chưa có toạ độ" trên card.
+- Click card "Trải nghiệm tự tay giã cốm dẹp" (EXP-01, ban đầu nằm trong 1 cụm marker): bản đồ tự zoom/spiderfy, mở đúng popup EXP-01 (địa chỉ, giá, giờ, nút "Xem chi tiết" + "🧭 Chỉ đường"), card được highlight (`data-selected="true"`) — xác nhận đồng bộ card→marker hoạt động kể cả khi marker đang bị gom cụm.
+- Trang chi tiết EXP-03: nút "🧭 Chỉ đường" trỏ đúng `https://www.google.com/maps/dir/?api=1&destination=9.9248125,106.3276875` (toạ độ thật, không còn dùng link tìm kiếm theo địa chỉ).
+- `#/ops/pilot`: hiển thị đúng 7 listing, không lỗi console, không có ảnh hưởng từ việc đổi `doNotPublish` ở `sup-lam-phen`.
+- Quét tự động 6 route (`#/trail/explore`, 4 trang chi tiết, `#/ops/pilot`): `scrollWidth - clientWidth = 0` ở mọi route trên desktop.
+- Mobile 375px (`#/trail/explore`): không tràn ngang, không lỗi console, cụm marker gộp đúng "7" khi zoom bao trọn tất cả pin.
+- `read_console_messages` không ghi nhận lỗi nào xuyên suốt các bước kiểm thử trên.
+
+### File đã sửa
+`data/pilot-listings.json`, `data/pilot-suppliers.json`, `js/services/destinationsService.js`, `js/services/mapService.js`, `js/trail/explore.js`, `css/trail.css`, `css/components.css`, `PROGRESS.md`, `DATA_ISSUES.md`.
+
+## PHASE — Hoàn thiện hành trình, booking, thông báo và liên kết dữ liệu — 2026-09-11
+
+Triển khai 4 thay đổi lớn: (1) phân loại listing theo khả năng tạo doanh thu + quy tắc tour phải có hoạt động cộng đồng, (2) "Thêm vào hành trình" hoạt động như giỏ hàng, (3) xác nhận booking + trung tâm thông báo/nhắc lịch, (4) hợp nhất dữ liệu review/booking dùng chung Trail–Studio–Ops kèm đồng bộ cùng-tab/khác-tab. Không đổi dữ liệu 7 listing (tên/địa chỉ/toạ độ) hay bản đồ — chỉ thêm trường mới.
+
+### 1) Phân loại doanh thu listing
+`data/pilot-listings.json`: mỗi listing có thêm khối `revenue: { type, providerType, isCommunityActivity, bookable, priceValue, durationMinutes, durationEstimated }`. Phân loại theo đúng dữ liệu thật hiện có — **không có listing nào `bookable:true`/có `priceValue`** vì chưa supplier nào xác nhận giá/nhận khách (giữ đúng nguyên tắc trung thực đã theo suốt dự án):
+- EXP-01/02/03 (giã cốm dẹp, nhạc-múa Khmer, làm mặt nạ): `paid_activity`, `isCommunityActivity:true`, providerType `community_household`/`artisan`.
+- SITE-04/05/06/07 (cụm Nguyệt Hóa, Chùa Âng, Bảo tàng, Chùa Lò Gạch): `free_visit`, `isCommunityActivity:false`.
+- `durationMinutes` là ước lượng demo (90/120/75/30/45/60/45 phút), luôn kèm `durationEstimated:true` — dùng làm `suggestedDurationMin` mặc định cho thuật toán xếp lịch (trước đây luôn `null`), UI hiển thị đúng trạng thái "ước lượng", không phải đo thực địa.
+- `js/services/destinationsService.js` truyền các trường này ra `revenueType/providerType/isCommunityActivity/bookable/revenuePriceValue` trên object destination dùng chung toàn app.
+
+**Vì sao "tour bookable" gần như luôn rơi vào nhánh "chưa có hoạt động cộng đồng phù hợp" với dữ liệu hiện tại**: cả 7 listing pilot đều chưa có supplier xác nhận giá/nhận khách → không có `bookable:true` + `price>0` nào trong dữ liệu nguồn. Một tour chỉ thực sự "có hoạt động cộng đồng trả phí" khi một **host tự tạo trải nghiệm thật qua Studio** (`#/studio/experiences/new`, có giá + khung giờ) — đây là cơ chế sẵn có từ trước, không phải thứ tạo mới ở phase này. Đã kiểm thử trực tiếp: tạo 1 trải nghiệm thật (150.000đ, 90 phút, còn chỗ) cho host Trần Tuấn Việt → thuật toán xếp lịch nhận diện đúng, gắn `bookable:true`, tour chuyển đúng sang "có hoạt động cộng đồng" (xem mục kiểm thử).
+
+### 2) Quy tắc tạo tour có hoạt động sinh lời
+`js/services/aiService.js`:
+- Mỗi `stop` giờ có `revenueType/isCommunityActivity/providerType/bookable/price` — `bookable`/`price` CHỈ đúng khi khớp được 1 experience+slot thật còn chỗ (không suy đoán).
+- Option xếp lịch (`buildOption`) và itinerary (`recalcTimeline`) có thêm `isBookableTour = stops.some(s => s.bookable && s.revenueType==='paid_activity' && s.price>0)`.
+- Tour ngắn (`availableHours <= 2`): ứng viên có `isCommunityActivity` được ưu tiên xếp trước khi chọn — tránh kết quả toàn chùa/điểm miễn phí cho tour ngắn.
+- `js/trail/itinerary.js`: khi wizard trả về không có option nào `isBookableTour`, hiện rõ thông báo "Hiện chưa có hoạt động cộng đồng phù hợp với thời gian và lịch bạn chọn" phía trên các lựa chọn (vẫn hiện các lựa chọn miễn phí, không giấu) — mỗi option card có badge "🏘️ Có hoạt động cộng đồng" hoặc "📍 Lịch tham quan tự do".
+- **Chưa triển khai** phần "chèn cưỡng bức 1 hoạt động cộng đồng vào option đang tính" nếu ban đầu không lọt — với dữ liệu thật hiện tại (0 hoạt động bookable) bước này không có gì để chèn nên chưa có giá trị kiểm thử được; đã ưu tiên đúng thứ tự ứng viên (mục trên) thay vì thuật toán chèn ép phức tạp hơn.
+
+### 3) "Thêm vào hành trình" = giỏ hàng (tripCart)
+- `js/storage.js`: `tripCart: [{destinationId, addedAt, selected, partySize}]` — hàm `addToTripCart/removeFromTripCart/toggleTripCartItem/setTripCartItemSelected/setTripCartAllSelected/removeTripCartSelected/setTripCartPartySize`. Thay thế hoàn toàn `ui.draftItinerary`/`addDraftItineraryItem` cũ (đã gỡ).
+- Nút "+ Thêm vào hành trình" có ở card Khám phá (`js/trail/explore.js`, icon tròn +/✓ cạnh nút "Xem chi tiết") và trang chi tiết (`js/trail/placeDetail.js`) — bấm: thêm vào giỏ, hiện toast "Đã thêm [tên] vào hành trình của bạn.", đổi nút thành "✓ Đã thêm"; bấm lại: hỏi mở giỏ hay gỡ khỏi giỏ. Không tạo bản trùng (dedup theo destinationId, đã kiểm thử bấm 2 lần).
+- Badge số lượng trên tab "Hành trình" (bottom-nav + top-tabs, `js/trail/shell.js`) — cập nhật ngay khi thêm/gỡ (qua re-render).
+- Trang "Hành trình của tôi" (`#/trail/itinerary`, phần đầu `renderItineraryHome`): liệt kê toàn bộ giỏ, mỗi dòng có checkbox (mặc định tick khi mới thêm), số người, trạng thái miễn phí/có phí, nút Xem/Xoá. Nút "Chọn tất cả"/"Bỏ chọn tất cả"/"Xoá mục đã chọn"/"Tạo lộ trình từ các điểm đã chọn" (chỉ bật khi có ít nhất 1 mục tick). Bỏ tick KHÔNG xoá khỏi giỏ (đã kiểm thử).
+
+### 4) Kiểm tra hoạt động sinh lời trong giỏ + xếp lộ trình từ lựa chọn
+- `aiService.buildItineraryFromSelection(state, {selectedIds, date, startHour, startMin, partySize})`: xếp CHÍNH XÁC các listing đã tick (không lọc bớt như thuật toán gợi ý), thứ tự theo nearest-neighbor từ điểm xuất phát (hoặc giữ thứ tự gốc nếu thiếu toạ độ), gắn cảnh báo lệch giờ mở cửa thay vì tự loại bỏ điểm. Trả về `isBookableTour`.
+- `aiService.suggestCommunityAdditions(state, {excludeIds, anchorPoint, interests, partySize, date, limit})`: gợi ý tối đa 3 hoạt động cộng đồng CHƯA có trong lựa chọn, ưu tiên khoảng cách → sở thích → còn slot thật → hộ dân/nghệ nhân.
+- Luồng "Tạo lộ trình từ các điểm đã chọn" (modal trong `js/trail/itinerary.js`): hỏi ngày/giờ/số người → xếp lịch → nếu chưa có hoạt động cộng đồng hợp lệ, hiện panel gợi ý (tối đa 3, mỗi cái có nút "+ Thêm vào hành trình" tự xếp lại) + nút "Tạo lịch tham quan tự do" (không thêm gì, lưu itinerary với `isFreeVisitPlan:true`) — không tự ý thêm gì khi khách chưa bấm.
+- Itinerary tạo ra là object **cùng shape** với itinerary từ wizard cũ → tái dùng toàn bộ trang chi tiết/bản đồ/timeline có sẵn (`js/trail/itineraryDetail.js`), không cần trang kết quả riêng.
+- Đã kiểm thử trực tiếp qua trình duyệt: thêm 3 listing miễn phí vào giỏ (không có hoạt động cộng đồng nào có giá thật) → đúng hiện panel gợi ý (2 trải nghiệm còn lại, đánh dấu "Chưa bookable") + tạo được "Lịch tham quan tự do" thành công, không qua bước đặt/thanh toán (không có nút "Đặt các hoạt động trả phí" vì không stop nào có `experienceId`).
+
+### 5) Xác nhận booking
+`js/trail/booking.js`: màn kết quả sau khi thanh toán (`pendingResultHtml`) viết lại đầy đủ — mã booking, tên hành trình, ngày, giờ bắt đầu, số người, danh sách hoạt động kèm đúng trạng thái từng mục (không nói "đã xác nhận toàn bộ" khi vẫn còn mục `pending`), tổng tiền, số tiền đã thanh toán (demo), nút "Xem hành trình"/"Quay lại khám phá". Trạng thái item dùng enum đã có sẵn trong `bookingService.js` (`pending/accepted/rejected/cancelled/completed` cho item; `pending_host/partially_confirmed/confirmed/rejected/completed/cancelled/expired` cho booking) — **không đổi tên** `pending_host` thành `pending_host_confirmation` như tên gợi ý trong spec để tránh rủi ro sửa rải rác nhiều nơi (Studio/Ops đang dùng đúng enum cũ); ngữ nghĩa giống hệt nhau.
+
+`js/trail/itineraryDetail.js`: thêm badge "Booking: …" cạnh trạng thái hành trình, tính từ TRẠNG THÁI TỪNG bookingItem gắn với các điểm dừng (không lưu riêng, luôn tính lại) — null/không hiện khi tour chưa có booking nào (draft).
+
+### 6) Trung tâm thông báo + nhắc lịch
+- `js/storage.js`: `notifications: []` (đã bỏ trường `ui.notifications` cũ chưa từng dùng), hàm `addNotification/getNotifications/getUnreadNotificationCount/markNotificationRead/markAllNotificationsRead`. `reminders: []` + `scheduleBookingReminders(booking, itineraryId, startAt)` (tạo mốc 24h và 2h trước giờ khởi hành thật — bỏ qua mốc nào đã qua ngay lúc tạo, không gửi trễ) + `checkDueReminders()` (idempotent qua `sentAt`, gọi khi app mở/focus — wired ở `js/app.js`).
+- `bookingService.createBooking()` tự tạo notification "booking_created" + lên lịch 2 reminder ngay sau khi tạo booking (đặt ở lớp dữ liệu, không gọi rải rác từ UI — đúng yêu cầu). `respondToBooking()` tạo notification đúng theo trạng thái thật (`confirmed`/`partially_confirmed`/`rejected`), không bịa "đã xác nhận toàn bộ".
+- Trang mới `#/trail/notifications` (`js/trail/notifications.js`): danh sách thông báo, "Đánh dấu tất cả đã đọc", bấm 1 thông báo → đánh dấu đã đọc + mở đúng hành trình liên quan. Nút bật "Thông báo trình duyệt (tuỳ chọn)" — CHỈ xin quyền khi khách chủ động bấm (không tự xin lúc mở trang), có cảnh báo rõ "chỉ hoạt động khi tab đang mở, không gửi được khi đã đóng trình duyệt".
+- Icon 🔔 + badge số chưa đọc ở topbar Trail (`js/trail/shell.js`), badge số lượng giỏ hành trình ở tab "Hành trình".
+- Dùng múi giờ `Asia/Ho_Chi_Minh` khi hiển thị giờ nhắc lịch.
+
+### 7) Hợp nhất dữ liệu review + đồng bộ
+- **Trước đây có 3 tập tách biệt**: `reviews` (seed, luôn rỗng, bị nạp đè mỗi lần tải trang vì là CONTENT_KEY), `userReviews` (review gắn booking, persist), `placeImpressions` (cảm nhận tự đánh dấu, persist, KHÔNG đổi). Từ phase này: **`reviews` là tập DUY NHẤT, đã persist** (gỡ khỏi CONTENT_KEYS — trước đây là một lỗi tiềm ẩn: review thật của khách có thể bị mất khi tải lại trang vì luôn bị ghi đè bằng mảng rỗng từ seed) theo đúng shape spec yêu cầu: `{id, bookingId, bookingItemId, listingId, hostId, travellerId, overallRating, categoryRatings:{experience,hospitality,accuracy}, comment, createdAt, status}`. `placeImpressions` giữ nguyên, vẫn tách biệt (đúng như thiết kế trước đó).
+- `storage.addReview()` (thay `addUserReview`): chặn nếu bookingItem chưa `completed`, dedup theo `bookingItemId`, tự tra `hostId` theo `destinationId` (null nếu listing không gắn host nào — case "không có host cụ thể" mà spec nêu, hiện chưa xảy ra thật vì cả 7 listing đều có đúng 1 host).
+- `js/services/reviewsService.js` (mới): `computeRatingStats(reviews)` luôn lọc `status==='published'` rồi tính TỪ ĐẦU (không cộng dồn vào average cũ, đúng công thức spec đưa) + `getRatingStatsForListing`/`getRatingStatsForListingIds`/`formatRatingStats`. Dùng chung ở: trang chi tiết Trail (hiện "⭐ X.X · N đánh giá" + danh sách review), Studio Tổng quan (điểm sao tổng + khối "Đánh giá gần đây" mới: rating/bình luận/ngày/mã booking liên quan), CPS (`cpsService.js`), Admin báo cáo ẩn danh theo nhóm danh mục (`admin/reports.js`).
+- **Kiểm thử nghiệm thu đúng ví dụ trong spec**: tạo booking thật (150.000đ) → hộ xác nhận → hộ xác nhận hoàn thành → khách gửi 1 review 5 sao → Trail hiện "⭐ 5.0 · 1 đánh giá", Studio Tổng quan hiện cùng số + khối "Đánh giá gần đây" đúng nội dung/ngày/mã booking — khớp công thức `average = tổng overallRating / reviewCount`, không cộng dồn.
+- **Đồng bộ cùng-tab**: `storage.notifyDataChanged(entity, action)` bắn `CustomEvent('khmerlink:data-changed')` sau các thay đổi liên quan (tripCart, reviews, bookings/bookingItems, notifications, itinerary) — đặt Ở LỚP DỮ LIỆU (`storage.js`/`bookingService.js`), không gọi rải rác từ component. `js/app.js` lắng nghe sự kiện này (debounce 80ms) và re-render route hiện tại từ state mới — **không** `location.reload()`, không cuộn lại đầu trang.
+- **Đồng bộ khác-tab**: lắng nghe sự kiện `storage` chuẩn của trình duyệt. Phát hiện lỗi khi kiểm thử thật với 2 tab: ghi localStorage ở tab khác **không** tự cập nhật biến `state` trong bộ nhớ của tab đang mở (mỗi tab có bản sao module JS riêng) — đã sửa bằng `storage.syncFromLocalStorage()` (đọc lại localStorage, merge vào state hiện có, bỏ qua CONTENT_KEYS) gọi TRƯỚC khi re-render. Đã kiểm thử lại với 2 tab thật: tab A thêm địa điểm vào giỏ → tab B tự cập nhật số lượng giỏ mà không cần tải lại trang.
+- README/dữ liệu không mô tả localStorage là đồng bộ nhiều thiết bị — đây vẫn là giới hạn đã biết từ đầu dự án (mỗi trình duyệt là một "tài khoản" riêng), phase này chỉ đồng bộ nhiều TAB cùng trình duyệt, không phải nhiều thiết bị/người dùng.
+
+### 8) Migration schema v2 → v3
+`js/storage.js`: `SCHEMA_VERSION = 3`. `migrateV2ToV3()`: tạo `tripCart` từ `ui.draftItinerary` cũ (giữ nguyên lựa chọn trước đó, mặc định tick), tạo `notifications`/`reminders` rỗng, chuyển `userReviews` cũ sang `reviews` shape mới (giữ nguyên nội dung, không tạo trùng, không cộng lại điểm thưởng — điểm thưởng/passport/booking/favorites/vouchers giữ nguyên không đụng tới). Đã kiểm thử thật: trình duyệt có dữ liệu schema v2 từ phase trước (1 mục trong `ui.draftItinerary` cũ) → tải lại → tự động lên `schemaVersion:3`, mục cũ xuất hiện đúng trong giỏ hành trình mới, không mất dữ liệu, không cần khách tự xoá cache.
+
+### Đã kiểm thử qua trình duyệt thật (đầy đủ, không chỉ đọc code)
+1. Quét 20 route (Trail/Studio/Admin/Ops) — không lỗi console, không tràn ngang desktop lẫn mobile 375px.
+2. Migration v2→v3 tự động đúng khi mở lại trình duyệt có dữ liệu cũ.
+3. Card Khám phá + trang chi tiết: nút "+ Thêm vào hành trình" thêm/gỡ đúng, không tạo trùng, đổi nhãn "✓ Đã thêm", cập nhật badge.
+4. Trang giỏ hành trình: tick/bỏ tick, "Tạo lộ trình từ các điểm đã chọn" đúng chỉ dùng mục đã tick; bỏ tick không xoá khỏi giỏ.
+5. Tạo lộ trình từ 3 listing miễn phí (không có hoạt động cộng đồng nào bookable thật) → đúng hiện panel gợi ý + tạo được "Lịch tham quan tự do", không qua bước đặt chỗ.
+6. Tạo 1 trải nghiệm thật có giá (150.000đ) qua Studio cho host Trần Tuấn Việt → tạo lại lộ trình từ giỏ (có EXP-01) → thuật toán nhận diện đúng `bookable:true`, tour thành "Hành trình từ giỏ hành trình" (có hoạt động cộng đồng), hiện nút "Đặt các hoạt động trả phí".
+7. Luồng đặt chỗ đầy đủ: giữ chỗ → đặt cọc 30% → màn xác nhận đúng mã/tên hành trình/ngày/giờ/số người/trạng thái từng hoạt động ("Chờ hộ xác nhận", không nói đã xác nhận toàn bộ)/tổng tiền/đã thanh toán.
+8. Notification "Hành trình đã được ghi nhận" tạo đúng ngay khi đặt; reminder 2h tạo đúng (mốc 24h bị bỏ qua đúng vì đã qua giờ lúc tạo — không gửi trễ).
+9. Studio: hộ chấp nhận booking → notification "Booking đã được xác nhận" xuất hiện cho khách; xác nhận hoàn thành → chuyển đúng trạng thái.
+10. Viết review 5 sao từ Hộ chiếu → Trail hiện "⭐ 5.0 · 1 đánh giá" trên trang chi tiết; Studio Tổng quan hiện đúng cùng số liệu + khối "Đánh giá gần đây" (rating/bình luận/ngày/mã booking) — không cần tải lại trang thủ công (đồng bộ qua `khmerlink:data-changed`).
+11. Trung tâm thông báo: liệt kê đúng 2 thông báo, "Đánh dấu tất cả đã đọc" hoạt động, badge 🔔 cập nhật.
+12. Badge "Booking: Đã hoàn thành" trên trang chi tiết hành trình tính đúng từ trạng thái bookingItem thật.
+13. Đồng bộ 2 tab thật: thêm địa điểm vào giỏ ở tab A → tab B tự cập nhật số lượng mà không tải lại trang (sau khi sửa lỗi `syncFromLocalStorage`).
+14. Reload trang nhiều lần: không tạo thêm booking/notification/reminder/review nào (đếm lại đúng số cũ).
+15. `node -e "JSON.parse(...)"` xác nhận 2 file data vẫn hợp lệ sau khi sửa.
+
+### Giới hạn đã biết (không giấu)
+- Chưa triển khai bước "tự động chèn 1 hoạt động cộng đồng vào option đang xếp nếu ban đầu bị bỏ sót" — với dữ liệu thật hiện tại (0 hoạt động có giá được supplier xác nhận) nhánh này không có gì để chèn nên chưa kiểm thử được ý nghĩa; đã bù bằng việc ưu tiên đúng thứ tự ứng viên cho tour ngắn.
+- Trải nghiệm "Trải nghiệm giã cốm dẹp cùng cô Sáu (thử nghiệm)" tạo ra trong lúc kiểm thử chỉ tồn tại trong localStorage của trình duyệt kiểm thử (qua Studio, cơ chế có sẵn) — KHÔNG có trong bất kỳ file dữ liệu nào của repo, không ảnh hưởng người dùng thật.
+- Chưa có UI huỷ/ẩn riêng cho 1 review (chỉ có cơ chế tính average đúng nếu status đổi khỏi `published` — hàm đã hỗ trợ, nhưng chưa có nút thao tác nào gọi tới).
+- Đồng bộ multi-tab dùng `storage` event (chỉ hoạt động cùng trình duyệt, cùng máy) — vẫn đúng như từ đầu dự án, KHÔNG phải đồng bộ nhiều thiết bị/người dùng thật (cần backend thật cho việc đó).
+
+### File đã sửa/tạo
+Mới: `js/services/reviewsService.js`, `js/trail/notifications.js`.
+Sửa: `data/pilot-listings.json`, `js/data.js`, `js/storage.js`, `js/app.js`, `js/services/destinationsService.js`, `js/services/aiService.js`, `js/services/bookingService.js`, `js/services/cpsService.js`, `js/trail/itinerary.js`, `js/trail/itineraryDetail.js`, `js/trail/itinerarySummary.js`, `js/trail/explore.js`, `js/trail/placeDetail.js`, `js/trail/passport.js`, `js/trail/profile.js`, `js/trail/shell.js`, `js/trail/booking.js`, `js/studio/overview.js`, `js/admin/reports.js`, `css/components.css`, `css/layout.css`.
+
+## PHASE — Bổ sung dữ liệu mô phỏng liên kết cho Customer, Host và Management — 2026-09-11
+
+**Quyết định đã xác nhận với người dùng trước khi làm** (xem hộp thoại xác nhận trong hội thoại): dữ liệu mô phỏng (đánh giá/doanh thu/lượt ghé) gắn TRỰC TIẾP vào 7 listing/host THẬT (Chùa Âng, Bảo tàng, hộ Trần Tuấn Việt, nghệ nhân Lâm Phên...), không dùng danh tính hư cấu song song, không gắn nhãn "demo" trên từng card — đúng như yêu cầu, sau khi đã cảnh báo rõ đây là sự đổi hướng so với nguyên tắc "không bịa số liệu cho tổ chức thật" đã theo suốt các phase trước. Toàn bộ giả định ghi chi tiết ở [DEMO_DATA.md](DEMO_DATA.md).
+
+### 1) Nguồn dữ liệu trung tâm
+`data/pilot-seed-data.js` (mới) — DUY NHẤT một nguồn cho: `listingOperations` (giờ/giá/thời lượng/sức chứa 7 listing), `initialReviewStats` (baseline ratingSum/reviewCount lịch sử), `seedReviews` (68 review chi tiết viết tay, 8-10/listing, không lặp câu), `reviewTagsByCategory`/`listingTagGroup`, `monthlyParticipants`/`monthlyVisits` (12 tháng 09/2025–08/2026), `historicalMetrics` (tính bằng công thức `gross = participants×price`, `platformFee = gross×10%`, `providerIncome = gross − fee − refunds` — không hard-code từng số), `visitMetrics`. Cố định, không `Math.random()`, không đổi giữa các lần render. Đánh dấu `dataStatus:'demo_assumption'`/`source:'seed_demo'`, phân biệt với `source:'live_demo'` (dữ liệu thật phát sinh trong phiên demo).
+
+### 2) Giờ mở cửa/giá cho 7 listing
+`js/services/operationsService.js` (mới): `computeOpenStatus()` tính "Đang mở/Sắp đóng cửa/Đóng cửa/Cần đặt trước" REAL-TIME theo giờ Việt Nam (`Intl` với `timeZone:'Asia/Ho_Chi_Minh'`, không phụ thuộc múi giờ máy chạy); `formatPricePerPerson()` (0→Miễn phí, số→"180.000đ/người", null→Đang cập nhật); `getNearestSlotAvailability()` (chỉ hiện "Còn N chỗ lúc HH:MM" khi có slot thật từ Studio); `formatWeeklyHoursRows()` (bảng giờ cả tuần, thu gọn trong accordion). Trang chi tiết có chú thích "Thông tin vận hành trong giai đoạn pilot, vui lòng kiểm tra khi đặt lịch."
+
+### 3) Review và điểm đánh giá
+`js/services/reviewsService.js` viết lại: `computeRatingStats(baseline, liveReviews)` = baseline (từ `initialReviewStats`) + review live thật (`state.reviews`, không cộng thêm `seedReviews` vì đã tính gộp trong baseline) — LUÔN tính lại từ đầu, không cộng dồn vào average cũ. Thêm `getRatingDistribution`, `getTagShareForListings`, `getRecommendRate`, `getDisplayReviewsForListingIds` dùng chung Trail/Studio/Ops.
+
+### 4) Form đánh giá Customer
+`js/trail/passport.js`'s `openReviewModal` viết lại theo đúng thiết kế: tiêu đề "Cảm nhận chuyến ghé thăm", 1 sao tổng quát kèm nhãn diễn giải (1=Rất thất vọng…5=Hoàn hảo), câu hỏi "Bạn thích điều gì ở đây?" (chip đa chọn, bộ tag theo `listingTagGroup`), ô chia sẻ thêm, câu hỏi Có/Không "giới thiệu cho người khác". `storage.addReview()` lưu thêm `selectedTags`/`wouldRecommend`/`travellerName`. Chỉ booking item `completed` mới đánh giá được; dedup 1 review/bookingItem (giữ nguyên từ phase trước). Thêm nút "⭐ Viết đánh giá" trực tiếp trên trang chi tiết (`placeDetail.js`) khi có booking item đủ điều kiện chưa đánh giá.
+
+### 5) Dữ liệu hoạt động hàng tháng của Host + lượt ghé
+`js/services/metricsService.js` (mới): `getHostMonths()` (12 tháng seed + 1 tháng live từ booking thật, tháng live luôn SAU 08/2026 nên không đếm trùng với seed), `getHostKpis()` (kèm % thay đổi so với tháng trước), `getListingVisitMonths()`, `getTopTagShares()`, `generateHostRecommendations()` (gợi ý có căn cứ số liệu cụ thể: tag mạnh/yếu, review ≤3 sao, từ khoá "nóng/thiếu nước/khó tìm/audio" trong bình luận — không tự bịa tỷ lệ không có trong dữ liệu).
+
+### 6) Dashboard Host (`js/studio/overview.js`, `js/studio/reports.js`)
+Viết lại hoàn toàn: KPI đầy đủ (khách/booking hoàn thành/doanh thu gộp/thu nhập dự kiến kèm %so-với-tháng-trước, điểm đánh giá, tỷ lệ giới thiệu, tỷ lệ huỷ, booking cần phản hồi) — rẽ nhánh đúng theo loại host: host có doanh thu (3 trải nghiệm + bảo tàng) hiện đủ KPI tài chính; host quản lý chùa/cụm miễn phí (SITE-04/05/07) hiện lượt ghé thay vì doanh thu (đúng "không có doanh thu vé"). 5 chart Chart.js: doanh thu/khách theo tháng (bar), donut "Những điều khách yêu thích" (đúng chú thích "tỷ trọng trên tổng lượt lựa chọn lời khen", KHÔNG gọi là % khách), phân bố 1–5 sao (bar), danh sách phản hồi gần đây, 2 khối gợi ý cải thiện (vận hành cũ từ CPS + nội dung mới từ review).
+
+### 7) Cổng quản lý (`js/admin/overview.js`, `js/admin/networkMetrics.js` mới, `js/admin/filters.js`, `js/admin/demand.js`)
+KPI toàn mạng lưới: tổng lượt trải nghiệm (participants EXP + visitInstances SITE, SITE-06 CHỈ tính 1 lần qua visitMetrics — không đếm trùng với historicalMetrics.participants dùng cho doanh thu), booking hoàn thành, doanh thu qua nền tảng (đặt tên đúng "Doanh thu ghi nhận qua mạng lưới pilot", không gọi "doanh thu du lịch toàn tỉnh"), thu nhập chuyển hộ/nghệ nhân, điểm đánh giá **có trọng số** (`weightedAverageRating = ΣratingSum/Σreviewcount`, không lấy trung bình cộng 7 con số), tỷ lệ giới thiệu, số host hoạt động, booking cần xử lý. 5 chart: doanh thu theo tháng, lượt tham gia+lượt ghé (line 2 series), donut theo provider (chỉ tính đơn vị có doanh thu >0, bảo tàng gắn nhãn "Đơn vị văn hóa công" tách khỏi hộ dân/nghệ nhân), doanh thu theo loại hình, điểm đánh giá theo listing. 2 bảng: top phản hồi, đề án hỗ trợ đang chờ (link sang `#/admin/proposals`). Bộ lọc mở rộng thêm "Listing" và "Đơn vị cung cấp" (ngoài tháng/loại hình/khu vực/nhóm khách có sẵn) — đổi bất kỳ filter nào cập nhật đồng thời KPI+5 chart+2 bảng (đã kiểm thử: lọc riêng Chùa Âng → đúng 0đ doanh thu, đúng tổng lượt ghé khớp `monthlyVisits['SITE-05']`). `admin/demand.js` (dự báo doanh thu) chuyển từ nguồn cũ đã rỗng (`state.metrics.monthlyByHost`) sang `networkMetrics.getNetworkMonthlyRevenue()`.
+
+### 8) Chart.js — sự cố phát hiện + đã sửa
+`js/services/chartService.js` (mới): `loadChartJs()` dùng chung, `createChart()`/`destroyChart()` có registry theo canvas id (huỷ chart cũ trước khi tạo lại, không chồng canvas khi chuyển tab/đổi filter). **Phát hiện lúc kiểm thử**: URL CDN cũ (`Chart.js/4.4.4`, dùng từ phase trước) trả về **404 thật** — cdnjs đã gỡ bản 4.4.4 khỏi CDN, không phải do mạng chặn. Đã sửa sang bản còn tồn tại (`4.5.1`, xác nhận qua `cdnjs` API), kiểm thử lại: `window.Chart.version === '4.5.1'`, canvas có kích thước render thật (652×478, không còn 300×150 mặc định), chuyển route qua lại nhiều lần không phát sinh lỗi console.
+
+### 9) Migration schema v3 → v4
+`SCHEMA_VERSION = 4`. `migrateV3ToV4()` là passthrough (không có gì trong state đã lưu cần đổi hình dạng — historicalMetrics/reviewTags/visitMetrics đều là nội dung tĩnh đọc trực tiếp từ `pilot-seed-data.js` mỗi lần tải, không lưu localStorage). Xoá `js/admin/metrics.js` (dead code, dùng `state.metrics.monthlyByHost` luôn rỗng — đã thay bằng `networkMetrics.js`).
+
+### Đã kiểm thử qua trình duyệt thật
+1. Card Khám phá + trang chi tiết cả 7 listing: đúng sao/lượt đánh giá (4.9/4.7/4.9/4.3/4.6/4.5/4.8 khớp chính xác spec), đúng giá (180k/280k/220k/Miễn phí/Miễn phí/20k/Miễn phí), đúng thời lượng, trạng thái "Đang mở" tính real-time.
+2. Trang chi tiết EXP-01: accordion "Giờ và phí" đủ trạng thái/giá/thời lượng/sức chứa/giờ cả tuần/chú thích pilot; 11 review hiển thị đúng thứ tự mới nhất trước (10 seed + 1 live từ phase trước).
+3. Viết review mới qua form "Cảm nhận chuyến ghé thăm" (tag + Có/Không) → `reviewCount` tăng đúng 1 (86→87), average tính lại đúng từ ratingSum/reviewCount, card/trang chi tiết/Studio Tổng quan cùng cập nhật ngay (qua sự kiện `khmerlink:data-changed`, không cần tải lại trang thủ công).
+4. Tạo 1 trải nghiệm thật + booking thật qua Studio → Studio Tổng quan hiện đúng KPI (%so-với-tháng-trước), Báo cáo hiện đúng 4 chart Chart.js thật (participants/revenue/tags-donut/rating-distribution).
+5. Cổng quản lý: KPI + 5 chart + 2 bảng hiện đúng; lọc theo listing "Chùa Âng" → đúng 0đ doanh thu (chùa miễn phí không tính doanh thu), đúng tổng lượt ghé.
+6. Reload trang nhiều lần: `schemaVersion` lên đúng 4, không nhân đôi review/booking/notification/reminder (đếm lại đúng số cũ).
+7. Reminder "2h trước giờ khởi hành" tới hạn tự động tạo đúng 1 notification khi mở lại app (idempotent qua `sentAt`, đã quan sát thực tế trong lúc kiểm thử kéo dài phiên).
+8. Quét 30 route (Trail/Studio/Admin/Ops) ở cả desktop và mobile 375px: không tràn ngang, không lỗi console.
+
+### Giới hạn đã biết (không giấu)
+- `%so với tháng trước` ở Studio có thể hiện chênh lệch rất lớn (vd −98%) khi so tháng lịch sử (seed, nhiều dữ liệu) với tháng hiện tại (chỉ có vài booking thật phát sinh trong phiên demo) — đây là kết quả tính đúng công thức, không phải lỗi, nhưng cần lưu ý khi trình diễn.
+- Chưa có UI ẩn/huỷ riêng cho 1 review cụ thể (hàm tính average đã hỗ trợ đúng nếu status đổi khỏi `published`, nhưng chưa có nút thao tác nào gọi tới — giống giới hạn đã ghi nhận ở phase trước).
+- Phân bố 1–5 sao ở Host/Management là ước lượng từ 68 review mẫu hiển thị, không phải toàn bộ review lịch sử (vd Chùa Âng có 1751 review theo baseline nhưng chỉ 10 review chi tiết được viết ra) — đã ghi chú rõ trong UI.
+
+### File đã sửa/tạo
+Mới: `data/pilot-seed-data.js`, `DEMO_DATA.md`, `js/services/operationsService.js`, `js/services/metricsService.js`, `js/services/chartService.js`, `js/admin/networkMetrics.js`.
+Sửa: `js/services/reviewsService.js`, `js/storage.js`, `js/trail/passport.js`, `js/trail/placeDetail.js`, `js/trail/explore.js`, `js/trail/profile.js`, `js/studio/overview.js`, `js/studio/reports.js`, `js/admin/overview.js`, `js/admin/filters.js`, `js/admin/demand.js`, `js/data.js`.
+Xoá: `js/admin/metrics.js` (dead code, thay bằng `networkMetrics.js`).
 - Quét lại toàn bộ route liên quan (7 trang chi tiết, `#/ops/pilot`, `#/studio/overview`, `#/trail/explore`) ở 375px và desktop — không lỗi console, không tràn ngang.

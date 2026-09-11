@@ -39,6 +39,32 @@
   padding: 8px 12px;
 }
 .trail-topbar__spacer { flex: 1; }
+.trail-topbar__bell {
+  position: relative;
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 6px;
+}
+.trail-topbar__bell:hover { text-decoration: none; }
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger, #b3413a);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.trail-topbar__bell .nav-badge, .top-tabs__item .nav-badge { position: relative; top: -1px; margin-left: 2px; }
+.bottom-nav__item { position: relative; }
+.bottom-nav__item .nav-badge { position: absolute; top: 2px; right: calc(50% - 22px); }
 
 .trail-content {
   flex: 1;
