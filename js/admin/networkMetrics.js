@@ -108,7 +108,12 @@ export function getNetworkKpis(state) {
 
   const activeHostIds = new Set(state.hosts.filter((h) => listingIds.includes(h.destinationId) && providerInScope(state, h.id)).map((h) => h.id));
   const expIdsInScope = new Set(state.experiences.filter((e) => listingIds.includes(e.destinationId)).map((e) => e.id));
-  const pendingBookings = state.bookingItems.filter((bi) => expIdsInScope.has(bi.experienceId) && bi.status === 'pending').length;
+  const hostIdsInScope = new Set(state.hosts.filter((h) => providerInScope(state, h.id)).map((h) => h.id));
+  // Gộp booking THẬT (bookingItems) + booking demo cho Lịch & Booking của Host (PHẦN 2, mục 2.7:
+  // "Management Portal nhận dữ liệu booking tương ứng") — cùng nguồn hostDemoBookings dùng ở
+  // js/services/hostBookingService.js, tránh 2 nơi tính khác nhau.
+  const pendingBookings = state.bookingItems.filter((bi) => expIdsInScope.has(bi.experienceId) && bi.status === 'pending').length
+    + (state.hostDemoBookings || []).filter((b) => hostIdsInScope.has(b.providerId) && b.status === 'pending').length;
 
   return {
     totalExperienceInstances,

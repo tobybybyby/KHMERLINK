@@ -1,15 +1,36 @@
-// Giờ mở cửa / giá / thời lượng / sức chứa cho 7 listing pilot — đọc từ nguồn trung tâm
-// data/pilot-seed-data.js (PHASE "Bổ sung dữ liệu mô phỏng liên kết"). Đây là GIẢ ĐỊNH cho mục
-// đích trình diễn, không phải giờ/giá vận hành đã xác nhận — trang chi tiết luôn kèm chú thích
-// "Thông tin vận hành trong giai đoạn pilot, vui lòng kiểm tra khi đặt lịch."
-import { listingOperations, TIMEZONE } from '../../data/pilot-seed-data.js';
+// Activity Catalog trung tâm cho 7 listing pilot — đọc từ nguồn trung tâm data/pilot-seed-data.js
+// (PHASE "Data Linkage" 15/09/2026, trước đó "Bổ sung dữ liệu mô phỏng liên kết"). Đây là GIẢ ĐỊNH
+// cho mục đích trình diễn, không phải giờ/giá vận hành đã xác nhận — trang chi tiết luôn kèm chú
+// thích "Thông tin vận hành trong giai đoạn pilot, vui lòng kiểm tra khi đặt lịch."
+//
+// getOperations() là ĐIỂM ĐỌC DUY NHẤT cho giá/thời lượng/sức chứa/khung giờ/financialMode/
+// publicationStatus — Customer (explore/placeDetail), Host (Studio Trải nghiệm), AI gợi ý hành
+// trình (aiService) và Cổng quản lý đều gọi qua đây, LUÔN hợp nhất LIVE với phần Host đã chỉnh sửa
+// (state.activityCatalogOverrides, xem storage.updateActivityCatalogOverride) — không bao giờ đọc
+// activityCatalog "gốc" trực tiếp ở nơi khác, để 1 lần sửa phản ánh đúng khắp Customer/Host/AI.
+import { activityCatalog, TIMEZONE } from '../../data/pilot-seed-data.js';
 import { getSlotRemaining } from './bookingService.js';
 import { formatDateShort } from '../utils.js';
+import { getState } from '../storage.js';
 
 const WEEKDAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
+/** Hợp nhất catalog gốc + phần Host đã ghi đè — gọi LIVE mỗi lần render (không đóng băng vào
+ * state.destinations) để đổi 1 nơi (Studio) thấy ngay ở Customer/AI/Cổng quản lý, kể cả sau khi
+ * đồng bộ localStorage giữa các tab (activityCatalogOverrides không phải CONTENT_KEY — xem
+ * storage.js). Không throw khi storage chưa init (một số ngữ cảnh gọi sớm) — coi như chưa có override. */
 export function getOperations(listingId) {
-  return listingOperations[listingId] || null;
+  const base = activityCatalog[listingId];
+  if (!base) return null;
+  let override = {};
+  try {
+    // getState() throw nếu Storage.init() chưa chạy (một vài kịch bản gọi sớm/test) — coi như
+    // chưa có override, vẫn trả về bản catalog gốc thay vì lỗi cả trang.
+    override = (getState().activityCatalogOverrides || {})[listingId] || {};
+  } catch (err) {
+    override = {};
+  }
+  return { ...base, ...override };
 }
 
 /** Giờ/phút hiện tại theo múi giờ Asia/Ho_Chi_Minh — không phụ thuộc múi giờ máy chạy trình

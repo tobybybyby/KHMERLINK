@@ -30,11 +30,12 @@ export function renderStudioShell(root, activeKey) {
       <header class="trail-topbar">
         <a class="trail-topbar__brand" href="#/">🏡 KhmerLink Studio</a>
         <div class="trail-topbar__spacer"></div>
-        <select class="host-switcher" id="studio-host-switcher" aria-label="Chọn hộ để xem demo">
+        <label class="text-sm host-switcher-label" for="studio-host-switcher">Đơn vị cung cấp</label>
+        <select class="host-switcher" id="studio-host-switcher" aria-label="Đơn vị cung cấp — chọn để xem demo">
           ${hostOptionsHtml(state, currentHostId)}
         </select>
       </header>
-      <p class="demo-note" style="margin:0;border-radius:0;text-align:center;">Demo chuyển vai trò: bạn đang xem Studio như thể đang đăng nhập bằng hộ đã chọn ở trên — không phải xác thực thật.</p>
+      <p class="demo-note" style="margin:0;border-radius:0;text-align:center;">Demo chuyển vai trò: bạn đang xem Studio như thể đang đăng nhập bằng đơn vị cung cấp đã chọn ở trên — không phải xác thực thật. Không phải mọi đơn vị đều là hộ kinh doanh (có chùa, bảo tàng, ban quản lý cụm).</p>
       <div class="studio-body">
         <nav class="studio-sidebar" aria-label="Điều hướng Studio">
           ${TABS.map((t) => `<a class="studio-sidebar__item" href="${t.href}" ${t.key === activeKey ? 'aria-current="page"' : ''}>${t.icon} ${t.label}</a>`).join('')}

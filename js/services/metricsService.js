@@ -2,52 +2,43 @@
 // historicalMetrics/visitMetrics (data/pilot-seed-data.js, 12 tháng 09/2025–08/2026, cố định) +
 // booking/review THẬT phát sinh trong phiên demo (không nằm trong 12 tháng lịch sử nên không thể
 // đếm trùng — tháng hiện tại của app luôn là 09/2026, sau khi dữ liệu lịch sử kết thúc).
-import { historicalMetrics, visitMetrics, MONTHS_12, TIMEZONE } from '../../data/pilot-seed-data.js';
+import { historicalMetrics, visitMetrics, MONTHS_12, TIMEZONE, DEMO_REFERENCE_DATE } from '../../data/pilot-seed-data.js';
 import { getRatingStatsForListingIds, getTagShareForListings, getRecommendRate, getDisplayReviewsForListingIds } from './reviewsService.js';
+import { getProviderMetrics, getCurrentPeriod } from './hostBookingService.js';
 
 export function monthLabel(monthKey) {
   const [y, m] = monthKey.split('-');
   return `T${Number(m)}/${y}`;
 }
 
-export function currentMonthKey(now = new Date()) {
+// Mốc "hiện tại" dùng DEMO_REFERENCE_DATE cố định (không phải `new Date()` thật) — khớp với
+// hostBookingService.getCurrentPeriod(), để "tháng này" luôn là CÙNG một tháng trên mọi trang
+// (PHASE 15/09/2026: trước đó currentMonthKey() dùng ngày máy thật, có thể lệch khỏi tháng có
+// dữ liệu booking demo nếu mở app sau 09/2026).
+export function currentMonthKey(now = new Date(DEMO_REFERENCE_DATE)) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit' }).formatToParts(now);
   const map = {};
   parts.forEach((p) => { map[p.type] = p.value; });
   return `${map.year}-${map.month}`;
 }
 
-/** bookingItem "thuộc" tháng nào — dùng mốc chấp nhận/hoàn thành đầu tiên (statusHistory[0].at). */
-function bookingItemMonthKey(bi) {
-  const at = new Date(bi.statusHistory?.[0]?.at || bi.createdAt || Date.now());
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit' }).formatToParts(at);
-  const map = {};
-  parts.forEach((p) => { map[p.type] = p.value; });
-  return `${map.year}-${map.month}`;
-}
-
-/** Tháng "live" (booking thật trong phiên demo, KHÔNG có trong 12 tháng lịch sử — vì lịch sử kết
- * thúc 08/2026 và "hiện tại" của app luôn sau mốc đó) cho 1 host, theo đúng experience của host. */
+/** Tháng "hiện tại" cho 1 host — nay lấy TRỰC TIẾP từ getProviderMetrics() (hostBookingService,
+ * nguồn duy nhất dùng chung với Tổng quan/Lịch & Booking) thay vì tự tính riêng từ bookingItems,
+ * để chart 12 tháng ở Báo cáo không lệch số với 2 trang kia (PHASE 15/09/2026). */
 function computeLiveMonth(state, hostId, monthKey) {
-  const expIds = new Set(state.experiences.filter((e) => e.hostId === hostId).map((e) => e.id));
-  const items = state.bookingItems.filter((bi) => expIds.has(bi.experienceId) && bookingItemMonthKey(bi) === monthKey);
-  const completed = items.filter((bi) => bi.status === 'completed');
-  const accepted = items.filter((bi) => ['accepted', 'completed'].includes(bi.status));
-  const cancelled = items.filter((bi) => bi.status === 'cancelled');
-  const grossRevenue = accepted.reduce((s, bi) => s + bi.subtotal, 0);
-  const platformFee = Math.round(grossRevenue * 0.1);
+  const pm = getProviderMetrics(state, hostId, getCurrentPeriod());
   return {
     month: monthKey,
     listingId: null,
     providerId: hostId,
-    participants: completed.reduce((s, bi) => s + bi.quantity, 0),
-    completedBookings: new Set(completed.map((bi) => bi.bookingId)).size,
-    cancelledBookings: cancelled.length,
-    grossRevenue,
+    participants: pm.totalGuests,
+    completedBookings: pm.completedCount,
+    cancelledBookings: pm.cancelledCount,
+    grossRevenue: pm.grossExpected,
     refunds: 0,
-    platformFee,
-    providerIncome: grossRevenue - platformFee,
-    dataStatus: items.length ? 'live_demo' : 'no_data',
+    platformFee: pm.grossExpected - pm.providerExpectedIncome,
+    providerIncome: pm.providerExpectedIncome,
+    dataStatus: pm.totalBookings ? 'live_demo' : 'no_data',
     source: 'live_demo',
   };
 }

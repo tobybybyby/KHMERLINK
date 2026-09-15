@@ -234,6 +234,12 @@ export function renderPlaceDetail(container, id) {
 
   const ratingStats = getRatingStatsForListing(state, dest.id);
   const reviews = getDisplayReviewsForListing(state, dest.id);
+  // Mô tả ngắn: ưu tiên bản Host đã chỉnh trong Studio (activityCatalogOverrides.shortDescription,
+  // hợp nhất live qua getOperations) — Customer luôn thấy ĐÚNG bản mới nhất, không phải bản tĩnh
+  // trong pilot-listings.json (PHASE "Data Linkage" 15/09/2026, mục 5 "Sau khi Host lưu thay đổi").
+  const activityOps = getOperations(dest.id);
+  const summaryText = (activityOps && activityOps.shortDescription) || dest.summary;
+  const isPaused = activityOps && activityOps.publicationStatus && activityOps.publicationStatus !== 'published';
 
   const related = (dest.relatedListingIds || [])
     .map((rid) => state.destinations.find((d) => d.id === rid))
@@ -259,10 +265,11 @@ export function renderPlaceDetail(container, id) {
           <div class="badge-row">
             <span class="badge ${typeBadge.cls}">${categoryEmoji(dest.category)} ${escapeHtml(typeBadge.label)}</span>
             <span class="badge badge-type">${escapeHtml(dest.category)}</span>
+            ${isPaused ? '<span class="badge badge-demo">Tạm dừng nhận khách</span>' : ''}
           </div>
           <p class="text-sm text-muted" style="margin:4px 0 0;">${formatRatingStats(ratingStats)}</p>
           ${readinessNoteHtml(dest)}
-          <p style="margin-top:12px;">${escapeHtml(dest.summary)}</p>
+          <p style="margin-top:12px;">${escapeHtml(summaryText)}</p>
         </div>
 
         <div class="cta-row">

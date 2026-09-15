@@ -1,12 +1,44 @@
 import { getState } from '../storage.js';
 import { escapeHtml, formatMoney, formatDateShort } from '../utils.js';
-import { adminFilters, filterBarHtml, wireFilterBar } from './filters.js';
+import { adminFilters, filterBarHtml, wireFilterBar, destinationInScope, providerInScope } from './filters.js';
 import {
   getNetworkKpis, getNetworkMonthlyRevenue, getParticipantsAndVisitsSeries,
   getRevenueByProviderDonut, getRevenueByType, getRatingByListingBar, getTopFeedbackTable,
 } from './networkMetrics.js';
+import { getNetworkMetrics, getCurrentPeriod } from '../services/hostBookingService.js';
 import { loadChartJs, createChart, CHART_COLORS } from '../services/chartService.js';
 import { qs } from '../utils.js';
+
+/** Đơn vị cung cấp trong phạm vi bộ lọc admin hiện tại (địa bàn/loại hình/listing/đơn vị) — dùng
+ * cho KPI "tháng này" (getNetworkMetrics), cùng phạm vi lọc với các chart lịch sử bên dưới. */
+function scopedProviderIds(state) {
+  return state.hosts
+    .filter((h) => destinationInScope(state.destinations.find((d) => d.id === h.destinationId)) && providerInScope(state, h.id))
+    .map((h) => h.id);
+}
+
+function monthCurrentLabel(period) { return `T${period.month + 1}/${period.year}`; }
+
+function currentMonthKpiHtml(net) {
+  const label = monthCurrentLabel(net.period);
+  return `
+    <section class="card" style="padding:20px;">
+      <h3 style="margin-top:0;">Mạng lưới pilot — tháng ${label} (khớp Lịch & Booking của từng đơn vị)</h3>
+      <div class="quick-facts" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
+        <div class="quick-fact"><span class="quick-fact__label">Tổng active booking</span><span class="quick-fact__value">${net.totalActiveBookings.toLocaleString('vi-VN')}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Hoàn thành</span><span class="quick-fact__value">${net.totalCompleted.toLocaleString('vi-VN')}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Đã xác nhận</span><span class="quick-fact__value">${net.totalConfirmed.toLocaleString('vi-VN')}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Đang chờ</span><span class="quick-fact__value">${net.totalPending.toLocaleString('vi-VN')}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Tổng khách</span><span class="quick-fact__value">${net.totalGuests.toLocaleString('vi-VN')}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Tổng giá trị booking + vé</span><span class="quick-fact__value">${formatMoney(net.totalGrossValue)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Thu nhập dự kiến (3 trải nghiệm cộng đồng)</span><span class="quick-fact__value">${formatMoney(net.communityProviderIncome)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Doanh thu vé dự kiến (bảo tàng)</span><span class="quick-fact__value">${formatMoney(net.ticketGrossRevenue)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Phí nền tảng dự kiến (3 trải nghiệm)</span><span class="quick-fact__value">${formatMoney(net.communityPlatformFee)}</span></div>
+      </div>
+      <p class="text-sm text-faint" style="margin-top:-6px;">Tổng hợp trực tiếp từ getProviderMetrics() của từng đơn vị trong phạm vi lọc — cùng nguồn với Tổng quan/Lịch & Booking của Host, không tính riêng công thức khác. Điểm miễn phí (chùa/cụm) không đưa vào doanh thu.</p>
+    </section>
+  `;
+}
 
 function pendingProposalsHtml(state) {
   const pending = state.proposals.filter((p) => ['sent', 'reviewing', 'needs_info'].includes(p.status));
@@ -41,6 +73,7 @@ function topFeedbackHtml(rows) {
 export function renderAdminOverview(container) {
   const state = getState();
   const kpi = getNetworkKpis(state);
+  const netCurrentMonth = getNetworkMetrics(state, getCurrentPeriod(), scopedProviderIds(state));
   const monthlyRevenue = getNetworkMonthlyRevenue(state);
   const series = getParticipantsAndVisitsSeries(state);
   const providerDonut = getRevenueByProviderDonut(state);
@@ -54,6 +87,8 @@ export function renderAdminOverview(container) {
       <p class="text-sm text-muted">Doanh thu ghi nhận qua mạng lưới pilot — tổng hợp trực tiếp từ dữ liệu các host/listing, không phải số liệu du lịch chính thức của tỉnh.</p>
     </div>
     ${filterBarHtml(state)}
+
+    ${currentMonthKpiHtml(netCurrentMonth)}
 
     <div class="quick-facts" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
       <div class="quick-fact"><span class="quick-fact__label">Tổng lượt trải nghiệm</span><span class="quick-fact__value">${kpi.totalExperienceInstances.toLocaleString('vi-VN')}</span></div>

@@ -447,7 +447,10 @@ function popupSummary(text) {
 }
 
 function buildPopupHtml(d) {
-  const priceText = d.priceDisplay ? `${escapeHtml(d.priceDisplay)}${d.priceStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giá</span>';
+  const ops = getOperations(d.id);
+  const priceText = ops
+    ? escapeHtml(formatPricePerPerson(ops.pricePerPerson))
+    : (d.priceDisplay ? `${escapeHtml(d.priceDisplay)}${d.priceStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giá</span>');
   const hoursText = d.openingHours ? `${escapeHtml(d.openingHours)}${d.openingHoursStatus === 'estimated' ? ' (ước lượng)' : ''}` : '<span class="text-faint">Chưa xác minh giờ mở cửa</span>';
   const roleLabel = d.markerRole && MapService.MARKER_ROLE_LABEL[d.markerRole];
   const dirUrl = (d.lat !== null && d.lng !== null) ? `https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lng}` : null;

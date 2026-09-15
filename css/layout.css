@@ -85,6 +85,7 @@
 }
 .bottom-nav__item {
   flex: 1;
+  min-width: 0; /* cho phép flex item co lại dưới độ rộng chữ gốc — thiếu dòng này làm nhãn dài (vd "Hỗ trợ & Đề án" ở Studio, 5 tab) đẩy tràn ngang trên mobile */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -93,6 +94,8 @@
   font-size: 0.72rem;
   color: var(--color-text-muted);
   font-weight: 600;
+  text-align: center;
+  line-height: 1.15;
 }
 .bottom-nav__item[aria-current="page"] { color: var(--color-primary); }
 .bottom-nav__icon { font-size: 1.25rem; }
@@ -112,8 +115,10 @@
 .studio-body { flex: 1; display: flex; min-height: 0; }
 .studio-sidebar { display: none; }
 .studio-content { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: var(--space-4); gap: var(--space-4); }
+.host-switcher-label { color: #fff; opacity: 0.85; flex-shrink: 0; white-space: nowrap; }
 .host-switcher {
   max-width: 220px;
+  min-width: 0; /* select không tự co dưới độ rộng option dài nhất nếu thiếu dòng này — tràn ngang trên topbar hẹp */
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
@@ -121,6 +126,11 @@
   padding: 8px 12px;
 }
 .host-switcher option { color: var(--color-text); }
+
+@media (max-width: 480px) {
+  .host-switcher-label { display: none; } /* nhãn nhìn thấy chỉ hiện khi đủ chỗ — aria-label vẫn giữ khả năng tiếp cận trên mobile */
+  .host-switcher { max-width: 150px; }
+}
 
 @media (min-width: 768px) {
   .studio-shell { padding-bottom: 0; }

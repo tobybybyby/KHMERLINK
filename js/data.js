@@ -145,6 +145,20 @@ export function createSeedState() {
     notifications: [],
     reminders: [],
     notificationsOptIn: false,
+    // Booking demo cho "Tổng quan"/"Lịch & Booking" của Host (7/7 đơn vị) — sinh lúc init() theo
+    // CURRENT_DEMO_BOOKINGS_VERSION (data/pilot-seed-data.js buildInitialDemoBookings), rồi đóng
+    // băng trong localStorage — xem PHASE 15/09/2026.
+    hostDemoBookings: [],
+    hostDemoBookingsVersion: 0,
+    // Phần Host tự chỉnh trên Activity Catalog trung tâm (mô tả/giá/thời lượng/sức chứa/khung giờ/
+    // trạng thái công bố) — keyed theo activityId (EXP-01..SITE-07), hợp nhất LIVE lên trên
+    // data/pilot-seed-data.js#activityCatalog mỗi lần đọc qua operationsService.getOperations(),
+    // KHÔNG đóng băng vào destinations — xem PHASE "Data Linkage" 15/09/2026.
+    activityCatalogOverrides: {},
+    // Nhật ký hành vi khách thật trong phiên demo + trạng thái xử lý gợi ý "Nhu cầu & Cơ hội" của
+    // Management — xem js/storage.js#logCustomerBehaviourEvent/setOpportunityActionStatus.
+    customerBehaviourEvents: [],
+    opportunityActions: {},
     ui: {
       activeItineraryId: null,
       currentHostId: null,

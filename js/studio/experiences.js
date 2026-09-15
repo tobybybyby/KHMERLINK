@@ -1,14 +1,26 @@
-import { getState, upsertHostExperience } from '../storage.js';
+import { getState, upsertHostExperience, updateActivityCatalogOverride } from '../storage.js';
 import { escapeHtml, formatCurrency, formatDateShort, uid, qs, qsa } from '../utils.js';
 import { getSlotRemaining } from '../services/bookingService.js';
+import { getOperations, formatPricePerPerson } from '../services/operationsService.js';
+import { getProviderMetrics, getCurrentPeriod } from '../services/hostBookingService.js';
+import { getRatingStatsForListing, formatRatingStats } from '../services/reviewsService.js';
 import { NotificationService } from '../services/notificationService.js';
-import { confirmDialog } from '../ui.js';
 
 const STATUS_LABELS = {
   draft: ['Nháp', 'badge-demo'],
   pending_review: ['Chờ duyệt', 'badge-type'],
   published: ['Đã công bố', 'badge-free'],
 };
+
+// Tiêu đề mục theo offeringType (mục 4 yêu cầu 15/09/2026) — không phải mọi đơn vị đều có "trải
+// nghiệm" trả phí, chùa/cụm/bảo tàng cần heading phù hợp bản chất, không để tab trống hoặc gọi sai.
+const OFFERING_HEADING = {
+  paid_experience: 'Trải nghiệm',
+  public_ticket_visit: 'Hoạt động tham quan',
+  free_cultural_visit: 'Địa điểm đang quản lý',
+};
+
+const BOOKING_COUNT_LABEL = { free_visit: 'Lượt đăng ký trong tháng', public_ticket: 'Booking trong tháng', community_paid: 'Booking trong tháng' };
 
 function slotRowHtml(exp, slot) {
   const remaining = getSlotRemaining(slot);
@@ -144,39 +156,158 @@ function renderForm(container, hostId, existingExp) {
   wire();
 }
 
+// ---------- Activity Catalog: thẻ + form chỉnh sửa cho listing pilot gắn với host (PHASE "Data
+// Linkage" 15/09/2026) — nguồn DUY NHẤT với Customer/AI/Cổng quản lý, xem operationsService.js. ----------
+
+function catalogCardHtml(state, host, dest, ops) {
+  const pm = getProviderMetrics(state, host.id, getCurrentPeriod());
+  const ratingStats = getRatingStatsForListing(state, dest.id);
+  const isFree = ops.financialMode === 'free_visit';
+  const priceText = isFree ? 'Miễn phí' : formatPricePerPerson(ops.pricePerPerson);
+  const bookingLabel = BOOKING_COUNT_LABEL[ops.financialMode] || 'Booking trong tháng';
+  const statusBadge = ops.publicationStatus === 'published'
+    ? '<span class="badge badge-free">Đã công bố</span>'
+    : '<span class="badge badge-demo">Tạm dừng nhận khách</span>';
+  const heroSrc = dest.imagePath || dest.representativeImageUrl || '';
+
+  return `
+    <div class="activity-card" data-catalog-card="${dest.id}" style="padding:16px;">
+      ${heroSrc ? `<img src="${escapeHtml(heroSrc)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:10px;" />` : ''}
+      <div class="activity-card__head">
+        <strong>${escapeHtml(dest.name)}</strong>
+        ${statusBadge}
+      </div>
+      <p class="text-sm text-muted" style="margin:2px 0 0;">${escapeHtml(dest.category)}</p>
+      <p class="text-sm" style="margin:8px 0;">${escapeHtml(ops.shortDescription || dest.summary || 'Chưa có mô tả.')}</p>
+      <div class="quick-facts" style="margin:0;">
+        <div class="quick-fact"><span class="quick-fact__label">Giá</span><span class="quick-fact__value">${escapeHtml(priceText)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Thời lượng</span><span class="quick-fact__value">${ops.durationMinutes} phút</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Sức chứa mỗi lượt</span><span class="quick-fact__value">${ops.capacity ? `${ops.capacity} người` : 'Không giới hạn'}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Khung giờ</span><span class="quick-fact__value">${(ops.availableTimeSlots || []).join(', ') || '—'}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">${bookingLabel}</span><span class="quick-fact__value">${pm.totalBookings}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Khách tháng này</span><span class="quick-fact__value">${pm.totalGuests}</span></div>
+      </div>
+      <p class="text-sm text-muted" style="margin:8px 0 0;">${formatRatingStats(ratingStats)}</p>
+      ${ops.openingNote ? `<p class="text-sm text-faint" style="margin:4px 0 0;">${escapeHtml(ops.openingNote)}</p>` : ''}
+      <div class="cta-row" style="margin-top:12px;">
+        <button type="button" class="btn btn-secondary btn-sm" id="catalog-edit-btn">Chỉnh sửa</button>
+        <a class="btn btn-secondary btn-sm" href="#/trail/place/${dest.id}" target="_blank" rel="noopener noreferrer">Xem trên giao diện khách</a>
+      </div>
+    </div>
+  `;
+}
+
+const TIME_SLOT_RE = /^\d{1,2}:\d{2}$/;
+
+function catalogFormHtml(dest, ops) {
+  const isFree = ops.financialMode === 'free_visit';
+  return `
+    <a href="#/studio/experiences" class="text-sm">← Về danh sách</a>
+    <h1 style="margin-top:8px;">Chỉnh sửa: ${escapeHtml(dest.name)}</h1>
+    <p class="text-sm text-muted">Không thể đổi đơn vị sở hữu, cơ chế tài chính hoặc mã hoạt động ở đây — các trường này do quản trị hệ thống thiết lập.</p>
+    <div class="card" style="padding:20px;">
+      <div class="flex-col gap-3">
+        <div><label class="field-label" for="cat-desc">Mô tả ngắn</label><textarea class="field-input" id="cat-desc" rows="3">${escapeHtml(ops.shortDescription || dest.summary || '')}</textarea></div>
+        <div class="quick-facts">
+          <div><label class="field-label" for="cat-price">Giá (đ/người)</label><input type="number" min="0" step="1000" class="field-input" id="cat-price" value="${ops.pricePerPerson || 0}" ${isFree ? 'disabled' : ''}></div>
+          <div><label class="field-label" for="cat-duration">Thời lượng (phút)</label><input type="number" min="5" class="field-input" id="cat-duration" value="${ops.durationMinutes || 60}"></div>
+          <div><label class="field-label" for="cat-capacity">Sức chứa mỗi lượt (bỏ trống = không giới hạn)</label><input type="number" min="1" class="field-input" id="cat-capacity" value="${ops.capacity ?? ''}"></div>
+        </div>
+        <div><label class="field-label" for="cat-slots">Khung giờ (phân tách bằng dấu phẩy, dạng HH:MM)</label><input type="text" class="field-input" id="cat-slots" value="${escapeHtml((ops.availableTimeSlots || []).join(', '))}"></div>
+        <div><label class="field-label" for="cat-note">Ghi chú giờ mở cửa</label><input type="text" class="field-input" id="cat-note" value="${escapeHtml(ops.openingNote || '')}"></div>
+        <div>
+          <label class="field-label" for="cat-status">Trạng thái công bố</label>
+          <select class="field-input" id="cat-status">
+            <option value="published" ${ops.publicationStatus === 'published' ? 'selected' : ''}>Đã công bố</option>
+            <option value="paused" ${ops.publicationStatus === 'paused' ? 'selected' : ''}>Tạm dừng nhận khách</option>
+          </select>
+        </div>
+        ${isFree ? '<p class="text-sm text-faint">Điểm miễn phí — trường giá bị khoá ở 0đ, không tạo doanh thu giả.</p>' : ''}
+      </div>
+    </div>
+    <div class="cta-row">
+      <button type="button" class="btn btn-primary" id="cat-save-btn">Lưu thay đổi</button>
+    </div>
+    <p class="text-sm text-faint">Lưu xong: trang chi tiết địa điểm, gợi ý AI và Cổng quản lý sẽ dùng số liệu mới ngay lập tức.</p>
+  `;
+}
+
+function renderCatalogForm(container, dest) {
+  const ops = getOperations(dest.id);
+  container.innerHTML = catalogFormHtml(dest, ops);
+
+  qs('#cat-save-btn', container).addEventListener('click', () => {
+    const isFree = ops.financialMode === 'free_visit';
+    const priceRaw = Number(qs('#cat-price', container).value);
+    const capRaw = qs('#cat-capacity', container).value.trim();
+    const slotsRaw = qs('#cat-slots', container).value;
+    const parsedSlots = slotsRaw.split(',').map((s) => s.trim()).filter((s) => TIME_SLOT_RE.test(s));
+
+    const patch = {
+      shortDescription: qs('#cat-desc', container).value.trim(),
+      pricePerPerson: isFree ? 0 : Math.max(0, Number.isFinite(priceRaw) ? priceRaw : ops.pricePerPerson),
+      durationMinutes: Math.max(5, Number(qs('#cat-duration', container).value) || ops.durationMinutes),
+      capacity: capRaw === '' ? null : Math.max(1, Number(capRaw) || 1),
+      availableTimeSlots: parsedSlots.length ? parsedSlots : ops.availableTimeSlots,
+      openingNote: qs('#cat-note', container).value.trim(),
+      publicationStatus: qs('#cat-status', container).value === 'paused' ? 'paused' : 'published',
+    };
+
+    updateActivityCatalogOverride(dest.id, patch);
+    NotificationService.notify('Đã lưu thay đổi — Customer Interface và AI gợi ý dùng số liệu mới ngay.', 'success');
+    window.location.hash = '#/studio/experiences';
+  });
+}
+
 export function renderExperiences(container, hostId, params = {}) {
   const state = getState();
+  const host = state.hosts.find((h) => h.id === hostId);
+  const dest = host ? state.destinations.find((d) => d.id === host.destinationId) : null;
+  const ops = dest ? getOperations(dest.id) : null;
+
+  if (params.editId === 'catalog') {
+    if (!dest || !ops) { window.location.hash = '#/studio/experiences'; return; }
+    renderCatalogForm(container, dest);
+    return;
+  }
+
   if (params.editId || params.newExp) {
     const existing = params.editId ? state.experiences.find((e) => e.id === params.editId) : null;
     renderForm(container, hostId, existing);
     return;
   }
 
+  const heading = ops ? (OFFERING_HEADING[ops.offeringType] || 'Trải nghiệm') : 'Trải nghiệm';
   const exps = state.experiences.filter((e) => e.hostId === hostId);
 
   container.innerHTML = `
-    <div class="flex justify-between items-center gap-2 wrap">
-      <h1 style="margin:0;">Trải nghiệm</h1>
+    <h1 style="margin:0 0 12px;">${escapeHtml(heading)}</h1>
+    ${dest && ops ? catalogCardHtml(state, host, dest, ops) : '<p class="text-sm text-faint">Chưa gắn địa điểm nào cho đơn vị này.</p>'}
+
+    <div class="flex justify-between items-center gap-2 wrap" style="margin-top:28px;">
+      <h2 style="margin:0;">Trải nghiệm bổ sung tự thêm</h2>
       <button type="button" class="btn btn-accent" id="new-exp-btn">➕ Thêm trải nghiệm</button>
     </div>
+    <p class="text-sm text-faint" style="margin:2px 0 10px;">Dùng khi đơn vị muốn khai báo thêm hoạt động khác ngoài mục ở trên (có khung giờ/sức chứa riêng theo slot, tách biệt khỏi Activity Catalog).</p>
     <div class="flex-col gap-3">
       ${exps.length ? exps.map((exp) => {
         const [label, cls] = STATUS_LABELS[exp.status] || ['Đã công bố', 'badge-free'];
-        const dest = state.destinations.find((d) => d.id === exp.destinationId);
+        const expDest = state.destinations.find((d) => d.id === exp.destinationId);
         return `
           <div class="activity-card">
             <div class="activity-card__head">
               <strong>${escapeHtml(exp.title)}</strong>
               <span class="badge ${cls}">${escapeHtml(label)}</span>
             </div>
-            <p class="text-sm text-muted" style="margin:0;">${dest ? escapeHtml(dest.name) : ''} · ${formatCurrency(exp.price)} · ${exp.durationMin} phút · ${(exp.slots || []).length} khung giờ</p>
+            <p class="text-sm text-muted" style="margin:0;">${expDest ? escapeHtml(expDest.name) : ''} · ${formatCurrency(exp.price)} · ${exp.durationMin} phút · ${(exp.slots || []).length} khung giờ</p>
             <button type="button" class="btn btn-secondary btn-sm" data-edit="${exp.id}" style="margin-top:6px;align-self:flex-start;">Chỉnh sửa</button>
           </div>
         `;
-      }).join('') : '<p class="text-sm text-faint">Chưa có trải nghiệm nào — bấm "Thêm trải nghiệm" để bắt đầu.</p>'}
+      }).join('') : '<p class="text-sm text-faint">Chưa có trải nghiệm bổ sung nào.</p>'}
     </div>
   `;
 
+  qs('#catalog-edit-btn', container)?.addEventListener('click', () => { window.location.hash = '#/studio/experiences/catalog'; });
   qs('#new-exp-btn', container).addEventListener('click', () => { window.location.hash = '#/studio/experiences/new'; });
   qsa('[data-edit]', container).forEach((btn) => {
     btn.addEventListener('click', () => { window.location.hash = `#/studio/experiences/${btn.dataset.edit}`; });

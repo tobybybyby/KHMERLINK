@@ -1,7 +1,8 @@
 import { createSeedState } from './data.js';
 import { loadDestinations } from './services/destinationsService.js';
+import { buildInitialDemoBookings, CURRENT_DEMO_BOOKINGS_VERSION } from '../data/pilot-seed-data.js';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 8;
 export const STORAGE_KEY = 'vlt_user_state';
 
 // Nội dung/catalog (destinations, hosts, experiences, events, metrics) được nạp lại mới mỗi lần
@@ -22,6 +23,48 @@ export function notifyDataChanged(entity, action) {
   } catch (err) {
     // môi trường không hỗ trợ CustomEvent (không nên xảy ra trên trình duyệt hiện đại) — bỏ qua an toàn
   }
+}
+
+const MAX_BEHAVIOUR_EVENTS = 500; // giới hạn tăng trưởng localStorage cho phiên demo dài
+
+/** Ghi 1 sự kiện hành vi khách THẬT (xem view/thêm giỏ/gửi cá nhân hoá/chọn hành trình/tạo booking/
+ * huỷ booking/gửi review) — dùng để Management Portal đọc "current operational data" phát sinh
+ * thật trong phiên demo (khác với networkMonthlyHistory, vốn là số liệu MẠNG LƯỚI mô phỏng, xem
+ * data/pilot-seed-data.js). Tự gọi persist() — nơi gọi không cần persist() thêm lần nữa cho riêng
+ * việc ghi log này (nhưng gọi lại persist() ở nơi khác vẫn an toàn, không có tác dụng phụ). */
+export function logCustomerBehaviourEvent(type, payload = {}) {
+  const s = getState();
+  if (!Array.isArray(s.customerBehaviourEvents)) s.customerBehaviourEvents = [];
+  s.customerBehaviourEvents.push({ id: uidLocal('evt'), type, at: new Date().toISOString(), ...payload });
+  if (s.customerBehaviourEvents.length > MAX_BEHAVIOUR_EVENTS) {
+    s.customerBehaviourEvents = s.customerBehaviourEvents.slice(-MAX_BEHAVIOUR_EVENTS);
+  }
+  persist();
+}
+
+export function getCustomerBehaviourEvents() {
+  return getState().customerBehaviourEvents || [];
+}
+
+// ---------- Management Portal: trạng thái xử lý gợi ý "Nhu cầu & Cơ hội" ----------
+export function getOpportunityActions() {
+  return getState().opportunityActions || {};
+}
+
+/** Cập nhật trạng thái 1 recommendation (draft→planned→assigned→in_progress→done) — lưu
+ * localStorage, đồng bộ qua notifyDataChanged + storage event (khác tab) như mọi mutator khác. */
+export function setOpportunityActionStatus(recommendationId, status, extra = {}) {
+  const s = getState();
+  if (!s.opportunityActions || typeof s.opportunityActions !== 'object') s.opportunityActions = {};
+  s.opportunityActions[recommendationId] = {
+    ...(s.opportunityActions[recommendationId] || {}),
+    status,
+    ...extra,
+    updatedAt: new Date().toISOString(),
+  };
+  persist();
+  notifyDataChanged('opportunityActions', 'updated');
+  return s.opportunityActions[recommendationId];
 }
 
 let state = null;
@@ -92,7 +135,49 @@ function migrateV2ToV3(parsed) {
  * cần biến đổi hình dạng ở đây. Chỉ tăng version để đánh dấu đã áp dụng quy ước mới; booking/review/
  * hành trình/toạ độ/yêu thích của người dùng giữ nguyên hoàn toàn, không cộng lại gì cả. */
 function migrateV3ToV4(parsed) {
-  return { ...parsed, schemaVersion: SCHEMA_VERSION };
+  return { ...parsed, schemaVersion: 4 };
+}
+
+/** v4 -> v5: PHẦN 2 "Bổ sung dữ liệu cho Lịch & Booking của Host" — thêm hostDemoBookings (rỗng ở
+ * đây; init() sẽ seed booking demo cố định NẾU còn rỗng, đúng cho cả người dùng mới lẫn đã
+ * migrate). Không đụng tới bookings/bookingItems/review/hành trình/toạ độ đã có. */
+function migrateV4ToV5(parsed) {
+  const migrated = { ...parsed, schemaVersion: 5 };
+  if (!Array.isArray(migrated.hostDemoBookings)) migrated.hostDemoBookings = [];
+  return migrated;
+}
+
+/** v5 -> v6: PHASE 15/09/2026 "Dữ liệu Host đầy đủ 7 đơn vị + Tổng quan khớp Lịch & Booking" —
+ * đổi HẲN cấu trúc bản ghi hostDemoBookings (providerId thay hostId, thêm unitPrice/grossAmount/
+ * platformFee/providerIncome/groupType/preferredTime, bỏ activityName/totalAmount cũ) và mở rộng
+ * từ 3/7 lên đủ 7/7 đơn vị. Vì đây là dữ liệu SEED (không phải do người dùng tạo), migration không
+ * cố "chuyển đổi hình dạng" bản ghi cũ — chỉ đặt hostDemoBookingsVersion=0 để init() tự seed lại
+ * đúng 1 lần theo công thức mới (so khớp CURRENT_DEMO_BOOKINGS_VERSION). Booking/review/hành
+ * trình/toạ độ/yêu thích DO NGƯỜI DÙNG TẠO không hề bị đụng tới. */
+function migrateV5ToV6(parsed) {
+  return { ...parsed, schemaVersion: 6, hostDemoBookingsVersion: 0 };
+}
+
+/** v6 -> v7: PHASE "Data Linkage" (15/09/2026) — thêm activityCatalogOverrides (rỗng nếu chưa có,
+ * Host chưa từng chỉnh gì thì hành vi giữ nguyên 100% — chỉ trả về đúng bản catalog gốc). Không
+ * đụng booking/review/hành trình/toạ độ/yêu thích đã có. */
+function migrateV6ToV7(parsed) {
+  const migrated = { ...parsed, schemaVersion: 7 };
+  if (!migrated.activityCatalogOverrides || typeof migrated.activityCatalogOverrides !== 'object') migrated.activityCatalogOverrides = {};
+  return migrated;
+}
+
+/** v7 -> v8: Management Portal "Nhu cầu & Cơ hội" — thêm customerBehaviourEvents (nhật ký nhẹ các
+ * hành vi khách thật trong phiên demo: xem địa điểm/thêm giỏ/gửi cá nhân hoá/chọn hành trình/tạo
+ * booking/huỷ booking/gửi review — KHÔNG phải nguồn của các con số funnel quy mô mạng lưới hiển
+ * thị trên dashboard, xem ghi chú ở data/pilot-seed-data.js#networkMonthlyHistory) và
+ * opportunityActions (trạng thái Host/Management đã xử lý gợi ý nào, keyed theo recommendation id).
+ * Không đụng booking/review/hành trình/toạ độ/yêu thích đã có. */
+function migrateV7ToV8(parsed) {
+  const migrated = { ...parsed, schemaVersion: SCHEMA_VERSION };
+  if (!Array.isArray(migrated.customerBehaviourEvents)) migrated.customerBehaviourEvents = [];
+  if (!migrated.opportunityActions || typeof migrated.opportunityActions !== 'object') migrated.opportunityActions = {};
+  return migrated;
 }
 
 function loadUserData() {
@@ -103,7 +188,11 @@ function loadUserData() {
     if (!parsed) return null;
     if (parsed.schemaVersion === SCHEMA_VERSION) return parsed;
     if (parsed.schemaVersion === 2) parsed = migrateV2ToV3(parsed);
-    if (parsed.schemaVersion === 3) return migrateV3ToV4(parsed);
+    if (parsed.schemaVersion === 3) parsed = migrateV3ToV4(parsed);
+    if (parsed.schemaVersion === 4) parsed = migrateV4ToV5(parsed);
+    if (parsed.schemaVersion === 5) parsed = migrateV5ToV6(parsed);
+    if (parsed.schemaVersion === 6) parsed = migrateV6ToV7(parsed);
+    if (parsed.schemaVersion === 7) return migrateV7ToV8(parsed);
     return parsed.schemaVersion === SCHEMA_VERSION ? parsed : null; // version không xác định/quá cũ — không có đường migration đã định nghĩa
   } catch (err) {
     return null;
@@ -152,6 +241,16 @@ export async function init() {
       r.hostId = host ? host.id : null;
     }
   });
+
+  // Seed booking demo cho toàn bộ 7 đơn vị cung cấp ("Tổng quan" + "Lịch & Booking", PHASE
+  // 15/09/2026) — ngày tháng tính tương đối theo DEMO_REFERENCE_DATE CỐ ĐỊNH (không phải ngày thật
+  // máy chạy), rồi đóng băng trong localStorage. Seed lại (đè hoàn toàn — đây là dữ liệu mô phỏng,
+  // không phải do người dùng tạo) khi phiên bản công thức đổi (`CURRENT_DEMO_BOOKINGS_VERSION`),
+  // để sửa lỗi/mở rộng công thức không đòi người dùng tự xoá cache; không seed lại khi version khớp.
+  if (!Array.isArray(state.hostDemoBookings) || state.hostDemoBookingsVersion !== CURRENT_DEMO_BOOKINGS_VERSION) {
+    state.hostDemoBookings = buildInitialDemoBookings();
+    state.hostDemoBookingsVersion = CURRENT_DEMO_BOOKINGS_VERSION;
+  }
 
   persist();
   return state;
@@ -289,6 +388,7 @@ export function addToTripCart(destinationId) {
   s.tripCart.push({ destinationId, addedAt: new Date().toISOString(), selected: true, partySize: 1 });
   persist();
   notifyDataChanged('tripCart', 'created');
+  logCustomerBehaviourEvent('trip_cart_add', { destinationId });
   return { ok: true, added: true };
 }
 
@@ -586,6 +686,7 @@ export function addReview({ destinationId, bookingId = null, bookingItemId, over
   s.reviews.push(review);
   persist();
   notifyDataChanged('reviews', 'created');
+  logCustomerBehaviourEvent('review_submitted', { listingId: destinationId, overallRating });
   return { ok: true, review };
 }
 
@@ -652,6 +753,7 @@ export function recordDestinationView(destinationId) {
   const s = getState();
   s.viewCounts[destinationId] = (s.viewCounts[destinationId] || 0) + 1;
   persist();
+  logCustomerBehaviourEvent('destination_view', { destinationId });
 }
 
 // ---------- Studio: gợi ý cải thiện — trạng thái người dùng đã chọn cho từng gợi ý ----------
@@ -803,6 +905,89 @@ export function setHostRecognition(hostId, recognized, reason) {
 
 export function getHostRecognitionOverride(hostId) {
   return getState().hostRecognitionOverrides[hostId] || null;
+}
+
+// ---------- PHASE "Data Linkage" (15/09/2026): Host tự chỉnh Activity Catalog ----------
+/** Ghi đè các trường Host được phép sửa (mục 5 yêu cầu 15/09/2026: mô tả/giá/thời lượng/sức chứa/
+ * khung giờ/trạng thái công bố, xem js/studio/experiences.js) lên
+ * trên activityCatalog gốc — KHÔNG cho sửa providerAccountId/financialMode/platformFeeRate/
+ * activityId/offeringType/revenueSplitNote (lọc bỏ nếu lỡ có trong patch, phòng gọi sai chỗ).
+ * getOperations() đọc hợp nhất LIVE ngay sau lần persist() này — Customer/AI/Cổng quản lý thấy
+ * đúng ngay trong cùng tab; tab khác thấy sau khi đồng bộ `storage` event (activityCatalogOverrides
+ * không phải CONTENT_KEY nên CÓ đồng bộ qua syncFromLocalStorage, khác destinations tĩnh). */
+const LOCKED_ACTIVITY_FIELDS = ['activityId', 'providerAccountId', 'partnerProviderIds', 'financialMode', 'platformFeeRate', 'revenueSplitNote', 'offeringType'];
+export function updateActivityCatalogOverride(activityId, patch) {
+  const s = getState();
+  const safePatch = { ...patch };
+  LOCKED_ACTIVITY_FIELDS.forEach((f) => { delete safePatch[f]; });
+  if (!s.activityCatalogOverrides) s.activityCatalogOverrides = {};
+  s.activityCatalogOverrides[activityId] = {
+    ...(s.activityCatalogOverrides[activityId] || {}),
+    ...safePatch,
+    updatedAt: new Date().toISOString(),
+  };
+  persist();
+  notifyDataChanged('activityCatalog', 'updated');
+  return s.activityCatalogOverrides[activityId];
+}
+
+// ---------- PHẦN 2: Booking demo cho "Lịch & Booking" của Host ----------
+// Tách biệt khỏi bookings/bookingItems thật (xem ghi chú ở buildInitialDemoBookings, data/pilot-
+// seed-data.js) nhưng vẫn mutable/persist/đồng bộ qua storage/custom event như dữ liệu thật.
+
+export function getHostDemoBookings(providerId) {
+  const list = getState().hostDemoBookings || [];
+  return providerId ? list.filter((b) => b.providerId === providerId) : list.slice();
+}
+
+function findHostDemoBooking(id) {
+  return (getState().hostDemoBookings || []).find((b) => b.id === id) || null;
+}
+
+export function confirmHostDemoBooking(id) {
+  const b = findHostDemoBooking(id);
+  if (!b || b.status !== 'pending') return { ok: false, reason: 'Booking không còn ở trạng thái chờ xác nhận.' };
+  b.status = 'confirmed';
+  persist();
+  notifyDataChanged('hostDemoBookings', 'updated');
+  return { ok: true, booking: b };
+}
+
+export function rejectHostDemoBooking(id, reason = '') {
+  const b = findHostDemoBooking(id);
+  if (!b || b.status !== 'pending') return { ok: false, reason: 'Booking không còn ở trạng thái chờ xác nhận.' };
+  b.status = 'cancelled';
+  b.customerNote = reason ? `${b.customerNote ? `${b.customerNote} — ` : ''}Hộ từ chối: ${reason}` : b.customerNote;
+  persist();
+  notifyDataChanged('hostDemoBookings', 'updated');
+  return { ok: true, booking: b };
+}
+
+export function proposeHostDemoBookingTime(id, newTime) {
+  const b = findHostDemoBooking(id);
+  if (!b || b.status !== 'pending') return { ok: false, reason: 'Booking không còn ở trạng thái chờ xác nhận.' };
+  b.proposedTime = newTime;
+  persist();
+  notifyDataChanged('hostDemoBookings', 'updated');
+  return { ok: true, booking: b };
+}
+
+export function completeHostDemoBooking(id) {
+  const b = findHostDemoBooking(id);
+  if (!b || b.status !== 'confirmed') return { ok: false, reason: 'Chỉ có thể đánh dấu hoàn thành cho booking đã xác nhận.' };
+  b.status = 'completed';
+  persist();
+  notifyDataChanged('hostDemoBookings', 'updated');
+  return { ok: true, booking: b };
+}
+
+export function markHostDemoBookingContacted(id) {
+  const b = findHostDemoBooking(id);
+  if (!b) return { ok: false, reason: 'Không tìm thấy booking.' };
+  b.contactStatus = 'contacted';
+  persist();
+  notifyDataChanged('hostDemoBookings', 'updated');
+  return { ok: true, booking: b };
 }
 
 function uidLocal(prefix) {

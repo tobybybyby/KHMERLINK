@@ -1,6 +1,6 @@
 // Adapter giữ chỗ/booking — mô phỏng trên state cục bộ (không có backend thật).
 // Triển khai thật cần backend khoá chỗ nguyên tử để tránh overbooking giữa nhiều thiết bị/tab.
-import { getState, persist, addPassportStamp, addPoints, addNotification, scheduleBookingReminders, notifyDataChanged } from '../storage.js';
+import { getState, persist, addPassportStamp, addPoints, addNotification, scheduleBookingReminders, notifyDataChanged, logCustomerBehaviourEvent } from '../storage.js';
 import { uid, generateBookingCode } from '../utils.js';
 
 /** Giờ khởi hành thật = giờ điểm dừng sớm nhất có slot trong booking (không phải giờ tạo booking).
@@ -143,6 +143,7 @@ export function createBooking({ itineraryId = null, partySize, items }) {
   });
   scheduleBookingReminders(booking, itineraryId, startAt);
   notifyDataChanged('bookings', 'created');
+  logCustomerBehaviourEvent('booking_created', { bookingId: booking.id, destinationIds: bookingItems.map((bi) => bi.destinationId), partySize });
 
   return { ok: true, booking, bookingItems };
 }
@@ -298,6 +299,8 @@ export function cancelBooking(bookingId) {
     booking.paymentStatus = 'refunded';
   }
   persist();
+  notifyDataChanged('bookings', 'cancelled');
+  logCustomerBehaviourEvent('booking_cancelled', { bookingId });
   return { ok: true, refundAmount, policy };
 }
 

@@ -1,13 +1,13 @@
 import {
-  getState, saveItinerary,
+  getState, saveItinerary, toggleTripCartItem, isInTripCart,
   getTripCart, setTripCartItemSelected, setTripCartAllSelected, removeTripCartSelected,
-  removeFromTripCart, setTripCartPartySize,
+  removeFromTripCart, setTripCartPartySize, logCustomerBehaviourEvent,
 } from '../storage.js';
-import { escapeHtml, uid, categoryEmoji, formatCurrency, formatDurationMin, listingTypeBadge, destinationImageSrc, qs, qsa } from '../utils.js';
-import { suggestItineraries, recalcTimeline, buildItineraryFromSelection, suggestCommunityAdditions } from '../services/aiService.js';
+import { escapeHtml, uid, categoryEmoji, formatCurrency, formatDurationMin, listingTypeBadge, destinationImageSrc, placeholderImageDataUri, qs, qsa } from '../utils.js';
+import { recalcTimeline, buildItineraryFromSelection, suggestCommunityAdditions, getItineraryRecommendations } from '../services/aiService.js';
 import { INTEREST_OPTIONS } from '../data.js';
 import { NotificationService } from '../services/notificationService.js';
-import { renderErrorState, openModal, confirmDialog } from '../ui.js';
+import { openModal, confirmDialog } from '../ui.js';
 
 const STATUS_LABELS = {
   selected: 'Đã chọn — chưa bắt đầu',
@@ -269,6 +269,7 @@ const wizardState = {
   startTime: '08:00',
   availableHours: 4,
   partySize: 2,
+  budget: '', // rỗng = "Ngân sách linh hoạt" (mục 1.2), chuẩn hoá ở normalizeItineraryPrefs()
   hasChildren: false,
   accessibilityNeeds: false,
   transport: 'xe-may',
@@ -287,6 +288,7 @@ function resetWizard() {
   wizardState.startTime = '08:00';
   wizardState.availableHours = 4;
   wizardState.partySize = 2;
+  wizardState.budget = '';
   wizardState.hasChildren = false;
   wizardState.accessibilityNeeds = false;
   wizardState.transport = 'xe-may';
@@ -325,6 +327,10 @@ function step2Html() {
     <h2>Đoàn của bạn</h2>
     <div class="flex-col gap-3">
       <div><label class="field-label" for="wz-party">Số người</label><input type="number" min="1" max="20" class="field-input" id="wz-party" value="${wizardState.partySize}"></div>
+      <div>
+        <label class="field-label" for="wz-budget">Ngân sách dự kiến cho cả nhóm (đ, không bắt buộc)</label>
+        <input type="number" min="0" step="10000" class="field-input" id="wz-budget" placeholder="Bỏ trống = ngân sách linh hoạt" value="${escapeHtml(wizardState.budget)}">
+      </div>
       <label class="flex items-center gap-2"><input type="checkbox" id="wz-children" ${wizardState.hasChildren ? 'checked' : ''}> Có trẻ nhỏ đi cùng</label>
       <label class="flex items-center gap-2"><input type="checkbox" id="wz-access" ${wizardState.accessibilityNeeds ? 'checked' : ''}> Cần hỗ trợ tiếp cận (di chuyển, sức khoẻ...)</label>
       <div>
@@ -397,6 +403,7 @@ function readCurrentStepInputs(root) {
     wizardState.availableHours = Number(qs('#wz-hours', root).value) || wizardState.availableHours;
   } else if (wizardState.step === 2) {
     wizardState.partySize = Number(qs('#wz-party', root).value) || wizardState.partySize;
+    wizardState.budget = qs('#wz-budget', root).value;
     wizardState.hasChildren = qs('#wz-children', root).checked;
     wizardState.accessibilityNeeds = qs('#wz-access', root).checked;
     wizardState.transport = qs('#wz-transport', root).value;
@@ -493,81 +500,233 @@ function optionCardHtml(option, index) {
   `;
 }
 
-function generateAndRenderResults(container) {
+function suggestionCardHtml(s, index, { isPopularFallback = false } = {}) {
+  const img = s.image || placeholderImageDataUri(s.category, s.name);
+  const matchBadge = s.matchScore !== null
+    ? `<span class="badge badge-new">Phù hợp ${s.matchedCriteria.length}/5 tiêu chí · ${s.matchScore}%</span>`
+    : (s.ratingLabel ? `<span class="badge badge-type">${escapeHtml(s.ratingLabel)}</span>` : '');
+  return `
+    <div class="card" style="padding:16px;overflow:hidden;" data-suggestion-card="${index}">
+      <img src="${escapeHtml(img)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:10px;" loading="lazy">
+      <h3 style="margin:0 0 4px;">${escapeHtml(s.name)}</h3>
+      <div class="badge-row" style="margin:0 0 6px;">
+        ${matchBadge}
+        <span class="badge badge-type">${s.stopCount} điểm dừng</span>
+      </div>
+      ${s.matchedCriteria && s.matchedCriteria.length ? `<p class="text-sm text-faint" style="margin:0 0 6px;">Đã khớp: ${s.matchedCriteria.map((m) => escapeHtml(m)).join(', ')}</p>` : ''}
+      <div class="quick-facts" style="margin:0 0 8px;">
+        <div class="quick-fact"><span class="quick-fact__label">Thời lượng dự kiến</span><span class="quick-fact__value">${formatDurationMin(s.durationMin)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Chi phí cho cả nhóm</span><span class="quick-fact__value">${s.totalCost ? formatCurrency(s.totalCost) : 'Miễn phí'}</span></div>
+      </div>
+      ${s.unmetNote ? `<p class="text-sm" style="margin:0 0 6px;color:var(--color-danger,#b3413a);">⚠️ ${escapeHtml(s.unmetNote)}</p>` : ''}
+      <div class="cta-row" style="margin-top:8px;">
+        <a class="btn btn-secondary btn-sm" href="#/trail/place/${s.destinationId}">Xem hành trình</a>
+        ${isPopularFallback
+          ? `<button type="button" class="btn btn-primary btn-sm" data-cart-suggestion="${s.destinationId}">${isInTripCart(s.destinationId) ? '✓ Đã thêm vào giỏ' : '+ Thêm vào giỏ hành trình'}</button>`
+          : `<button type="button" class="btn btn-primary btn-sm" data-pick-suggestion="${index}">Chọn hành trình này</button>
+             <button type="button" class="btn btn-ghost btn-sm" data-open-quick-adjust="1">Điều chỉnh nhanh</button>`}
+      </div>
+    </div>
+  `;
+}
+
+function quickAdjustBarHtml(prefs) {
+  return `
+    <div class="card" style="padding:14px;" id="quick-adjust-bar">
+      <p class="text-sm text-muted" style="margin:0 0 8px;">Điều chỉnh nhanh — hệ thống tính lại ngay, không cần nhập lại form:</p>
+      <div class="chip-row">
+        <button type="button" class="chip" data-adjust="more-time">⏱️ Tăng thời gian thêm 1 giờ</button>
+        ${prefs.budget !== null ? '<button type="button" class="chip" data-adjust="more-budget">💰 Tăng ngân sách 20%</button>' : ''}
+        <button type="button" class="chip" data-adjust="fewer-stops">➖ Giảm một điểm dừng</button>
+        <button type="button" class="chip" data-adjust="best-match">★ Ưu tiên trải nghiệm phù hợp nhất</button>
+      </div>
+    </div>
+  `;
+}
+
+/** Lưu 1 lựa chọn (route hoặc 1 địa điểm đơn) thành hành trình đã lưu — dùng chung cho cả 3 chế độ
+ * kết quả (full/partial-route/partial-places) để không lặp lại logic tạo object itinerary. */
+function saveResultAsItinerary(container, { name, reason, built, prefs, matchMode = null }) {
+  const itinerary = {
+    id: uid('itin'),
+    name,
+    reason,
+    createdAt: new Date().toISOString(),
+    status: 'selected',
+    // matchMode: 'full' | 'partial-route' | 'partial-places' | 'popular-fallback' — ghi lại kết quả
+    // AI nào dẫn tới hành trình này (trước đây không lưu, không tính được tỷ lệ exact/partial-match
+    // từ dữ liệu đã lưu — xem js/services/managementService.js#getDemandFunnel).
+    matchMode,
+    date: prefs.date,
+    startHour: prefs.startHour,
+    startMin: prefs.startMin,
+    availableHours: Math.max(1, Math.round(built.totalDurationMin / 60) || prefs.availableHours || 1),
+    partySize: prefs.partySize,
+    startPoint: prefs.startPoint,
+    pace: wizardState.pace,
+    priority: wizardState.priority,
+    transport: wizardState.transport,
+    hasChildren: wizardState.hasChildren,
+    accessibilityNeeds: wizardState.accessibilityNeeds,
+    stops: built.stops.map((s) => ({ ...s, selfVisitedAt: null, bookingItemId: null })),
+    totalDurationMin: built.totalDurationMin,
+    totalTravelMin: built.totalTravelMin,
+    totalCost: built.totalCost,
+    isBookableTour: built.isBookableTour,
+    isFreeVisitPlan: !built.isBookableTour,
+  };
+  recalcTimeline(itinerary);
+  saveItinerary(itinerary);
+  logCustomerBehaviourEvent('itinerary_submitted', { itineraryId: itinerary.id, matchMode });
+  NotificationService.notify('Đã lưu hành trình nháp — bạn có thể chỉnh sửa trước khi bắt đầu.', 'success');
+  window.location.hash = `#/trail/itinerary/${itinerary.id}`;
+}
+
+function buildRawPrefs() {
   const state = getState();
   const seedIds = new Set([
     ...state.favorites,
     ...state.tripCart.filter((it) => it.selected).map((it) => it.destinationId),
   ]);
   const [startH, startM] = wizardState.startTime.split(':').map(Number);
-  const prefs = {
+  return {
     date: wizardState.date,
     startHour: startH,
     startMin: startM,
     availableHours: wizardState.availableHours,
     partySize: wizardState.partySize,
+    budget: wizardState.budget,
     startPoint: wizardState.startPoint,
     interests: wizardState.interests,
     pace: wizardState.pace,
     priority: wizardState.priority,
     seedIds,
   };
-  const result = suggestItineraries(prefs);
+}
 
-  if (!result.itineraries.length) {
-    container.innerHTML = `
-      <div class="profile-page">
-        <a href="#/trail/itinerary" class="text-sm">← Về danh sách hành trình</a>
-        ${renderErrorState({ title: 'Chưa tạo được hành trình phù hợp', message: result.reason || 'Thử điều chỉnh lại lựa chọn.' })}
-        <button type="button" class="btn btn-secondary" id="wz-retry" style="align-self:center;">← Thử lại</button>
-      </div>
-    `;
-    qs('#wz-retry', container).addEventListener('click', () => renderItineraryWizard(container));
-    return;
+/** Điều chỉnh nhanh (mục 1.5) — cập nhật rawPrefs đang dùng rồi vẽ lại CHỈ phần kết quả, không
+ * bắt khách quay lại wizard hay nhập lại toàn bộ form. */
+function applyQuickAdjust(container, rawPrefs, kind) {
+  const next = { ...rawPrefs };
+  if (kind === 'more-time') {
+    next.availableHours = (Number(rawPrefs.availableHours) || 4) + 1;
+  } else if (kind === 'more-budget') {
+    const current = Number(rawPrefs.budget) || 0;
+    next.budget = current ? Math.round((current * 1.2) / 10000) * 10000 : current;
+  } else if (kind === 'fewer-stops') {
+    const currentCap = Number.isFinite(rawPrefs.maxStopsOverride) ? rawPrefs.maxStopsOverride : 4;
+    next.maxStopsOverride = Math.max(1, currentCap - 1);
+  } else if (kind === 'best-match') {
+    next.__bestMatchOnly = true;
   }
+  renderResults(container, next);
+}
 
-  const anyBookable = result.itineraries.some((o) => o.isBookableTour);
-  container.innerHTML = `
+function wireSuggestionActions(container, rawPrefs, suggestions, { isPopularFallback = false, matchMode = null } = {}) {
+  qsa('[data-pick-suggestion]', container).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const s = suggestions[Number(btn.dataset.pickSuggestion)];
+      const state = getState();
+      const prefs = getItineraryRecommendations(rawPrefs).prefs;
+      const built = buildItineraryFromSelection(state, {
+        selectedIds: [s.destinationId], date: prefs.date, startHour: prefs.startHour, startMin: prefs.startMin,
+        startPoint: prefs.startPoint, partySize: prefs.partySize,
+      });
+      if (!built) { NotificationService.notify('Không xếp được lịch cho địa điểm này.', 'error'); return; }
+      saveResultAsItinerary(container, { name: s.name, reason: 'Gợi ý phù hợp nhất dựa trên lựa chọn của bạn.', built, prefs, matchMode });
+    });
+  });
+  qsa('[data-cart-suggestion]', container).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const active = toggleTripCartItem(btn.dataset.cartSuggestion);
+      btn.textContent = active ? '✓ Đã thêm vào giỏ' : '+ Thêm vào giỏ hành trình';
+      NotificationService.notify(active ? 'Đã thêm vào giỏ hành trình.' : 'Đã gỡ khỏi giỏ hành trình.', 'success');
+    });
+  });
+  qsa('[data-open-quick-adjust]', container).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      qs('#quick-adjust-bar', container)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+}
+
+/** Vẽ lại phần kết quả từ rawPrefs hiện tại — gọi ở lần tạo đầu tiên VÀ mỗi lần điều chỉnh nhanh.
+ * Luôn trả về ≥1 gợi ý hữu ích (mục 1.1), không bao giờ dừng ở màn hình trống. */
+function renderResults(container, rawPrefs) {
+  const wantsBestOnly = !!rawPrefs.__bestMatchOnly;
+  const cleanPrefs = { ...rawPrefs };
+  delete cleanPrefs.__bestMatchOnly;
+  const result = getItineraryRecommendations(cleanPrefs);
+
+  const header = `
     <div class="profile-page">
       <a href="#/trail/itinerary" class="text-sm">← Về danh sách hành trình</a>
       <h2>Chọn một hành trình</h2>
-      <p class="text-sm text-muted">${result.label} — dựa trên sở thích và thời gian bạn vừa nhập.</p>
-      ${!anyBookable ? '<div class="demo-note">Hiện chưa có hoạt động cộng đồng phù hợp với thời gian và lịch bạn chọn. Các lựa chọn dưới đây là lịch tham quan tự do (miễn phí, không qua bước đặt/thanh toán) — bạn có thể thử đổi thời gian/ngày ở bước trước, hoặc xem trực tiếp các hoạt động cộng đồng đang chờ khảo sát ở Khám phá.</div>' : ''}
-      <div class="flex-col gap-4">
-        ${result.itineraries.map(optionCardHtml).join('')}
-      </div>
-    </div>
   `;
-  qsa('[data-pick-option]', container).forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const option = result.itineraries[Number(btn.dataset.pickOption)];
-      const itinerary = {
-        id: uid('itin'),
-        name: option.name,
-        reason: option.reason,
-        createdAt: new Date().toISOString(),
-        status: 'selected',
-        date: wizardState.date,
-        startHour: prefs.startHour,
-        startMin: prefs.startMin,
-        availableHours: wizardState.availableHours,
-        partySize: wizardState.partySize,
-        startPoint: wizardState.startPoint,
-        pace: wizardState.pace,
-        priority: wizardState.priority,
-        transport: wizardState.transport,
-        hasChildren: wizardState.hasChildren,
-        accessibilityNeeds: wizardState.accessibilityNeeds,
-        stops: option.stops.map((s) => ({ ...s, selfVisitedAt: null, bookingItemId: null })),
-        totalDurationMin: option.totalDurationMin,
-        totalTravelMin: option.totalTravelMin,
-        totalCost: option.totalCost,
-        isBookableTour: option.isBookableTour,
-      };
-      recalcTimeline(itinerary);
-      saveItinerary(itinerary);
-      NotificationService.notify('Đã lưu hành trình nháp — bạn có thể chỉnh sửa trước khi bắt đầu.', 'success');
-      window.location.hash = `#/trail/itinerary/${itinerary.id}`;
+  const footer = `</div>`;
+
+  if (result.mode === 'full') {
+    const itineraries = wantsBestOnly ? result.itineraries.slice(0, 1) : result.itineraries;
+    const anyBookable = itineraries.some((o) => o.isBookableTour);
+    container.innerHTML = `${header}
+      <p class="text-sm text-muted">${result.label} — dựa trên sở thích và thời gian bạn vừa nhập.</p>
+      ${!anyBookable ? '<div class="demo-note">Hiện chưa có hoạt động cộng đồng phù hợp với thời gian và lịch bạn chọn. Các lựa chọn dưới đây là lịch tham quan tự do (miễn phí, không qua bước đặt/thanh toán).</div>' : ''}
+      <div class="flex-col gap-4">${itineraries.map(optionCardHtml).join('')}</div>
+    ${footer}`;
+    qsa('[data-pick-option]', container).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const option = itineraries[Number(btn.dataset.pickOption)];
+        saveResultAsItinerary(container, { name: option.name, reason: option.reason, built: option, prefs: result.prefs, matchMode: 'full' });
+      });
     });
+    return;
+  }
+
+  if (result.mode === 'partial-route') {
+    const itineraries = wantsBestOnly ? result.itineraries.slice(0, 1) : result.itineraries;
+    container.innerHTML = `${header}
+      <div class="demo-note"><strong>Chưa có hành trình khớp hoàn toàn</strong><p style="margin:6px 0 0;">Chúng tôi chưa tìm thấy hành trình đáp ứng toàn bộ lựa chọn của bạn. Tuy nhiên, những gợi ý dưới đây vẫn phù hợp với phần lớn nhu cầu và có thể được điều chỉnh thêm trước khi xác nhận.</p></div>
+      <div class="flex-col gap-4">${itineraries.map(optionCardHtml).join('')}</div>
+      ${quickAdjustBarHtml(result.prefs)}
+    ${footer}`;
+    qsa('[data-pick-option]', container).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const option = itineraries[Number(btn.dataset.pickOption)];
+        saveResultAsItinerary(container, { name: option.name, reason: option.reason, built: option, prefs: result.prefs, matchMode: 'partial-route' });
+      });
+    });
+    qsa('[data-adjust]', container).forEach((btn) => btn.addEventListener('click', () => applyQuickAdjust(container, rawPrefs, btn.dataset.adjust)));
+    return;
+  }
+
+  if (result.mode === 'partial-places') {
+    const suggestions = wantsBestOnly ? result.suggestions.slice(0, 1) : result.suggestions;
+    container.innerHTML = `${header}
+      <div class="demo-note"><strong>Chưa có hành trình khớp hoàn toàn</strong><p style="margin:6px 0 0;">Chúng tôi chưa tìm thấy hành trình đáp ứng toàn bộ lựa chọn của bạn. Tuy nhiên, những gợi ý dưới đây vẫn phù hợp với phần lớn nhu cầu và có thể được điều chỉnh thêm trước khi xác nhận.</p></div>
+      <div class="place-grid">${suggestions.map((s, i) => suggestionCardHtml(s, i)).join('')}</div>
+      ${quickAdjustBarHtml(result.prefs)}
+    ${footer}`;
+    wireSuggestionActions(container, rawPrefs, suggestions, { matchMode: 'partial-places' });
+    qsa('[data-adjust]', container).forEach((btn) => btn.addEventListener('click', () => applyQuickAdjust(container, rawPrefs, btn.dataset.adjust)));
+    return;
+  }
+
+  // popular-fallback (mục 1.7) — lỗi kỹ thuật/chưa đủ dữ liệu: gợi ý phổ biến, không trang trắng.
+  container.innerHTML = `${header}
+    <p class="text-sm text-faint">${escapeHtml(result.fallbackReason || '')}</p>
+    ${result.suggestions.length ? `<div class="place-grid">${result.suggestions.map((s, i) => suggestionCardHtml(s, i, { isPopularFallback: true })).join('')}</div>` : '<p class="text-sm text-faint">Chưa có địa điểm nào trong dữ liệu — vui lòng thử lại sau.</p>'}
+  ${footer}`;
+  wireSuggestionActions(container, rawPrefs, result.suggestions, { isPopularFallback: true, matchMode: 'popular-fallback' });
+}
+
+function generateAndRenderResults(container) {
+  const rawPrefs = buildRawPrefs();
+  logCustomerBehaviourEvent('customisation_request', {
+    interests: Array.from(rawPrefs.interests || []),
+    budget: rawPrefs.budget,
+    partySize: rawPrefs.partySize,
+    availableHours: rawPrefs.availableHours,
+    priority: rawPrefs.priority,
   });
+  renderResults(container, rawPrefs);
 }

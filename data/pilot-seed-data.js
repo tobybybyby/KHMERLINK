@@ -15,9 +15,25 @@ export const TIMEZONE = 'Asia/Ho_Chi_Minh';
 export const DEMO_DATA_NOTE = 'Dữ liệu hoạt động trong bản mẫu được mô phỏng cho mục đích trình diễn.';
 export const SEED_DATA_STATUS = 'demo_assumption';
 
-// ---------- 1. Giờ mở cửa / giá / thời lượng / sức chứa cho 7 listing ----------
-export const listingOperations = {
+// ---------- 1. Activity Catalog trung tâm — giờ mở cửa / giá / thời lượng / sức chứa / khung giờ /
+// cơ chế tài chính / trạng thái công bố cho 7 listing (PHASE "Data Linkage" 15/09/2026) ----------
+// NGUYÊN TẮC: đây là NGUỒN DUY NHẤT cho các trường hoạt động (giá/thời lượng/sức chứa/khung giờ/
+// financialMode) — Customer (destinationsService/operationsService), Host (Studio Trải nghiệm),
+// AI gợi ý hành trình (aiService), booking demo (buildInitialDemoBookings bên dưới) và Cổng quản lý
+// ĐỀU đọc qua getOperations()/getActivityCatalogEntry() (operationsService.js), không hard-code
+// riêng ở component nào. Host có thể ghi đè một số trường qua state.activityCatalogOverrides (xem
+// storage.updateActivityCatalogOverride) — override hợp nhất LIVE mỗi lần đọc, không đóng băng vào
+// state.destinations, để đổi 1 nơi thấy khắp nơi (kể cả sau khi đồng bộ localStorage giữa các tab).
+// id ở đây CHÍNH LÀ destinationId/listing id (EXP-01..SITE-07) — không tạo hệ id song song.
+export const activityCatalog = {
   'EXP-01': {
+    activityId: 'EXP-01',
+    providerAccountId: 'host-com-dep-tuan-viet',
+    partnerProviderIds: null,
+    offeringType: 'paid_experience',
+    financialMode: 'community_paid',
+    platformFeeRate: 0.10,
+    revenueSplitNote: null,
     openingHours: {
       monday: 'closed',
       tuesday: ['08:00-11:00', '14:00-17:00'],
@@ -31,8 +47,22 @@ export const listingOperations = {
     durationMinutes: 90,
     pricePerPerson: 180000,
     capacityPerSlot: 12,
+    capacity: 12,
+    availableTimeSlots: ['08:00', '09:30', '14:00', '15:30'],
+    culturalNotes: null,
+    visitRegistrationEnabled: false,
+    bookable: true,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'EXP-02': {
+    activityId: 'EXP-02',
+    providerAccountId: 'host-nhac-mua-khmer',
+    partnerProviderIds: ['LAM-PHEN', 'ANH-BINH-MINH'],
+    offeringType: 'paid_experience',
+    financialMode: 'community_paid',
+    platformFeeRate: 0.10,
+    revenueSplitNote: 'Nếu chia theo đơn vị hợp tác: Xưởng NNƯT Lâm Phên 45% · Đoàn Nghệ thuật Khmer Ánh Bình Minh 55% (minh hoạ tỷ lệ chia, booking vẫn tính 1 lần duy nhất trong tổng mạng lưới, không nhân đôi).',
     openingHours: {
       monday: 'by_appointment',
       tuesday: 'by_appointment',
@@ -46,8 +76,22 @@ export const listingOperations = {
     durationMinutes: 120,
     pricePerPerson: 280000,
     capacityPerSlot: 20,
+    capacity: 20,
+    availableTimeSlots: ['09:00', '15:00'],
+    culturalNotes: null,
+    visitRegistrationEnabled: false,
+    bookable: true,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'EXP-03': {
+    activityId: 'EXP-03',
+    providerAccountId: 'host-mat-na-khmer',
+    partnerProviderIds: null,
+    offeringType: 'paid_experience',
+    financialMode: 'community_paid',
+    platformFeeRate: 0.10,
+    revenueSplitNote: null,
     openingHours: {
       monday: 'closed',
       tuesday: ['08:00-11:00', '13:30-17:00'],
@@ -61,22 +105,64 @@ export const listingOperations = {
     durationMinutes: 90,
     pricePerPerson: 220000,
     capacityPerSlot: 10,
+    capacity: 10,
+    availableTimeSlots: ['08:00', '09:30', '13:30', '15:00'],
+    culturalNotes: null,
+    visitRegistrationEnabled: false,
+    bookable: true,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'SITE-04': {
+    activityId: 'SITE-04',
+    providerAccountId: 'host-lang-van-hoa-nguyet-hoa',
+    partnerProviderIds: null,
+    offeringType: 'free_cultural_visit',
+    financialMode: 'free_visit',
+    platformFeeRate: 0,
+    revenueSplitNote: null,
     openingHours: { everyday: ['05:00-21:00'] },
     openingNote: 'Giờ của từng điểm nằm trong cụm có thể khác nhau',
     durationMinutes: 90,
     pricePerPerson: 0,
     capacityPerSlot: null,
+    capacity: null,
+    availableTimeSlots: ['08:00', '15:00'],
+    culturalNotes: null,
+    visitRegistrationEnabled: true,
+    bookable: false,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'SITE-05': {
+    activityId: 'SITE-05',
+    providerAccountId: 'host-chua-ang',
+    partnerProviderIds: null,
+    offeringType: 'free_cultural_visit',
+    financialMode: 'free_visit',
+    platformFeeRate: 0,
+    revenueSplitNote: null,
     openingHours: { everyday: ['06:00-18:00'] },
     openingNote: 'Có thể hạn chế tham quan trong ngày lễ hoặc nghi lễ',
     durationMinutes: 60,
     pricePerPerson: 0,
     capacityPerSlot: null,
+    capacity: null,
+    availableTimeSlots: ['08:00', '15:00'],
+    culturalNotes: ['Ăn mặc lịch sự', 'Giữ yên lặng tại không gian thờ tự', 'Không thương mại hóa nghi lễ tôn giáo'],
+    visitRegistrationEnabled: true,
+    bookable: false,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'SITE-06': {
+    activityId: 'SITE-06',
+    providerAccountId: 'host-bao-tang-khmer',
+    partnerProviderIds: null,
+    offeringType: 'public_ticket_visit',
+    financialMode: 'public_ticket',
+    platformFeeRate: 0,
+    revenueSplitNote: null,
     openingHours: {
       monday: 'closed',
       tuesday: ['07:00-17:00'],
@@ -90,15 +176,40 @@ export const listingOperations = {
     durationMinutes: 75,
     pricePerPerson: 20000,
     capacityPerSlot: 40,
+    capacity: 40,
+    availableTimeSlots: ['07:30', '09:00', '10:30', '13:30', '15:00'],
+    culturalNotes: null,
+    visitRegistrationEnabled: false,
+    bookable: true,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
   'SITE-07': {
+    activityId: 'SITE-07',
+    providerAccountId: 'host-chua-lo-gach',
+    partnerProviderIds: null,
+    offeringType: 'free_cultural_visit',
+    financialMode: 'free_visit',
+    platformFeeRate: 0,
+    revenueSplitNote: null,
     openingHours: { everyday: ['06:00-18:00'] },
     openingNote: 'Không tự ý đi vào khu vực khảo cổ được bảo vệ',
     durationMinutes: 60,
     pricePerPerson: 0,
     capacityPerSlot: null,
+    capacity: null,
+    availableTimeSlots: ['08:00', '15:00'],
+    culturalNotes: ['Ăn mặc lịch sự', 'Tôn trọng không gian tôn giáo', 'Không gây ảnh hưởng đến hoạt động của chùa'],
+    visitRegistrationEnabled: true,
+    bookable: false,
+    publicationStatus: 'published',
+    updatedAt: null,
   },
 };
+
+// Alias cũ — giữ để không phải sửa lại các chỗ chưa migrate (không còn chỗ nào dùng sau phase này,
+// nhưng giữ export cho an toàn/tương thích ngược).
+export const listingOperations = activityCatalog;
 
 // ---------- 2. Baseline đánh giá (dữ liệu lịch sử tổng hợp, KHÔNG liệt kê từng review) ----------
 // average = ratingSum / reviewCount — luôn tính lại, không cộng dồn trực tiếp (xem reviewsService.js)
@@ -275,7 +386,7 @@ function buildExperienceHistoricalMetrics() {
   const records = [];
   Object.entries(monthlyParticipants).forEach(([listingId, values]) => {
     const providerId = PROVIDER_BY_EXPERIENCE[listingId];
-    const price = listingOperations[listingId].pricePerPerson;
+    const price = activityCatalog[listingId].pricePerPerson;
     const avgParty = AVG_PARTY_SIZE[listingId];
     values.forEach((participants, i) => {
       const completedBookings = Math.round(participants / avgParty);
@@ -309,7 +420,7 @@ function buildExperienceHistoricalMetrics() {
 function buildMuseumHistoricalMetrics() {
   const listingId = 'SITE-06';
   const providerId = 'host-bao-tang-khmer';
-  const price = listingOperations[listingId].pricePerPerson;
+  const price = activityCatalog[listingId].pricePerPerson;
   return monthlyVisits[listingId].map((visits, i) => {
     const grossRevenue = visits * price;
     const platformFee = Math.round(grossRevenue * PLATFORM_FEE_RATE);
@@ -357,3 +468,231 @@ export function buildVisitMetrics() {
   return records;
 }
 export const visitMetrics = buildVisitMetrics();
+
+// ---------- 6. Booking demo cho Host — "Lịch & Booking" + "Tổng quan" (PHASE 15/09/2026) ----------
+// TÁCH BIỆT khỏi state.bookings/bookingItems thật (vốn gắn với 1 traveller demo duy nhất của Trail
+// — xem storage.js) để không làm lẫn "booking của người khác" vào Hành trình/Hộ chiếu/đánh giá của
+// chính khách đang dùng app. Đây là NGUỒN DUY NHẤT cho Tổng quan/Lịch & Booking/Cổng quản lý của
+// TẤT CẢ 7 đơn vị cung cấp (trước đó chỉ có 3/7, gây lệch số giữa Tổng quan và Lịch & Booking).
+//
+// Mốc thời gian "hiện tại" DUY NHẤT cho toàn bộ dữ liệu demo — KHÔNG dùng `new Date()` thật, để
+// booking/trạng thái/dashboard không đổi theo ngày thật máy chạy (xem hostBookingService.js,
+// metricsService.js dùng hằng số này thay vì `new Date()` khi tính "tháng này"/"hôm nay").
+export const DEMO_REFERENCE_DATE = '2026-09-14T09:00:00+07:00';
+export const CURRENT_DEMO_BOOKINGS_VERSION = 2; // tăng số này nếu đổi lại công thức sinh dữ liệu — seed lại 1 lần, không đụng booking/review thật của người dùng
+
+// Phân loại cơ chế tài chính theo ĐÚNG bản chất từng đơn vị (mục 2 yêu cầu 15/09/2026) — không
+// hiển thị "thu nhập hộ" giống nhau cho cả chùa/bảo tàng/hộ kinh doanh. TỪ PHASE "Data Linkage"
+// (15/09/2026), đây KHÔNG còn là số liệu hand-code riêng — derive trực tiếp từ activityCatalog
+// (mỗi host ở HOSTS trong js/data.js có đúng 1 destinationId/activityId) để không có 2 nguồn
+// financialMode/platformFeeRate lệch nhau.
+export const providerFinancialMeta = Object.fromEntries(
+  Object.values(activityCatalog).map((entry) => [
+    entry.providerAccountId,
+    { financialMode: entry.financialMode, platformFeeRate: entry.platformFeeRate, revenueSplitNote: entry.revenueSplitNote || undefined },
+  ]),
+);
+
+function addDaysIso(base, days) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i += 1) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Nhóm khách cỡ (group size) cho từng đoàn/booking theo ĐÚNG bảng người dùng cung cấp 15/09/2026 —
+// tổng số đoàn/khách/tiền của mỗi đơn vị đã được kiểm tra khớp chính xác từng con số mục tiêu.
+const PROVIDER_BOOKING_SPECS = [
+  { providerId: 'host-com-dep-tuan-viet', activityId: 'EXP-01', groups: { completed: [4], confirmed: [5, 3, 6, 4], pending: [5, 4] } },
+  { providerId: 'host-nhac-mua-khmer', activityId: 'EXP-02', groups: { completed: [8, 6], confirmed: [10, 7, 9], pending: [6] } },
+  { providerId: 'host-mat-na-khmer', activityId: 'EXP-03', groups: { completed: [4, 5], confirmed: [6, 4, 7, 5], pending: [3, 6] } },
+  { providerId: 'host-lang-van-hoa-nguyet-hoa', activityId: 'SITE-04', groups: { completed: [18, 16, 14], confirmed: [20, 15, 12, 13], pending: [10, 8] } },
+  { providerId: 'host-chua-ang', activityId: 'SITE-05', groups: { completed: [22, 18, 20, 24, 16], confirmed: [25, 21, 19, 23, 20], pending: [15, 15] } },
+  { providerId: 'host-bao-tang-khmer', activityId: 'SITE-06', groups: { completed: [12, 14, 16, 12], confirmed: [18, 16, 20, 14], pending: [14, 18] } },
+  { providerId: 'host-chua-lo-gach', activityId: 'SITE-07', groups: { completed: [12, 10], confirmed: [15, 14, 13, 12], pending: [15] } },
+];
+
+// Tên khách/đoàn demo tự nhiên — trộn cá nhân và nhóm/đoàn để phù hợp cả trải nghiệm nhỏ lẫn điểm
+// tham quan đón đoàn đông. Không dùng thông tin cá nhân thật.
+const CUSTOMER_NAME_POOL = [
+  'Nhóm Minh Anh', 'Gia đình Quốc Bảo', 'Nhóm bạn Thu Hà', 'Đoàn Trường Đại học Trà Vinh', 'Nhóm Văn hóa Mekong',
+  'James Wilson', 'Emily Chen', 'Gia đình Hoàng Nam', 'Nhóm Gia Hân', 'Nhóm bạn Thanh Trúc',
+  'Đoàn Công ty Lữ hành Mekong Xanh', 'Nhóm nhiếp ảnh Bảo Ngọc', 'Gia đình Anh Tuấn', 'Nhóm Diệu Linh',
+  'Đoàn hưu trí phường Nguyệt Hóa', 'Sarah Johnson', 'Nhóm Khánh Vy', 'Gia đình Minh Quân',
+  'Đoàn sinh viên Ngọc Ánh', 'Nhóm bạn Tuấn Kiệt', 'Gia đình Hà My', 'Nhóm Đức Thịnh',
+];
+const CUSTOMER_NOTE_POOL = ['Có người lớn tuổi đi cùng, mong hỗ trợ đi lại.', 'Xin hướng dẫn thêm cho trẻ nhỏ trong đoàn.', 'Đoàn đi từ xa đến, mong linh động giờ giấc.', 'Cần chỗ đậu xe cho đoàn đông người.', ''];
+
+function classifyGroupType(name) {
+  if (/Gia đình/i.test(name)) return 'family';
+  if (/Đoàn|Công ty|Trường|sinh viên|hưu trí/i.test(name)) return 'school_or_corporate';
+  if (/Nhóm/i.test(name)) return 'friends';
+  return 'solo';
+}
+
+function pickFromPool(pool, seedKey) {
+  return pool[hashString(seedKey) % pool.length];
+}
+
+/** Sinh booking demo cho CẢ 7 đơn vị cung cấp — nguồn DUY NHẤT cho Tổng quan/Lịch & Booking/Cổng
+ * quản lý (mục 5, 6 của yêu cầu 15/09/2026). Ngày tháng tính tương đối theo DEMO_REFERENCE_DATE
+ * (không phải `new Date()` thật) — completed nằm TRƯỚC mốc này, confirmed/pending nằm SAU, đúng
+ * yêu cầu "không để completed có ngày tương lai / không để confirmed-pending có ngày quá khứ". */
+export function buildInitialDemoBookings() {
+  const refDate = new Date(DEMO_REFERENCE_DATE);
+  const records = [];
+
+  PROVIDER_BOOKING_SPECS.forEach((spec, providerIdx) => {
+    const catalogEntry = activityCatalog[spec.activityId];
+    const unitPrice = (catalogEntry && catalogEntry.pricePerPerson) || 0;
+    const meta = providerFinancialMeta[spec.providerId];
+    const times = (catalogEntry && catalogEntry.availableTimeSlots) || ['09:00'];
+
+    ['completed', 'confirmed', 'pending'].forEach((status) => {
+      const sizes = spec.groups[status] || [];
+      sizes.forEach((groupSize, i) => {
+        const dayOffset = status === 'completed'
+          ? -(1 + ((providerIdx * 3 + i * 2) % 13))
+          : (1 + ((providerIdx * 2 + i * 3) % 16));
+        const bookingDate = addDaysIso(refDate, dayOffset);
+        const createdOffset = dayOffset - (1 + (i % 3));
+        const startTime = times[(providerIdx + i) % times.length];
+        const grossAmount = groupSize * unitPrice;
+        const platformFee = Math.round(grossAmount * meta.platformFeeRate);
+        const providerIncome = grossAmount - platformFee;
+        const nameKey = `${spec.providerId}|${status}|${i}`;
+        const customerName = pickFromPool(CUSTOMER_NAME_POOL, nameKey);
+
+        records.push({
+          id: `pb-${spec.activityId}-${status}-${i + 1}`,
+          providerId: spec.providerId,
+          activityId: spec.activityId,
+          customerName,
+          bookingDate,
+          startTime,
+          groupSize,
+          unitPrice,
+          grossAmount,
+          platformFee,
+          providerIncome,
+          status, // 'completed' | 'confirmed' | 'pending' — không có booking demo nào ở trạng thái 'cancelled' (đúng bảng mục tiêu)
+          createdAt: `${addDaysIso(refDate, createdOffset)}T09:00:00+07:00`,
+          customerNote: pickFromPool(CUSTOMER_NOTE_POOL, `${nameKey}|note`),
+          groupType: classifyGroupType(customerName),
+          preferredTime: startTime,
+          contactStatus: 'not_contacted', // 'not_contacted' | 'contacted' — chỉ có ý nghĩa với status 'confirmed'
+          proposedTime: null,
+          source: 'seed_demo',
+          dataStatus: SEED_DATA_STATUS,
+        });
+      });
+    });
+  });
+
+  return records;
+}
+
+// Nhu cầu khách theo NGÀY TRONG TUẦN (mẫu hình chung cấp nền tảng, không gắn với booking demo cụ
+// thể) — dùng cho biểu đồ "Nhu cầu của khách trong 7 ngày tới" (mục 2.2, phase 14/09/2026).
+export const weeklyDemandPattern = {
+  monday: 6, tuesday: 8, wednesday: 7, thursday: 11, friday: 14, saturday: 22, sunday: 19,
+};
+
+// Insight hành vi khách toàn nền tảng (mục 2.5) — mẫu hình minh hoạ cấp nền tảng, không suy ra
+// được từ số booking demo hiện có (chưa đủ lớn để có ý nghĩa thống kê thời điểm trong ngày).
+export const demandInsightsSeed = {
+  timeOfDay: { morning: 0.42, afternoon: 0.46, evening: 0.12 },
+  groupType: { friends: 0.38, family: 0.34, solo: 0.16, schoolOrCorporate: 0.12 },
+  weekendUpliftPct: 58,
+};
+
+// ---------- 7. "Nhu cầu & Cơ hội" (Management Portal) — xu hướng mạng lưới 6 tháng + sở thích
+// khách (PHASE cập nhật gần nhất) ----------
+// Mảng dưới đây do người dùng cung cấp trực tiếp trong yêu cầu — quy mô TOÀN MẠNG LƯỚI (gộp nhiều
+// du khách qua thời gian), cùng bản chất "historical demo data" như monthlyParticipants/
+// historicalMetrics ở mục 5 phía trên — KHÔNG thể tái tạo từ hành vi của 1 traveller demo duy nhất
+// đang chạy trong trình duyệt hiện tại (bản demo chỉ có 1 tài khoản khách). Tháng hiện tại
+// (2026-09) đã được đối chiếu khớp booking records: activeBookings=59, guests=726,
+// grossValue=30.340.000đ (xem getDemandFunnel()/getCustomerDemandMetrics() ở managementService.js —
+// 3 trường booking-derived này LUÔN được TÍNH LẠI từ getNetworkMetrics() khi hiển thị, không đọc
+// trực tiếp 3 field tĩnh cùng tên trong mảng này, để không bị "đơ" nếu booking records đổi).
+export const networkMonthlyHistory = [
+  { month: '2026-04', destinationViews: 1680, tripCartAdds: 510, customisationRequests: 240, itinerariesSubmitted: 172, activeBookings: 32, guests: 392, grossValue: 15600000, partialMatchRate: 18 },
+  { month: '2026-05', destinationViews: 1920, tripCartAdds: 590, customisationRequests: 288, itinerariesSubmitted: 206, activeBookings: 37, guests: 438, grossValue: 18100000, partialMatchRate: 19 },
+  { month: '2026-06', destinationViews: 2180, tripCartAdds: 680, customisationRequests: 346, itinerariesSubmitted: 248, activeBookings: 41, guests: 486, grossValue: 20400000, partialMatchRate: 21 },
+  { month: '2026-07', destinationViews: 2460, tripCartAdds: 770, customisationRequests: 418, itinerariesSubmitted: 302, activeBookings: 46, guests: 552, grossValue: 23700000, partialMatchRate: 23 },
+  { month: '2026-08', destinationViews: 2910, tripCartAdds: 930, customisationRequests: 520, itinerariesSubmitted: 381, activeBookings: 52, guests: 638, grossValue: 27200000, partialMatchRate: 25 },
+  { month: '2026-09', destinationViews: 3480, tripCartAdds: 1120, customisationRequests: 668, itinerariesSubmitted: 480, activeBookings: 59, guests: 726, grossValue: 30340000, partialMatchRate: 28.1 },
+];
+
+// "Reviews submitted trong tháng" — số duy nhất trong funnel KHÔNG suy ra được từ booking records
+// (review là hành động riêng, không phải trường trên booking) và cũng không có trong
+// networkMonthlyHistory ở trên — do người dùng cung cấp trực tiếp cho tháng hiện tại. Cộng thêm
+// review THẬT phát sinh trong phiên demo (nếu có, xem getDemandFunnel()) — không đếm trùng vì số
+// này đại diện hoạt động MẠNG LƯỚI (khách khác), tách biệt khỏi review của traveller demo hiện tại.
+export const CURRENT_MONTH_REVIEWS_SUBMITTED_BASELINE = 17;
+
+export const interestTrend = [
+  { month: '2026-04', heritage: 34, handsOnCraft: 18, localFood: 18, performance: 14, spiritualLandscape: 16 },
+  { month: '2026-05', heritage: 33, handsOnCraft: 19, localFood: 18, performance: 14, spiritualLandscape: 16 },
+  { month: '2026-06', heritage: 33, handsOnCraft: 20, localFood: 19, performance: 14, spiritualLandscape: 14 },
+  { month: '2026-07', heritage: 32, handsOnCraft: 21, localFood: 20, performance: 15, spiritualLandscape: 12 },
+  { month: '2026-08', heritage: 31, handsOnCraft: 23, localFood: 20, performance: 15, spiritualLandscape: 11 },
+  { month: '2026-09', heritage: 31, handsOnCraft: 24, localFood: 21, performance: 15, spiritualLandscape: 9 },
+];
+export const INTEREST_TREND_LABELS = {
+  heritage: 'Di sản & lịch sử',
+  handsOnCraft: 'Thủ công trải nghiệm tay chân',
+  localFood: 'Ẩm thực địa phương',
+  performance: 'Âm nhạc & biểu diễn',
+  spiritualLandscape: 'Tâm linh & cảnh quan',
+};
+
+// Sở thích khách hiện tại — cards/thanh ngang, KHÔNG phải chart tròn (tránh quá nhiều pie chart
+// trên 1 màn hình, đúng yêu cầu). Mỗi nhóm cộng lại đúng 100%.
+export const customerPreferenceSeed = {
+  tripDuration: [
+    { key: 'short', label: '2–4 giờ', pct: 46 },
+    { key: 'half', label: 'Nửa ngày', pct: 34 },
+    { key: 'full', label: 'Cả ngày', pct: 20 },
+  ],
+  budget: [
+    { key: 'under300', label: 'Dưới 300.000₫', pct: 43 },
+    { key: '300to600', label: '300.000–600.000₫', pct: 39 },
+    { key: 'over600', label: 'Trên 600.000₫', pct: 18 },
+  ],
+  groupType: [
+    { key: 'friends', label: 'Nhóm bạn', pct: 38 },
+    { key: 'family', label: 'Gia đình', pct: 34 },
+    { key: 'solo', label: 'Đi một mình', pct: 16 },
+    { key: 'school_or_corporate', label: 'Trường học hoặc doanh nghiệp', pct: 12 },
+  ],
+  preferredTime: [
+    { key: 'morning', label: 'Buổi sáng', pct: 42 },
+    { key: 'afternoon', label: 'Buổi chiều', pct: 46 },
+    { key: 'evening', label: 'Buổi tối', pct: 12 },
+  ],
+  weekendUpliftPct: 58,
+};
+
+// Nhãn cơ hội cố định theo từng activity (mục 7 yêu cầu) — đây là NỘI DUNG gợi ý biên tập sẵn theo
+// đặc thù từng đơn vị (không phải KPI tính toán), cột "Demand/Capacity/Occupancy/Pending" bên cạnh
+// vẫn tính động 100% từ booking records — xem getCapacityUtilisation() ở managementService.js.
+export const OPPORTUNITY_COPY_BY_ACTIVITY = {
+  'EXP-01': 'Tăng slot cuối tuần',
+  'EXP-02': 'Mở thêm suất biểu diễn',
+  'EXP-03': 'Tăng capacity hoặc suất song song',
+  'SITE-04': 'Kết nối sang paid experiences',
+  'SITE-05': 'Phân luồng giờ cao điểm',
+  'SITE-06': 'Tạo bundle giáo dục',
+  'SITE-07': 'Tăng nhận diện',
+};
+
+export const FORECAST_DISCLAIMER = 'Dự báo được tạo từ xu hướng của dữ liệu mô phỏng 6 tháng gần nhất và chỉ phục vụ mục đích trình diễn prototype — không phải dự báo chính thức của tỉnh Vĩnh Long hay Sở Văn hóa, Thể thao và Du lịch.';
+export const MANAGEMENT_SIMULATED_NOTE = 'Dữ liệu hoạt động và dự báo trong bản mẫu được mô phỏng cho mục đích trình diễn.';
+export const LOW_SAMPLE_NOTE = 'Dữ liệu trong nhóm được chọn còn hạn chế; forecast có thể kém ổn định.';

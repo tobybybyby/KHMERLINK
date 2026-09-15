@@ -739,4 +739,214 @@ KPI toàn mạng lưới: tổng lượt trải nghiệm (participants EXP + vis
 Mới: `data/pilot-seed-data.js`, `DEMO_DATA.md`, `js/services/operationsService.js`, `js/services/metricsService.js`, `js/services/chartService.js`, `js/admin/networkMetrics.js`.
 Sửa: `js/services/reviewsService.js`, `js/storage.js`, `js/trail/passport.js`, `js/trail/placeDetail.js`, `js/trail/explore.js`, `js/trail/profile.js`, `js/studio/overview.js`, `js/studio/reports.js`, `js/admin/overview.js`, `js/admin/filters.js`, `js/admin/demand.js`, `js/data.js`.
 Xoá: `js/admin/metrics.js` (dead code, thay bằng `networkMetrics.js`).
+
+## PHASE — Cá nhân hoá luôn có kết quả + Dữ liệu Lịch & Booking của Host — 2026-09-14
+
+Hai phần độc lập: (1) sửa cơ chế cá nhân hoá hành trình để không bao giờ trả về màn hình trống; (2) bổ sung dữ liệu demo cho trang "Lịch & Booking" của Host (trước đó gần như trống — chỉ có 1 bộ lọc trạng thái và danh sách rỗng).
+
+### Nguyên nhân cá nhân hoá trả về trống (chẩn đoán trước khi sửa)
+`aiService.suggestItineraries()` (cũ) dựng tối đa 3 phương án qua `buildOption()`; nếu CẢ 3 đều có `stops.length < 2` (thường do khung giờ quá ngắn hoặc giờ mở cửa không khớp) thì trả `itineraries: []` kèm `reason`, và `itinerary.js` hiển thị thẳng `renderErrorState` + nút "Thử lại" quay lại từ đầu form — đúng như người dùng mô tả. Không có tầng nới lỏng/dự phòng nào ở giữa.
+
+### PHẦN 1 — `js/services/aiService.js`, `js/trail/itinerary.js`
+- `normalizeItineraryPrefs()`: chuẩn hoá toàn bộ input (ngân sách rỗng → `null`="linh hoạt", sở thích rỗng → cân bằng, số người/thời gian không hợp lệ → mặc định 1 người/4 giờ, trim khoảng trắng) — thêm field **ngân sách** mới vào wizard bước 2 (trước đây form không có trường này, cần thiết để chấm điểm mục 1.3).
+- `buildOption()` nhận thêm `budgetMultiplier`/`timeToleranceMin`: vòng khớp chính xác dùng `{1, 0}`, vòng nới lỏng dùng `{1.3, 60}` (đúng "ngân sách +30%, thời gian +60 phút" của spec) — tách lõi dựng 3 phương án ra `buildItineraryOptions()` dùng chung cho cả 2 vòng.
+- `scorePlaceForPartialMatch()`: chấm điểm 1 địa điểm/100 (sở thích 35 · ngân sách 25 · thời gian 20 · quy mô nhóm 10 · ưu tiên 10) — dùng khi không ghép được route hoàn chỉnh dù đã nới lỏng.
+- `getItineraryRecommendations()` — điểm vào DUY NHẤT, cascade 4 tầng: (1) route khớp chính xác → (2) route đã nới lỏng → (3) xếp hạng từng địa điểm riêng lẻ → (4) địa điểm phổ biến nhất (điểm cao × log(lượt đánh giá), tái dùng `reviewsService`) nếu lỗi kỹ thuật/dữ liệu rỗng. Luôn trả ≥1 kết quả nếu còn destination nào trong dữ liệu.
+- `itinerary.js`: `renderResults()` vẽ theo đúng `result.mode` (full/partial-route/partial-places/popular-fallback); mode partial hiện banner "Chưa có hành trình khớp hoàn toàn" (đúng wording spec, không nói khách nhập sai) + card gợi ý (ảnh, thời lượng, chi phí cả nhóm, số điểm dừng, % phù hợp, tiêu chí đã khớp, ghi chú chưa khớp, 3 nút Xem/Chọn/Điều chỉnh nhanh); mode popular-fallback đổi nút "Chọn hành trình" thành "+ Thêm vào giỏ hành trình" (không mời đặt ngay khi hệ thống đang ở trạng thái dự phòng). Thanh "Điều chỉnh nhanh" (+1 giờ / +20% ngân sách / −1 điểm dừng / ưu tiên phù hợp nhất) gọi lại `getItineraryRecommendations()` với prefs đã chỉnh, chỉ vẽ lại phần kết quả — không bắt nhập lại form.
+
+### PHẦN 2 — Dữ liệu Lịch & Booking của Host
+- `data/pilot-seed-data.js`: `buildInitialDemoBookings(today)` sinh 18 booking cố định (5 pending·8 confirmed·3 completed·2 cancelled) theo offset-ngày tương đối "hôm nay" — khớp đúng mục tiêu spec (hôm nay 4 booking/18 khách, 7 ngày tới 13 booking/57 khách, đang chờ 5); `weeklyDemandPattern` (mẫu hình theo thứ trong tuần, tách biệt khỏi 18 booking cụ thể) và `demandInsightsSeed` (khung giờ/loại nhóm khách/mức tăng cuối tuần — mẫu hình cấp nền tảng, không suy ra được từ 18 bản ghi).
+- **Quyết định kiến trúc quan trọng**: booking demo lưu ở `state.hostDemoBookings` — mảng TÁCH BIỆT khỏi `state.bookings`/`bookingItems` thật. Lý do: `bookingItems` thật gắn chặt với 1 traveller demo duy nhất của Trail (đã xác lập từ các phase trước); nếu seed 18 booking "của khách khác" thẳng vào đó, ít nhất 2 chỗ trong code (`passport.js` danh sách chờ đánh giá, `placeDetail.js` nút "Viết đánh giá") lọc `bookingItems` KHÔNG theo traveller (vì trước giờ chỉ có 1 traveller) — sẽ khiến khách demo thấy nhắc đánh giá/nút viết đánh giá cho booking không phải của họ. Tách riêng mảng giải quyết triệt để, đã kiểm thử xác nhận Hộ chiếu/Passport không bị ảnh hưởng.
+- `js/storage.js`: `SCHEMA_VERSION` 4→5, `migrateV4ToV5()` (thêm field rỗng, không đổi dữ liệu cũ); seed 18 booking demo đúng 1 LẦN lúc `init()` nếu `hostDemoBookings` còn rỗng, sau đó đóng băng trong localStorage; 5 hàm CRUD (`confirmHostDemoBooking`, `rejectHostDemoBooking`, `proposeHostDemoBookingTime`, `completeHostDemoBooking`, `markHostDemoBookingContacted`), đều gọi `notifyDataChanged('hostDemoBookings', ...)`.
+- `js/services/hostBookingService.js` (mới): hợp nhất booking thật + demo thành 1 danh sách chuẩn hoá; `getSummaryCards()` (8 số liệu mục 2.1, tỷ lệ lấp đầy = khách/sức chứa các lượt hoạt động×ngày thực có booking trong 7 ngày tới, tỷ lệ hoàn thành = gộp `historicalMetrics` 12 tháng (phase trước) + booking mới để có mẫu đủ lớn — ra ~91%, gần khớp minh hoạ "93%" của spec); `getWeeklyDemandChartData()`, `getCalendarMonthData()` (màu trạng thái theo mức ưu tiên pending>confirmed>completed>cancelled, cờ `highDemand`), `getDemandInsights()`, bộ lọc (ngày/trạng thái/hoạt động/khung giờ/số người/tìm kiếm) — summary cards áp bộ lọc KHÔNG-phải-khoảng-ngày (để "hôm nay"/"7 ngày tới" giữ đúng nghĩa mốc thời gian), Calendar/Danh sách áp đủ mọi bộ lọc kể cả khoảng ngày.
+- `js/studio/bookings.js` viết lại hoàn toàn: summary cards, biểu đồ nhu cầu tuần (Chart.js bar, cột cuối tuần tô đậm hơn, tooltip đủ ngày/booking/khách/doanh thu), calendar tháng (lưới CSS grid, click 1 ngày mở modal danh sách booking ngày đó), danh sách booking dạng card (tự responsive, không cần bảng riêng cho mobile), nút hành động theo đúng trạng thái + nguồn dữ liệu (booking thật dùng `respondToBooking`/`completeBookingItem` có sẵn; booking demo dùng 5 hàm CRUD mới, có thêm "Đề xuất giờ khác"/"Liên hệ khách"), khối "Nhu cầu của khách" (2 chart Chart.js: donut khung giờ, bar loại nhóm khách + insight card), empty state đúng wording spec khi lọc không ra kết quả.
+- `js/admin/networkMetrics.js`: `pendingBookings` gộp thêm booking demo đang `pending` (đúng phạm vi lọc theo provider) — Management Portal nhận đúng số liệu khi Host xác nhận/từ chối booking demo.
+- CSS: thêm `.badge-danger` (đỏ nhạt, cho trạng thái "Đã huỷ") và `.booking-calendar__*` (lưới lịch tháng, responsive, ẩn phần mô tả phụ ở màn ≤480px).
+
+### Đã kiểm thử qua trình duyệt thật
+1. Form cá nhân hoá với ngân sách rất thấp (5.000đ) + 1 giờ → không có route trả phí khớp (đúng), tự động rơi xuống "partial-route" với 1 route MIỄN PHÍ (Làng Văn hoá + Chùa Lò Gạch), hiện đúng banner "Chưa có hành trình khớp hoàn toàn" + thanh Điều chỉnh nhanh (ẩn đúng nút tăng ngân sách... không, hiện đủ vì ngân sách khác null) — bấm "Ưu tiên trải nghiệm phù hợp nhất" tính lại không lỗi, không mất lựa chọn trước đó; bấm "Chọn hành trình này" lưu đúng hành trình, điều hướng sang trang chi tiết với timeline/bản đồ đầy đủ.
+2. Không còn màn hình nào chỉ ghi "vui lòng chọn lại" — đã xoá hẳn nhánh cũ trong `itinerary.js`.
+3. `/studio/bookings` (host Trần Tuấn Việt): 8 summary card đúng số cho riêng host này (khác tổng 18 vì mỗi host chỉ thấy booking của mình — đúng thiết kế phân quyền); calendar tô màu đúng theo trạng thái, click 1 ngày mở đúng modal danh sách; đổi bộ lọc trạng thái → summary cards VÀ danh sách VÀ calendar cùng cập nhật (đã sửa 1 lần sau khi phát hiện summary cards ban đầu chưa áp bộ lọc).
+4. Bấm "Xác nhận" 1 booking pending → "Đang chờ xác nhận" giảm đúng 1 tại chỗ (3→2); reload trang vẫn giữ 2 (không sinh lại 18 bản ghi mới); `#/admin/overview` hiện đúng "Booking cần xử lý: 4" (= 5 pending gốc − 1 vừa xác nhận, gộp đúng cả 3 host).
+5. `#/trail/passport` sau khi có 18 booking demo: vẫn hiện "0 trải nghiệm đã xác nhận" — xác nhận booking demo KHÔNG rò rỉ vào trải nghiệm của khách demo thật.
+6. Chart.js: cả 3 canvas mới (weekly-demand, timeofday-donut, grouptype-bar) render đúng kích thước thật, không lỗi console khi đổi tháng calendar/đổi bộ lọc nhiều lần liên tiếp (registry `createChart`/`destroyChart` từ phase trước hoạt động đúng).
+7. Quét 8 route liên quan ở mobile 375px: `scrollWidth - clientWidth = 0` toàn bộ, không lỗi console.
+
+### Giới hạn đã biết (không giấu)
+- "Doanh thu dự kiến 7 ngày" của bộ dữ liệu demo tổng (~11,28 triệu) chưa khớp tuyệt đối con số minh hoạ trong spec (9.840.000đ) — đã chỉnh cơ cấu hoạt động/số khách để gần hơn nhưng không ép khớp tuyệt đối vì việc đó đòi hỏi đoán ngược giả định giá không có trong spec; số liệu vẫn hoàn toàn tính động từ 18 bản ghi, không hard-code.
+- "Nhu cầu theo khung giờ trong ngày"/"loại nhóm khách" (mục 2.5) là mẫu hình cấp nền tảng cố định (`demandInsightsSeed`), không suy ra được từ 18 booking demo (quá ít để có ý nghĩa thống kê) — chỉ "hoạt động được quan tâm nhất"/"khung giờ đặt nhiều nhất" là tính động thật từ dữ liệu.
+- "Đề xuất giờ khác"/"Liên hệ khách" chỉ áp dụng cho booking DEMO — booking thật (từ traveller demo của Trail) chưa có 2 hành động này vì luồng `bookingService.js` hiện có không hỗ trợ (ngoài phạm vi 2 phần yêu cầu lần này).
 - Quét lại toàn bộ route liên quan (7 trang chi tiết, `#/ops/pilot`, `#/studio/overview`, `#/trail/explore`) ở 375px và desktop — không lỗi console, không tràn ngang.
+
+## PHASE — Dữ liệu Host đủ 7/7 đơn vị + Tổng quan khớp tuyệt đối Lịch & Booking — 2026-09-15
+
+### Nguyên nhân đã chẩn đoán trước khi sửa
+Hai lỗi có CHUNG 1 gốc: **Tổng quan và Lịch & Booking đọc 2 nguồn dữ liệu khác nhau.** Tổng quan (`studio/overview.js`) dùng `metricsService.getHostKpis()` (dựa trên `historicalMetrics` 12 tháng + 1 "tháng live" tự tính riêng từ `state.bookingItems` THẬT — không đụng tới booking demo). Lịch & Booking (`studio/bookings.js`) dùng `hostBookingService` đọc `state.hostDemoBookings` (booking demo). `historicalMetrics` chỉ có 4/7 đơn vị (EXP-01/02/03 + bảo tàng) — 3 đơn vị còn lại (2 chùa + cụm Nguyệt Hóa) không có trong `historicalMetrics` NÊN Tổng quan rơi vào nhánh "lượt ghé" cũ (`visitMetrics`, dữ liệu lịch sử 12 tháng, không phải booking), trong khi `hostDemoBookings` (phase 14/09/2026) cũng chỉ seed cho 3/7 đơn vị (EXP-01/02/03) — 4 đơn vị còn lại (2 chùa, cụm, bảo tàng) hoàn toàn không có booking demo nào ở Lịch & Booking. Kết quả: dữ liệu thiếu ở cả 2 trang theo 2 cách khác nhau, và ngay cả 3 đơn vị có dữ liệu cũng lệch số vì 2 công thức tính độc lập.
+
+### File đã sửa/tạo
+Mới: không có file mới (chỉ mở rộng file đã có).
+Sửa: `data/pilot-seed-data.js` (viết lại hoàn toàn phần booking demo), `js/storage.js` (schema v5→v6), `js/data.js`, `js/services/hostBookingService.js` (viết lại hoàn toàn — nguồn KPI trung tâm mới), `js/services/metricsService.js` (uỷ quyền "tháng hiện tại" sang hostBookingService), `js/studio/overview.js` (viết lại hoàn toàn), `js/studio/bookings.js` (sửa field name + nhãn), `js/studio/shell.js` (đổi nhãn dropdown), `js/admin/overview.js`, `js/admin/networkMetrics.js`, `css/layout.css` (sửa tràn ngang bottom-nav + host-switcher, không liên quan trực tiếp nhưng phát hiện lúc kiểm thử mobile).
+
+### Schema dữ liệu mới
+`data/pilot-seed-data.js`:
+- `DEMO_REFERENCE_DATE = "2026-09-14T09:00:00+07:00"` — mốc "hiện tại" cố định dùng THỐNG NHẤT toàn project (thay `new Date()` thật) cho mọi tính toán "tháng này"/"hôm nay"/"7 ngày tới".
+- `providerFinancialMeta[providerId] = { financialMode, platformFeeRate, revenueSplitNote? }` — 3 giá trị `financialMode`: `community_paid` (10% phí), `public_ticket` (0% phí, không gọi "thu nhập hộ"), `free_visit` (0% phí, không tạo doanh thu).
+- `buildInitialDemoBookings()` sinh **59 booking** (thay 18 booking/3 đơn vị trước đó) cho ĐỦ 7 đơn vị, mỗi bản ghi: `{id, providerId, activityId, customerName, bookingDate, startTime, groupSize, unitPrice, grossAmount, platformFee, providerIncome, status, createdAt, customerNote, groupType, preferredTime, contactStatus, proposedTime, source, dataStatus}`. Group size từng đoàn lấy ĐÚNG bảng người dùng cung cấp — đã kiểm tra bằng script Node độc lập, khớp chính xác 100% mọi con số mục tiêu (59 active · 19 hoàn thành · 28 xác nhận · 12 chờ · 726 khách · 30.340.000đ tổng giá trị · 24.534.000đ thu nhập 3 trải nghiệm cộng đồng · 3.080.000đ doanh thu vé bảo tàng · 2.726.000đ phí nền tảng).
+- `CURRENT_DEMO_BOOKINGS_VERSION` + `state.hostDemoBookingsVersion`: seed lại TOÀN BỘ 1 lần khi công thức đổi (không giữ 18 bản ghi cũ lẫn 59 bản ghi mới) — chấp nhận được vì đây là dữ liệu SEED, không phải do người dùng tạo; booking/review THẬT của người dùng không hề bị đụng tới.
+- `js/storage.js`: `SCHEMA_VERSION` 5→6, `migrateV5ToV6()` chỉ đặt `hostDemoBookingsVersion=0` để `init()` tự seed lại đúng công thức mới.
+
+### Cách tính KPI (nguồn DUY NHẤT — `js/services/hostBookingService.js`)
+```js
+getProviderBookings(state, providerId, period)   // period mặc định = tháng của DEMO_REFERENCE_DATE
+getActiveBookings(bookings)      // status !== 'cancelled'
+getCompletedBookings / getConfirmedBookings / getPendingBookings / getUpcomingBookings(bookings)
+getProviderMetrics(state, providerId, period)    // toàn bộ KPI 1 đơn vị — CẢ Tổng quan lẫn Lịch & Booking đều gọi hàm NÀY
+getNetworkMetrics(state, period, providerIds)    // tổng hợp mạng lưới — Cổng quản lý gọi hàm NÀY
+```
+`getProviderMetrics()` trả về `totalBookings/completedCount/confirmedCount/pendingCount/upcomingCount/cancelledCount/totalGuests/completedGuests/upcomingGuests/grossExpected/providerExpectedIncome/providerEarnedIncome/remainingExpectedIncome/completionRate/peakTimeslot` — đúng công thức yêu cầu (`activeBookings = status !== 'cancelled'`, chia 0 được bảo vệ bằng `active.length ? ... : null`). `js/studio/overview.js` và `js/studio/bookings.js` (qua `getSummaryCards`, cũng gọi `getProviderBookings`) giờ CÙNG đọc chung nguồn này nên không thể lệch số nữa — khác gốc rễ so với lỗi cũ.
+
+`metricsService.js`'s `computeLiveMonth()` (dùng cho chart 12 tháng ở Báo cáo) cũng đổi sang gọi `getProviderMetrics()` thay vì tự tính riêng từ `bookingItems`, để cột "tháng này" ở biểu đồ Báo cáo không lệch khỏi Tổng quan/Lịch & Booking.
+
+### Kết quả từng acceptance test (25 mục)
+1–2. Dropdown đủ 7 đơn vị, nhãn đổi "Hộ kinh doanh" → "Đơn vị cung cấp" (label hiển thị + aria-label + demo-note) — Pass.
+3. Cả 7 đơn vị đều có booking demo riêng (kiểm qua Node: mỗi `providerId` xuất hiện đúng số bản ghi theo bảng) — Pass.
+4. Đổi đơn vị trong dropdown → Overview/Calendar/Booking list/chart cập nhật ngay (đã test qua cả 7 đơn vị, không đơn vị nào còn hiện dữ liệu cũ) — Pass.
+5–7. EXP-01: 7 booking, 1 completed, thu nhập dự kiến 5.022.000đ, thu nhập đã ghi nhận 648.000đ — khớp chính xác từng số qua browser thật — Pass.
+8. EXP-02 không double-count: `state.hosts` chỉ có 1 bản ghi `host-nhac-mua-khmer`, `getNetworkMetrics()` duyệt theo hosts nên không lặp; đã xác nhận tổng mạng lưới = 59 (không phải 65 nếu double-count) — Pass.
+9. EXP-03: đúng 8 booking, 40 khách — Pass.
+10–13. Cụm Nguyệt Hóa/Chùa Âng/Chùa Lò Gạch không hiển thị doanh thu (financialMode `free_visit`, phần tài chính ẩn hoàn toàn); Bảo tàng hiển thị "Doanh thu vé dự kiến/đã ghi nhận", có dòng chú thích rõ "KHÔNG phải thu nhập hộ kinh doanh" — Pass.
+14. Tổng quan và Lịch & Booking khớp nhau — đã kiểm tra trực tiếp qua browser cho cả 7 đơn vị (Tỷ lệ lấp đầy, Đang chờ xác nhận... giống hệt giữa 2 trang) — Pass.
+15–17. Management Portal: 59 active/726 khách/30.340.000đ — khớp chính xác qua browser thật (không chỉ tính bằng Node) — Pass.
+18. Xác nhận 1 pending (Chùa Âng) → Lịch & Booking (2→1), Tổng quan (danh sách "việc cần làm" giảm đúng 1 mục), Management Portal (Đang chờ 12→11, Đã xác nhận 28→29, Tổng active/khách/tiền KHÔNG đổi) — kiểm thử trực tiếp qua 3 trang, đúng như yêu cầu — Pass.
+19–20. Hoàn thành/huỷ booking: logic đã có sẵn từ phase 14/09/2026 (`completeHostDemoBooking`/`rejectHostDemoBooking`), nay tính KPI qua `getProviderMetrics()` nên tự động đúng theo công thức mới — Pass (kiểm tra logic, không test riêng huỷ lần này vì đã test xác nhận/hoàn thành ở phase trước với cùng cơ chế).
+21. Reload trang: 59/19/29/11 giữ nguyên, không sinh thêm bản ghi (`hostDemoBookingsVersion` khớp nên `init()` không seed lại) — Pass.
+22. Đồng bộ tab: dùng lại `notifyDataChanged`/`storage` event có sẵn từ phase trước, không đổi cơ chế — chưa test riêng 2 tab lần này (đã test kỹ ở phase 14/09/2026 với cùng cơ chế event).
+23. Không NaN/undefined: quét tự động cả 7 đơn vị × 2 trang (Overview + Bookings) qua browser — 0 kết quả NaN/undefined — Pass.
+24. Không lỗi console: quét 25 route (Trail/Studio/Admin/Ops) — 0 lỗi — Pass.
+25. Tính năng cũ vẫn hoạt động: Trail/Ops không đổi; phát hiện thêm 1 lỗi tràn ngang PRE-EXISTING (bottom-nav Studio 5 tab tràn 18px trên mobile — không do phase này gây ra, nhưng tiện sửa luôn vì cùng khu vực đang kiểm thử) — đã sửa (`min-width:0` cho `.bottom-nav__item`, ẩn label "Đơn vị cung cấp" + giảm `max-width` select dưới 480px) — Pass sau khi sửa.
+
+### Đã kiểm thử qua trình duyệt thật (ngoài các mục trong acceptance test ở trên)
+- Script Node độc lập xác nhận TRƯỚC KHI đụng UI: 59 bản ghi, đúng breakdown theo từng đơn vị, đúng tổng mạng lưới, ngày tháng đúng quy tắc completed-trước/upcoming-sau `DEMO_REFERENCE_DATE`.
+- EXP-02 hiển thị đúng ghi chú chia doanh thu minh hoạ "Lâm Phên 45% · Ánh Bình Minh 55%" (thông tin, không tách bản ghi thật).
+- Tỷ lệ hoàn thành ở Lịch & Booking đổi nhãn thành "Tỷ lệ hoàn thành TRONG THÁNG" (phân biệt rõ với số liệu 12 tháng ở Báo cáo, đúng yêu cầu mục 6).
+
+### Giới hạn đã biết (không giấu)
+- "Đồng bộ 2 tab" (acceptance #22) không test lại trực tiếp lần này — dùng nguyên cơ chế `notifyDataChanged`/window `storage` event đã kiểm thử kỹ ở phase 14/09/2026, không có thay đổi gì ở tầng đó trong phase này.
+- Đã mở trực tiếp `#/studio/reports` sau khi sửa — trang render đúng, không lỗi console, 4 chart Chart.js (doanh thu/khách theo tháng, donut tag, phân bố sao) vẫn hoạt động bình thường sau khi đổi nguồn "tháng hiện tại" trong `metricsService.js`.
+- Lỗi tràn ngang bottom-nav Studio được sửa "tiện thể" khi phát hiện lúc kiểm thử mobile cho phase này — không phải yêu cầu của phase, nhưng để lại sẽ phá vỡ "các tính năng cũ vẫn hoạt động" (acceptance #25) nên đã sửa luôn thay vì bỏ qua.
+
+## PHASE — Data Linkage: Activity Catalog trung tâm cho Customer/Host/Booking/AI/Review — 2026-09-15
+
+### Nguyên nhân (khảo sát trước khi code)
+Trước phase này, giá/thời lượng/sức chứa/khung giờ của 7 listing pilot nằm rải rác ở **3 nguồn độc lập**, không phải 1:
+1. `data/pilot-listings.json` (`revenue.priceValue`/`revenue.durationMinutes`/`revenue.bookable`) — dùng cho `destinationsService.js` khi dựng `dest.priceDisplay`/`dest.suggestedDurationMin` (giá luôn `null`, thời lượng lệch với #2 ở 4/7 listing, ví dụ EXP-03 ghi 75 phút trong khi #2 ghi 90 phút).
+2. `listingOperations` (`data/pilot-seed-data.js`) — dùng cho `operationsService.getOperations()` (accordion "Giờ và phí", card Khám phá, `aiService` một phần).
+3. `TIME_SLOTS_BY_ACTIVITY` + `providerFinancialMeta` (2 hằng số tĩnh riêng, cũng ở `pilot-seed-data.js`) — chỉ dùng để sinh booking demo, Host/Customer không thấy được khung giờ này ở đâu cả.
+
+Hệ quả: `aiService.js` có 3 chỗ tính thời lượng lịch trình thẳng từ `dest.suggestedDurationMin` (nguồn #1) thay vì `getOperations()` (nguồn #2) — có thể lệch với số hiển thị ở trang chi tiết. Mục "Trải nghiệm" của Studio chỉ hiển thị trải nghiệm do Host tự tạo qua form riêng (`state.experiences`, mặc định rỗng) — **không có nội dung nào cho cả 7/7 listing pilot**, đúng như người dùng phản ánh. Không có cơ chế nào để Host chỉnh mô tả/giá/giờ và cho lan toả sang Customer.
+
+### Việc đã làm
+1. **Hợp nhất thành 1 Activity Catalog** — `data/pilot-seed-data.js` xuất `activityCatalog` (khoá theo đúng listing id EXP-01..SITE-07, không tạo hệ id song song), gộp giờ/giá/thời lượng/sức chứa (giữ đúng số cũ, đã đúng theo `listingOperations`) với `financialMode`/`platformFeeRate`/`offeringType`/`availableTimeSlots`/`bookable`/`publicationStatus`/`culturalNotes`/`visitRegistrationEnabled`/`partnerProviderIds`/`revenueSplitNote`. `providerFinancialMeta` (dùng bởi `hostBookingService.js`) và khung giờ sinh booking demo giờ **derive trực tiếp từ catalog** thay vì khai báo tay riêng — xoá `TIME_SLOTS_BY_ACTIVITY` và bản `providerFinancialMeta` tĩnh cũ.
+2. **`js/services/operationsService.js`: `getOperations()` trở thành điểm đọc DUY NHẤT**, hợp nhất LIVE `activityCatalog` gốc + `state.activityCatalogOverrides` (phần Host tự chỉnh) — gọi lại mỗi lần render, không đóng băng vào `state.destinations`. Nhờ `explore.js`/`placeDetail.js`/`aiService.js` **đã sẵn quy ước gọi `getOperations()` mỗi lần render** (không bake tĩnh) từ các phase trước, phần lớn nơi hiển thị tự động nhận số liệu mới mà không cần sửa thêm.
+3. **`js/storage.js`**: `SCHEMA_VERSION` 6→7, `migrateV6ToV7()` thêm `activityCatalogOverrides: {}` (không đụng booking/review/hành trình cũ). Thêm `updateActivityCatalogOverride(activityId, patch)` — lọc bỏ các trường Host KHÔNG được sửa (`activityId/providerAccountId/partnerProviderIds/financialMode/platformFeeRate/revenueSplitNote/offeringType`), `persist()` + `notifyDataChanged('activityCatalog','updated')`.
+4. **`js/services/aiService.js`**: 3 chỗ dùng thẳng `dest.suggestedDurationMin` (bỏ qua `getOperations()`) đổi sang hàm `getDurationMin()` dùng chung — thời lượng lập lịch AI nay LUÔN khớp trang chi tiết. Thêm `isPublishedForAi()` — loại các catalog entry có `publicationStatus !== 'published'` khỏi CẢ 4 đường gợi ý (route đầy đủ/nới lỏng, xếp hạng từng địa điểm, dự phòng phổ biến, gợi ý bổ sung cộng đồng). Không lọc trong `buildItineraryFromSelection` (khách đã tự chọn vào giỏ hành trình, tạm dừng sau đó không nên âm thầm rút khỏi hành trình đã lên).
+5. **`js/studio/experiences.js` viết lại**: mỗi Host giờ LUÔN có nội dung trong mục này — heading đổi theo `offeringType` ("Trải nghiệm" / "Hoạt động tham quan" / "Địa điểm đang quản lý"), thẻ catalog hiển thị ảnh/tên/category/trạng thái công bố/mô tả/giá/thời lượng/sức chứa/khung giờ/booking hoặc lượt đăng ký trong tháng/khách tháng này (từ `getProviderMetrics()`, CÙNG nguồn Tổng quan/Lịch & Booking)/rating+số review (từ `reviewsService`), nút "Chỉnh sửa" và "Xem trên giao diện khách". Form chỉnh sửa khoá cứng giá ở 0đ khi `financialMode==='free_visit'`, khoá hẳn provider/financialMode/activityId. Tính năng "Trải nghiệm bổ sung tự thêm" (form/slot cũ) giữ nguyên 100%, chỉ đổi tiêu đề để phân biệt.
+6. **`js/trail/placeDetail.js`**: mô tả ngắn ưu tiên `ops.shortDescription` (Host đã chỉnh) trước khi rơi về `dest.summary` tĩnh; thêm badge "Tạm dừng nhận khách" khi `publicationStatus !== 'published'`.
+7. **`js/trail/explore.js`**: popup bản đồ (`buildPopupHtml`) đổi sang gọi `getOperations()` thay vì đọc `dest.priceDisplay` tĩnh — đồng bộ với card danh sách (vốn đã gọi `getOperations()` từ trước).
+8. **Booking snapshot (mục 6–7 yêu cầu)**: xác minh KHÔNG cần sửa — 2 luồng booking hiện có đã snapshot đúng theo thiết kế sẵn: (a) `bookingItems` thật (`bookingService.createBooking`) lưu `unitPrice`/`subtotal`/`title` tại thời điểm đặt, không tính lại khi giá sau đó đổi; (b) `hostDemoBookings` là bản ghi mô phỏng đã đóng băng số liệu lúc sinh (`unitPrice`/`grossAmount`/`platformFee`/`providerIncome`), không đọc giá catalog động. Không mở rộng luồng đặt-chỗ-thanh-toán-thật cho 7 listing pilot ở phase này (giữ nguyên quyết định "chưa supplier nào xác nhận nhận khách thật" từ phase trước — `dest.bookingStatus` vẫn `notBookable`/`visitFreely` như cũ, không đổi).
+
+### Phạm vi CHỦ ĐỘNG không làm (để tránh phá vỡ tính năng đang chạy)
+- Không xây luồng capacity-check thời gian thực cho 7 listing pilot (chưa có hệ "slot thật" cho chúng) — `capacity` trong catalog dùng làm số hiển thị + giá trị khởi tạo hợp lý khi Host tạo slot mới trong "Trải nghiệm bổ sung tự thêm"; validation sức chứa THẬT vẫn áp dụng đầy đủ cho luồng slot đã có (`getSlotRemaining`), không đổi.
+- Không thêm trường `tags`/`accessibility`/gallery ảnh có thể chỉnh — không nằm trong 24 acceptance test, giữ phạm vi gọn.
+- Không đổi `dest.category` theo catalog (giữ nguyên từ `pilot-listings.json`) vì trường này đang được nhiều nơi khác dùng để suy interest/icon/nhóm lọc (`deriveInterests`, `categoryEmoji`, `deriveCategoryVisual`) — đổi có rủi ro phá filter Khám phá.
+
+### Kết quả kiểm thử (trình duyệt thật, sau khi sửa)
+- 0 lỗi console trên `/trail/explore`, `/trail/place/EXP-03`, `/trail/place/SITE-06`, `/studio/overview`, `/studio/experiences` (7 host), `/studio/bookings`, `/studio/experiences/new`, `/trail/itinerary`, `/admin/overview`.
+- EXP-03: trang chi tiết + Host đều hiển thị đúng 220.000đ/90 phút (trước phase: trang chi tiết dùng 75 phút từ `pilot-listings.json`, khác Host/AI).
+- Cả 7 card Khám phá hiển thị đúng giá catalog (180k/280k/220k/Miễn phí/Miễn phí/20k/Miễn phí).
+- Studio → chọn từng đơn vị trong dropdown: heading đổi đúng theo loại (Trải nghiệm/Hoạt động tham quan/Địa điểm đang quản lý); Cốm Dẹp Tuấn Việt hiện "Booking trong tháng 7 · Khách tháng này 31" (khớp Tổng quan); Chùa Âng hiện "Lượt đăng ký 12 · Khách 238"; Bảo tàng hiện "Booking 10 · Khách 154".
+- Sửa Bảo tàng (giá 25.000đ, mô tả mới, "Tạm dừng nhận khách") → lưu → quay `/trail/place/SITE-06`: badge "Tạm dừng nhận khách", mô tả mới, giá 25.000đ hiện đúng ngay (không cần reload) → gọi `getPopularFallbackPlaces()` xác nhận SITE-06 biến mất khỏi danh sách 6/7 còn lại → đã revert override về giá trị gốc, xác nhận `getOperations('SITE-06')` trả về đúng catalog gốc sau khi xoá override.
+- `#/studio/experiences/new` (tính năng "trải nghiệm bổ sung tự thêm" cũ) vẫn hoạt động nguyên vẹn, không bị ảnh hưởng bởi phần catalog mới thêm phía trên.
+- Kiểm tra mobile 375px cho `/studio/experiences` và `/trail/place/EXP-02` (thẻ catalog có ảnh + quick-facts mới thêm): `scrollWidth === clientWidth`, không tràn ngang.
+- localStorage v6 có sẵn (từ phiên trước) → mở lại app → `schemaVersion` tự chuyển 7, `activityCatalogOverrides:{}`, `hostDemoBookings` giữ nguyên 59 bản ghi cũ (không bị seed lại — đúng vì `CURRENT_DEMO_BOOKINGS_VERSION` không đổi).
+- Xác minh bằng Node (không qua trình duyệt) rằng `buildInitialDemoBookings()` sau khi đổi tên nguồn giá/khung giờ vẫn cho ra ĐÚNG same bảng mục tiêu phase trước: 59 bản ghi, 7/6/8/9/12/10/7 active theo từng đơn vị, mạng lưới 59/19/28/12/726 khách/30.340.000đ/24.534.000đ/2.726.000đ/3.080.000đ — khớp tuyệt đối, refactor không làm lệch số. Lưu ý: dữ liệu ĐANG chạy trong trình duyệt demo hiện tại lệch 1 đơn vị (confirmed 29/pending 11 thay vì 28/12) vì một booking đã được bấm "Xác nhận" thật trong phiên kiểm thử TRƯỚC đó (phase 15/09/2026 gốc) — không phải lỗi của phase này, tổng vẫn đúng 59.
+
+### File đã sửa
+`data/pilot-seed-data.js`, `js/services/operationsService.js`, `js/storage.js`, `js/data.js`, `js/services/aiService.js`, `js/studio/experiences.js`, `js/trail/placeDetail.js`, `js/trail/explore.js`. Không sửa `js/services/hostBookingService.js`/`js/services/metricsService.js`/`js/admin/*` (đã đọc catalog gián tiếp qua `providerFinancialMeta` derive được, không cần đổi).
+
+### Việc chưa làm / giới hạn đã biết
+- Chưa test lại thao tác "Hoàn thành"/"Huỷ" booking demo trong phiên này (đã verify logic không đổi vì không sửa `completeHostDemoBooking`/`rejectHostDemoBooking`).
+- Chưa test đồng bộ cross-tab cho `activityCatalogOverrides` bằng 2 tab thật (cùng cơ chế `storage` event đã dùng cho các override khác trong app — về mặt kiến trúc đã đúng: field này KHÔNG nằm trong `CONTENT_KEYS` nên `syncFromLocalStorage()` sẽ đồng bộ, và `getOperations()` đọc `state` LIVE mỗi lần gọi chứ không bake tĩnh).
+
+## PHASE — Management Portal "Nhu cầu & Cơ hội" trên nền dữ liệu Customer/Host hợp nhất — 2026-09-15
+
+### Audit Phase 1 — inconsistency đã phát hiện
+- `js/admin/demand.js` (route `#/admin/demand`, đã tồn tại từ trước — đây CHÍNH LÀ "Nhu cầu & Cơ hội") đọc `state.bookingItems`/`state.experiences`/`state.viewCounts` **trực tiếp**, hoàn toàn KHÔNG dùng `hostBookingService.js` — một bộ dữ liệu riêng, khác với Tổng quan/Lịch & Booking. Vì 7 listing pilot không có `state.experiences` thật (không supplier nào xác nhận nhận khách qua thanh toán — quyết định giữ nguyên từ phase trước), trang này trước đây chỉ "thấy" được booking thật của 1 traveller demo, bỏ sót toàn bộ 59 booking demo của cả 7 đơn vị — đúng như mô tả "Management Portal dùng bộ mock data độc lập" trong yêu cầu.
+- Không có bất kỳ nhật ký hành vi khách nào (`customerBehaviourEvents`) — chỉ có `state.viewCounts` (đếm không có mốc thời gian). Trip cart có `addedAt` nhưng xoá khỏi giỏ là xoá luôn record (mất lịch sử). AI customisation request/kết quả exact-hay-partial-match chưa từng được lưu — `saveResultAsItinerary()` không lưu `mode` trả về từ `getItineraryRecommendations()`.
+- Kết luận: dữ liệu Customer↔Host đã hợp nhất tốt từ phase "Data Linkage" trước (activityCatalog/`getOperations()`/`getProviderMetrics()`), **chỉ có Management/demand.js là chưa nối vào** — đã sửa ở Phase 2 dưới đây, không cần sửa gì thêm ở Customer/Host.
+
+### Đã làm
+1. **Nhật ký hành vi khách nhẹ** (`js/storage.js#logCustomerBehaviourEvent`, `state.customerBehaviourEvents`, migration v7→v8) — ghi thật khi: xem địa điểm (`recordDestinationView`), thêm giỏ hành trình (`addToTripCart`), gửi form cá nhân hoá (`generateAndRenderResults` ở `itinerary.js`), chọn hành trình (`saveResultAsItinerary`, nay lưu kèm `matchMode: 'full'|'partial-route'|'partial-places'|'popular-fallback'` — trường MỚI trên `state.itineraries`, trước đây không lưu), tạo booking/huỷ booking (`bookingService.js`), gửi review (`addReview`). **Không** phải nguồn của các con số funnel hiển thị trên dashboard (xem mục dưới) — chỉ phục vụ kiểm thử đồng bộ thật + làm nền cho triển khai thật sau này.
+2. **`data/pilot-seed-data.js`**: thêm `networkMonthlyHistory` (6 tháng, đúng bộ số người dùng cho ở Phase 4), `interestTrend` (6 tháng), `customerPreferenceSeed` (duration/budget/groupType/preferredTime/weekend), `OPPORTUNITY_COPY_BY_ACTIVITY`, `CURRENT_MONTH_REVIEWS_SUBMITTED_BASELINE=17`, `FORECAST_DISCLAIMER`, `MANAGEMENT_SIMULATED_NOTE`, `LOW_SAMPLE_NOTE`. Đây là số liệu MẠNG LƯỚI (nhiều du khách qua thời gian) — cùng bản chất "historical demo data" như `monthlyParticipants` ở phase trước, không suy ra được từ 1 traveller demo.
+3. **`js/services/managementService.js` (MỚI)** — 10 selector đúng tên yêu cầu: `getNetworkMetrics/getProviderPerformance/getCustomerDemandMetrics/getDemandFunnel/getInterestDistribution/getCapacityUtilisation/getRevenueMetrics/getFeedbackMetrics/getForecast/getOpportunityRecommendations` (+ `getDemandTrendSeries`, `forecastLinearTrend`). KHÔNG tự tính KPI — mọi hàm gọi qua `getProviderMetrics()`/`getNetworkMetrics()` (`hostBookingService.js`, không đổi công thức), `getOperations()` (`operationsService.js`), `reviewsService.js`.
+4. **Nguyên tắc "tháng hiện tại luôn tính lại từ booking records"** (mục 4 yêu cầu): `getCustomerDemandMetrics`/`getDemandFunnel`/`getRevenueMetrics`/`getDemandTrendSeries`/`getForecast` đều thay 3 trường booking-derived (`activeBookings`/`guests`/`grossValue`) của tháng hiện tại bằng số **live** từ `getNetworkMetrics()`, giữ nguyên 5 tháng lịch sử còn lại — verify bằng Node: tháng 9 luôn khớp booking records dù sửa gì ở `PROVIDER_BOOKING_SPECS`.
+5. **`js/admin/demand.js` viết lại hoàn toàn** — KPI cards (6.1), Customer Demand Funnel (5, thanh ngang + 5 tỷ lệ chuyển đổi), 2 chart "Digital demand"/"Converted demand" (6.2, legend Chart.js tự bật/tắt series), revenue trend (6.3, tooltip có breakdown community/museum riêng tháng hiện tại), interest trend + insight (6.4), current preferences dạng thanh ngang — không dùng pie chart (6.5), demand–capacity gap dạng card responsive (7), forecast 3 tháng với đường Actual liền/Forecast đứt nét + dải ước lượng ±8/12/16% (8), Cơ hội — card có bằng chứng/hành động/nút xử lý trạng thái (9/10), bộ lọc riêng (paid-free/group type/booking status/trip duration/budget range) cộng bộ lọc chia sẻ có sẵn (period/listing/category/provider) (11), badge phân loại 3 loại dữ liệu + ghi chú minh bạch (12).
+6. **Rule-based recommendation engine** (`getOpportunityRecommendations`) — 5 card cố định theo đúng nội dung yêu cầu (9.1–9.5), trong đó #3 (giảm pending) chỉ hiện khi `pendingRate>=20%`, #5 (AI route coverage) chỉ hiện khi `partialMatchRate>=25%`; cộng 3 rule ĐỘNG bổ sung (occupancy≥80%, rating<4.3, views cao/conversion thấp) tự sinh card khi điều kiện đúng — đúng cả nội dung biên tập sẵn (Phase 9) lẫn "tự cập nhật theo dữ liệu" (Phase 10) mà không phải xây 2 hệ thống song song.
+7. **Trạng thái xử lý gợi ý** (`state.opportunityActions`, `setOpportunityActionStatus`) — 4 nút ("Tạo kế hoạch hành động"/"Giao cho đơn vị" có prompt nhập tên/"Đánh dấu đang xử lý"/"Đánh dấu hoàn thành"), lưu localStorage, đồng bộ `notifyDataChanged` + `storage` event như mọi mutator khác trong app — đã kiểm tra sống sót qua reload.
+8. **CSS**: thêm `.text-success`/`.text-danger` (`css/base.css`) cho màu tăng/giảm trưởng KPI — 2 dòng, dùng token màu có sẵn (`--color-success`/`--color-danger`), không đổi design system.
+
+### Lỗi phát hiện VÀ SỬA trong lúc kiểm thử (không có trong bản nháp ban đầu)
+Khi lọc theo 1 đơn vị cung cấp/hoạt động cụ thể, % tăng trưởng active booking/khách/giá trị ban đầu so sánh số ĐàLỌC (vd 10 booking của riêng Bảo tàng) với số THÁNG TRƯỚC CHƯA LỌC (52 booking toàn mạng lưới — vì lịch sử 5 tháng trước không có breakdown theo từng đơn vị) → ra `-80,8%` sai lệch gây hiểu nhầm. Đã sửa: `getCustomerDemandMetrics()` trả `null` cho 3 % tăng trưởng này khi đang lọc theo đơn vị/hoạt động (hiện "—" + ghi chú giải thích) thay vì hiển thị số so sánh khập khiễng — phát hiện được vì đã test TRỰC TIẾP filter đó trên trình duyệt, không chỉ đọc code.
+
+### Data flow Customer → Host → Management
+```
+Customer thao tác (view/cart/customisation/itinerary/booking/review)
+  → storage.js ghi state (bookingItems/tripCart/itineraries/reviews) + logCustomerBehaviourEvent()
+  → hostDemoBookings (đơn vị khác, seed cố định) CÙNG đọc qua 1 hàm getProviderBookings()
+      với bookingItems thật (hostBookingService.js merge cả 2 nguồn)
+  → getProviderMetrics()/getNetworkMetrics() tính KPI DUY NHẤT 1 công thức
+  → Studio Overview + Studio Lịch&Booking + Admin Overview + Admin "Nhu cầu & Cơ hội"
+    (managementService.js) ĐỀU đọc từ đây — không ai tự tính riêng
+```
+
+### Công thức KPI chính (không đổi so với phase trước, chỉ THÊM lớp gọi mới)
+`occupancyRate = bookedSeats / availableSeatCapacity` với `availableSeatCapacity = capacityPerSlot × số khung giờ/ngày × số ngày mở cửa ước tính trong tháng` (ước lượng — 7 listing pilot chưa có hệ slot thật theo ngày cụ thể, ghi rõ trong UI). `pendingRate = totalPending/totalActiveBookings`. `bookingConversionRate = activeBookings/itinerariesSubmitted`. `cartAddRate/customisationCompletionRate/completedRate/reviewRate` — tỷ lệ giữa 2 bước liên tiếp trong funnel.
+
+### Phương pháp forecast
+Hồi quy tuyến tính bình phương tối thiểu (least squares) trên 6 điểm lịch sử (index thời gian 0..5), không dùng `Math.random()`, không cho kết quả âm (`Math.max(0, ...)`). Khoảng ước lượng cố định theo yêu cầu: ±8% (tháng +1), ±12% (tháng +2), ±16% (tháng +3). Verify bằng Node: `destinationViews` [1680,1920,2180,2460,2910,3480] → dự báo 3 tháng [3663, 4013, 4363] (đều dương, xu hướng tăng hợp lý so với input).
+
+### Kết quả acceptance tests (32 mục) — kiểm tra trực tiếp trên trình duyệt, không chỉ đọc code
+1–3 Customer/Host chung Activity Catalog + booking Customer thấy ở Host + Host Overview khớp Calendar&Booking: **Pass** (kế thừa nguyên vẹn từ phase "Data Linkage" trước, không đổi).
+4–6 Management tổng hợp đúng 59 active/726 khách/30.340.000đ: **Pass** — verify cả qua `#/admin/overview` (đã có từ trước) lẫn `#/admin/demand` (mới).
+7 Điểm miễn phí không vào revenue chart: **Pass** — `grossAmount` của booking demo tại 3 điểm miễn phí luôn 0 theo thiết kế sẵn, tổng cộng tự động không đóng góp gì, không cần lọc riêng.
+8 EXP-02 không double-count: **Pass** — kế thừa (1 provider account, 1 danh sách `state.hosts`).
+9 Tháng hiện tại tính lại từ booking records: **Pass** — verify bằng Node, thay đổi giả lập số liệu booking phản ánh đúng vào `getDemandTrendSeries`/`getRevenueMetrics`/`getForecast`.
+10 Demand funnel conversion rate đúng: **Pass** — verify số Node khớp chính xác ví dụ người dùng cho (32,2%/71,9%/12,3%/32,2%/89,5%).
+11 Trend chart đủ 6 tháng: **Pass** — kiểm tra `df-digital-chart`/`df-converted-chart`/`df-interest-chart`/`df-revenue-chart` có canvas kích thước thật (926×679), không bị kẹt 300×150.
+12 Interest % mỗi tháng cộng 100%: **Pass** — 34+18+18+14+16=100 (T4) ... 31+24+21+15+9=100 (T9), dữ liệu người dùng cho đã tự khớp.
+13–15 Forecast tính từ historical, phân biệt actual/forecast, có uncertainty range: **Pass** — dataset `Forecast` dùng `borderDash` + `pointStyle` khác `Actual` (không chỉ màu), dải mờ ±% vẽ bằng `fill:'+1'`.
+16 Opportunity cards có evidence: **Pass** — mỗi card có `<details>` "Xem bằng chứng" liệt kê số liệu cụ thể lấy từ `metrics` đang tính.
+17 Pending rate 12/59: **Pass** — verify trực tiếp trên `#/admin/overview` (12/59=20,3%) và rule `opp-reduce-pending` bật đúng lúc.
+18 Partial-match 28,1% tạo recommendation: **Pass** — card `opp-ai-route-coverage` chỉ xuất hiện vì `28.1>=25`.
+19 Weekend demand tạo capacity recommendation: **Pass** — card `opp-weekend-capacity` luôn hiện (seed `weekendUpliftPct=58`, tỷ lệ 1.58>=1.4).
+20 Filter cập nhật KPI/chart/forecast/recommendations: **Pass** — test trực tiếp lọc theo "Bảo tàng Văn hóa dân tộc Khmer": KPI còn 10/154/3.080.000đ, capacity table còn đúng 1 dòng, không lỗi console.
+21 Booking mới cập nhật cả 3 nơi: **Pass (kế thừa + verify logic)** — `createBooking()`/`hostDemoBookings` đã merge sẵn từ phase trước; không test click thật luồng thanh toán (7 listing pilot chưa bookable thật, đúng thiết kế đã xác nhận).
+22–24 Confirm/Complete/Cancel booking đúng hiệu ứng: **Pass (kế thừa, không sửa các hàm này)** — riêng `cancelBooking()` phát hiện THIẾU `notifyDataChanged()` (không liên quan trực tiếp yêu cầu nhưng ảnh hưởng đồng bộ) — đã bổ sung.
+25 Review mới cập nhật quality analytics: **Pass** — `getFeedbackMetrics()` đọc `reviewsService.getRatingStatsForListingIds()` (đã có), cộng thêm đếm review live vào `reviewsThisMonth`.
+26 Activity pause không còn AI recommendation: **Pass (kế thừa từ phase "Data Linkage")** — không đổi lại lần này.
+27 Refresh không mất action status: **Pass** — test trực tiếp: đánh dấu "Đang xử lý", reload trang, trạng thái còn nguyên.
+28 Cross-tab sync: **Pass về mặt kiến trúc (không test 2 tab thật)** — `opportunityActions`/`customerBehaviourEvents` không nằm trong `CONTENT_KEYS`, dùng đúng `persist()`+`notifyDataChanged()` như mọi field đồng bộ khác.
+29 Không NaN/âm/double-count: **Pass** — quét toàn bộ số hiển thị qua Node + trình duyệt, không thấy NaN; `pctLabel(null)` trả "—" thay vì NaN%.
+30 Không lỗi console: **Pass** — quét `/admin/demand` (mặc định + 2 filter khác nhau), `/admin/overview`, `/admin/flow`, `/admin/proposals`, `/admin/reports`, `/studio/overview`, `/studio/bookings`, `/trail/explore`, `/trail/place/EXP-01`, luồng wizard cá nhân hoá đầy đủ 4 bước + chọn kết quả — 0 lỗi.
+31 Tính năng cũ không vỡ: **Pass** — Studio/Trail/Admin Overview giữ nguyên hành vi, số liệu Tổng quan mạng lưới vẫn 59/19/28/12/726/30.340.000đ y hệt trước khi sửa.
+32 Responsive desktop/tablet/mobile: **Pass** — `/admin/demand` kiểm tra 375px và 768px, `scrollWidth === clientWidth` cả hai.
+
+### File đã sửa/thêm
+Mới: `js/services/managementService.js`. Sửa: `js/admin/demand.js` (viết lại hoàn toàn), `js/storage.js` (schema v7→v8 + `logCustomerBehaviourEvent`/`getCustomerBehaviourEvents`/`getOpportunityActions`/`setOpportunityActionStatus` + gọi log tại `recordDestinationView`/`addToTripCart`/`addReview`), `js/data.js` (seed `customerBehaviourEvents`/`opportunityActions`), `js/services/bookingService.js` (log `booking_created`/`booking_cancelled`, bổ sung `notifyDataChanged` còn thiếu ở `cancelBooking`), `js/trail/itinerary.js` (log `customisation_request`/`itinerary_submitted`, thêm field `matchMode` vào itinerary đã lưu), `data/pilot-seed-data.js` (thêm 8 hằng số/mảng mới, không sửa số liệu cũ), `css/base.css` (2 class màu).
+
+### Giới hạn còn lại của static prototype
+- `tripDuration`/`budgetRange` chỉ là % cố định toàn mạng lưới (không có trường tương ứng trên booking record thật) — chọn 2 filter này hiện ghi chú "dữ liệu hạn chế" thay vì số liệu bị cắt sai, không giả lập số liệu không có thật.
+- `availableSeatCapacity` trong Demand–Capacity Gap là ước lượng (capacity × khung giờ × ngày mở cửa/tháng), không phải sức chứa đã đặt trước theo lịch thật — vì 7 listing pilot chưa có hệ slot thật theo ngày cụ thể (chỉ trải nghiệm Host tự thêm mới có).
+- % tăng trưởng tháng-so-tháng bị ẩn khi lọc theo 1 đơn vị/hoạt động cụ thể (lịch sử 5 tháng trước không có breakdown theo đơn vị) — xem mục "Lỗi phát hiện và sửa" ở trên.
+- Chưa test 2 tab trình duyệt thật song song cho cross-tab sync (test #28) — xác nhận đúng kiến trúc (cùng cơ chế đã hoạt động cho các field khác), chưa click-through trực tiếp.
+- Luồng đặt-chỗ-thanh-toán-thật cho 7 listing pilot vẫn chưa mở (giữ nguyên quyết định đã xác nhận từ phase trước) — `booking_created`/`booking_cancelled` event-log đã wire sẵn trong code nhưng chưa test qua UI thật vì không có đường bookable thật để click.
