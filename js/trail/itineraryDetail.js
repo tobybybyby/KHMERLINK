@@ -1,6 +1,6 @@
 import { getState, getItinerary, saveItinerary, addPassportStamp, setActiveItinerary, addPoints } from '../storage.js';
 import {
-  escapeHtml, formatCurrency, formatDurationMin, combineDateTime,
+  escapeHtml, formatCurrency, formatActivityPrice, formatDurationMin, combineDateTime,
   categoryEmoji, deriveCategoryVisual, destinationImageSrc, getSimulatedCrowdLevel, ratingDisplay,
   qs, qsa,
 } from '../utils.js';
@@ -69,7 +69,10 @@ function stopCardHtml(state, itinerary, stop, index, mode) {
   const dest = state.destinations.find((d) => d.id === stop.destinationId);
   const crowd = getSimulatedCrowdLevel(stop.destinationId);
   const isProposedExperience = !stop.experienceId && (stop.listingType === 'experience' || stop.listingType === 'multiStopExperience');
-  const isFree = !stop.experienceId && !isProposedExperience;
+  // Miễn phí THẬT = giá niêm yết đúng 0đ (Activity Catalog) — không suy từ "chưa có experience thật"
+  // (trước đây `!stop.experienceId && !isProposedExperience` vô tình đúng vì 7 listing pilot chưa
+  // supplier nào xác nhận slot thật, nhưng không phản ánh đúng bản chất giá).
+  const isFree = stop.pricePerPerson === 0;
   const current = mode.currentIndex === index;
   const travelText = stop.travelUnknown
     ? 'chưa đủ dữ liệu để tối ưu tuyến đường (ước tính tạm)'
@@ -88,6 +91,7 @@ function stopCardHtml(state, itinerary, stop, index, mode) {
           ${isProposedExperience ? '<span class="badge badge-new">Đề xuất — cần xác nhận</span>' : ''}
           ${isFree ? '<span class="badge badge-free">Miễn phí / tự do</span>' : ''}
           ${stop.experienceId ? `<span class="badge badge-type">${escapeHtml(stop.experienceTitle)} · ${formatCurrency(stop.experiencePrice)}</span>` : ''}
+          ${!stop.experienceId && !isFree ? `<span class="badge badge-type">${escapeHtml(formatActivityPrice(stop.pricePerPerson))}</span>` : ''}
           ${bookingBadgeForStop(state, stop)}
           <span class="badge" style="background:${crowd.color}22;color:${crowd.color};">● ${escapeHtml(crowd.label)} <span class="text-faint">(mô phỏng)</span></span>
         </div>
@@ -151,7 +155,8 @@ function summaryHtml(itinerary) {
     <div class="quick-facts">
       <div class="quick-fact"><span class="quick-fact__label">Tổng thời gian</span><span class="quick-fact__value">${formatDurationMin(itinerary.totalDurationMin)}</span></div>
       <div class="quick-fact"><span class="quick-fact__label">Thời gian di chuyển</span><span class="quick-fact__value">${formatDurationMin(itinerary.totalTravelMin)} <span class="text-faint text-sm">(ước tính)</span></span></div>
-      <div class="quick-fact"><span class="quick-fact__label">Tổng chi phí hoạt động đã chọn</span><span class="quick-fact__value">${formatCurrency(itinerary.totalCost)}</span></div>
+      <div class="quick-fact"><span class="quick-fact__label">Chi phí mỗi khách</span><span class="quick-fact__value">${escapeHtml(formatActivityPrice(itinerary.pricePerPersonTotal))}</span></div>
+      <div class="quick-fact"><span class="quick-fact__label">Tổng dự kiến cho nhóm ${itinerary.partySize} khách</span><span class="quick-fact__value">${formatCurrency(itinerary.totalCost)}</span></div>
       <div class="quick-fact"><span class="quick-fact__label">Số điểm</span><span class="quick-fact__value">${itinerary.stops.length}${unbooked ? ` <span class="text-faint text-sm">(${unbooked} chưa đặt chỗ)</span>` : ''}</span></div>
     </div>
   `;
@@ -391,6 +396,11 @@ export function render(container, id) {
     `;
     return;
   }
+  // Làm mới giá từ Activity Catalog trước khi hiển thị — tự "vá" hành trình đã lưu trước bản sửa
+  // lỗi giá (trước đây totalCost chỉ tính từ giá slot THẬT, luôn ra 0/"Miễn phí" cho hoạt động có
+  // phí chưa có supplier xác nhận — xem aiService.recalcTimeline). Không cần migration/tăng schema
+  // version riêng vì đây là số liệu hiển thị tính lại mỗi lần xem, không phải dữ liệu đã "chốt".
+  recalcTimeline(itinerary);
   const state = getState();
   const isLive = itinerary.status === 'active';
   const editable = itinerary.status === 'selected';

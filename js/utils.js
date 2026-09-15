@@ -33,6 +33,18 @@ export function formatMoney(vnd) {
   return new Intl.NumberFormat('vi-VN').format(vnd) + ' đ';
 }
 
+/** Giá/khách của 1 hoạt động trong tour/hành trình (Activity Catalog) — phân biệt RÕ "Miễn phí"
+ * (pricePerPerson === 0, giá thật) với "Đang cập nhật giá" (null/undefined/NaN, chưa tra được giá
+ * — ví dụ listing không có trong catalog). Sửa lỗi tour hiển thị "Miễn phí" sai cho hoạt động có
+ * phí: nơi gọi PHẢI dùng `activity?.pricePerPerson ?? null`, KHÔNG dùng `... || 0` (biến giá chưa
+ * biết thành 0, bị hàm này hiểu nhầm thành miễn phí thật). */
+export function formatActivityPrice(pricePerPerson) {
+  if (pricePerPerson === 0) return 'Miễn phí';
+  const n = Number(pricePerPerson);
+  if (pricePerPerson === null || pricePerPerson === undefined || !Number.isFinite(n)) return 'Đang cập nhật giá';
+  return `${n.toLocaleString('vi-VN')}₫/khách`;
+}
+
 export function formatDateShort(isoOrDate) {
   const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
   if (Number.isNaN(d.getTime())) return '—';

@@ -40,6 +40,19 @@ function isPublishedForAi(dest) {
   return !ops || ops.publicationStatus === 'published';
 }
 
+/** Giá NIÊM YẾT (Activity Catalog, qua getOperations — đã hợp nhất phần Host tự chỉnh) cho 1
+ * điểm/khách — nguồn DUY NHẤT cho "chi phí dự kiến" hiển thị ở tour/hành trình. KHÁC với
+ * `booking.exp.price` (giá của 1 slot THẬT đã khớp qua findBookableExperience — chỉ khác 0/null
+ * khi host đã tạo experience+slot thật qua Studio, hiện chưa áp dụng cho 7 listing pilot) — trước
+ * bản sửa này, `stops[].price`/`totalCost` chỉ lấy từ `booking.exp.price`, nên LUÔN ra 0 cho cả
+ * hoạt động có phí (EXP-01/02/03, SITE-06) vì chưa có supplier nào xác nhận slot thật, khiến tour
+ * hiển thị "Miễn phí" sai. Trả về `null` (không phải 0) khi listing không có trong catalog — để
+ * phân biệt "miễn phí thật" với "chưa biết giá" ở nơi hiển thị (xem formatActivityPrice, utils.js). */
+function getCatalogPricePerPerson(destId) {
+  const ops = getOperations(destId);
+  return ops && Number.isFinite(ops.pricePerPerson) ? ops.pricePerPerson : null;
+}
+
 function parseFirstRange(hoursText) {
   if (!hoursText) return null;
   const m = String(hoursText).match(/(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})/);
@@ -125,10 +138,13 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
     if (!fitsOpeningHours(dest, arriveMin, departMin)) continue;
 
     const booking = findBookableExperience(state, dest, arriveDate, prefs.partySize);
-    // Ngân sách (mục 1.3) — chỉ chặn khi khách CÓ nhập ngân sách và điểm này thật sự bookable với
-    // giá xác nhận; budgetMultiplier>1 dùng cho vòng "partial match" nới lỏng tối đa 30%.
-    if (booking && prefs.budget !== null) {
-      const wouldBeCost = totalCost + booking.exp.price * prefs.partySize;
+    const catalogPrice = getCatalogPricePerPerson(dest.id);
+    // Ngân sách (mục 1.3) — dùng giá NIÊM YẾT (catalog), không phụ thuộc đã có slot thật hay chưa,
+    // để bộ lọc ngân sách có tác dụng thật (trước đây chỉ chặn khi `booking` tồn tại — với 7 listing
+    // pilot hiện chưa listing nào có slot thật nên ngân sách chưa từng thực sự được áp dụng).
+    // budgetMultiplier>1 dùng cho vòng "partial match" nới lỏng tối đa 30%.
+    if (catalogPrice !== null && prefs.budget !== null) {
+      const wouldBeCost = totalCost + catalogPrice * prefs.partySize;
       if (wouldBeCost > prefs.budget * budgetMultiplier) continue;
     }
     const isUnconfirmedExperience = !booking && (dest.listingType === 'experience' || dest.listingType === 'multiStopExperience');
@@ -152,6 +168,10 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
       slotId: booking ? booking.slot.id : null,
       experienceTitle: booking ? booking.exp.title : null,
       experiencePrice: booking ? booking.exp.price : 0,
+      // pricePerPerson: giá NIÊM YẾT dùng để hiển thị "chi phí dự kiến"/tính totalCost — luôn có
+      // giá trị khi listing nằm trong Activity Catalog, KHÔNG phụ thuộc `booking` (khác experiencePrice
+      // ở trên, vốn chỉ khác 0 khi có slot thật — giữ nguyên cho logic isBookableTour/CTA thanh toán).
+      pricePerPerson: catalogPrice,
       // Phân loại doanh thu (PHASE "Hoàn thiện hành trình") — bookable/price CHỈ true/>0 khi thật
       // sự khớp được 1 experience+slot còn chỗ (biến `booking` ở trên); revenueType/isCommunityActivity
       // luôn lấy từ phân loại listing (đúng bản chất listing dù chưa có supplier xác nhận).
@@ -162,7 +182,7 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
       price: booking ? booking.exp.price : 0,
       note: notes.join(' '),
     });
-    if (booking) totalCost += booking.exp.price * prefs.partySize;
+    if (catalogPrice) totalCost += catalogPrice * prefs.partySize;
 
     usedIds.add(dest.id);
     usedDests.push(dest);
@@ -175,6 +195,10 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
   const totalTravelMin = stops.reduce((s, x) => s + x.travelMinFromPrev, 0);
   const totalDurationMin = stops[stops.length - 1].departMin - (prefs.startHour * 60 + prefs.startMin);
   const isBookableTour = stops.some((s) => s.bookable && s.revenueType === 'paid_activity' && s.price > 0);
+  // Tổng giá/1 khách cho CẢ tour (tổng pricePerPerson từng điểm dừng, KHÔNG nhân số khách) — dùng
+  // để hiển thị "Chi phí mỗi khách" tách biệt với "Tổng dự kiến cho nhóm" (totalCost, đã nhân
+  // partySize) — đúng yêu cầu không gọi cả tour là "Miễn phí" khi chỉ một phần điểm dừng miễn phí.
+  const pricePerPersonTotal = stops.reduce((s, x) => s + (x.pricePerPerson || 0), 0);
 
   return {
     id,
@@ -184,6 +208,7 @@ function buildOption({ id, name, reason, candidates, prefs, maxStops, dwellBiasM
     totalDurationMin,
     totalTravelMin,
     totalCost,
+    pricePerPersonTotal,
     isBookableTour,
     demo: true,
   };
@@ -398,7 +423,8 @@ export function buildPartialMatchSuggestions(state, prefs, limit = 3) {
     image: dest.imagePath || dest.representativeImageUrl || null,
     category: dest.category,
     durationMin: duration,
-    totalCost: price ? price * prefs.partySize : 0,
+    pricePerPerson: price, // null = chưa biết giá (khác 0 = miễn phí thật) — xem formatActivityPrice, utils.js
+    totalCost: price === null || price === undefined ? null : price * prefs.partySize,
     stopCount: 1,
     interests: dest.interests || [],
     matchScore: score,
@@ -416,7 +442,7 @@ export function getPopularFallbackPlaces(state, limit = 3) {
     .sort((a, b) => (b.stats.averageRating || 0) * Math.log((b.stats.reviewCount || 0) + 1) - (a.stats.averageRating || 0) * Math.log((a.stats.reviewCount || 0) + 1))
     .slice(0, limit)
     .map(({ dest, stats }) => {
-      const ops = getOperations(dest.id);
+      const price = getCatalogPricePerPerson(dest.id);
       return {
         type: 'place',
         destinationId: dest.id,
@@ -424,7 +450,10 @@ export function getPopularFallbackPlaces(state, limit = 3) {
         image: dest.imagePath || dest.representativeImageUrl || null,
         category: dest.category,
         durationMin: getDurationMin(dest),
-        totalCost: ops && ops.pricePerPerson ? ops.pricePerPerson : 0,
+        // Không có partySize trong ngữ cảnh gọi hàm này (dự phòng chung, chưa gắn form cá nhân hoá
+        // cụ thể) — trả giá/khách, nơi hiển thị tự nhân theo số khách nếu cần (xem suggestionCardHtml).
+        pricePerPerson: price,
+        totalCost: price,
         stopCount: 1,
         interests: dest.interests || [],
         matchScore: null,
@@ -509,6 +538,11 @@ export function recalcTimeline(itinerary) {
     stop.arriveMin = arriveMin;
     stop.departMin = departMin;
 
+    // Luôn làm mới giá niêm yết từ Activity Catalog (không tin vào giá trị đã lưu trong hành trình
+    // cũ) — vừa tự "vá" hành trình lưu trước bản sửa này (chưa từng có `pricePerPerson`), vừa đảm
+    // bảo hành trình NHÁP (chưa xác nhận booking) luôn phản ánh đúng giá hiện tại.
+    stop.pricePerPerson = dest ? getCatalogPricePerPerson(dest.id) : (stop.pricePerPerson ?? null);
+
     if (stop.experienceId && !stop.bookingItemId) {
       const arriveDate = new Date(itinerary.date);
       arriveDate.setHours(0, arriveMin, 0, 0);
@@ -525,7 +559,7 @@ export function recalcTimeline(itinerary) {
         stop.note = 'Giờ đã đổi nên khung giờ trải nghiệm trả phí không còn khớp — hãy chọn lại nếu muốn đặt.';
       }
     }
-    if (stop.experienceId) totalCost += (stop.experiencePrice || 0) * itinerary.partySize;
+    if (stop.pricePerPerson) totalCost += stop.pricePerPerson * itinerary.partySize;
 
     totalTravelMin += travel.min;
     cursorMin = departMin;
@@ -534,6 +568,7 @@ export function recalcTimeline(itinerary) {
 
   itinerary.totalTravelMin = totalTravelMin;
   itinerary.totalCost = totalCost;
+  itinerary.pricePerPersonTotal = itinerary.stops.reduce((s, x) => s + (x.pricePerPerson || 0), 0);
   itinerary.totalDurationMin = itinerary.stops.length
     ? itinerary.stops[itinerary.stops.length - 1].departMin - (itinerary.startHour * 60 + itinerary.startMin)
     : 0;
@@ -582,6 +617,7 @@ export function buildItineraryFromSelection(state, { selectedIds, date, startHou
     const arriveDate = new Date(date);
     arriveDate.setHours(0, arriveMin, 0, 0);
     const booking = findBookableExperience(state, dest, arriveDate, partySize);
+    const catalogPrice = getCatalogPricePerPerson(dest.id);
     const fits = fitsOpeningHours(dest, arriveMin, departMin);
 
     const notes = [];
@@ -607,6 +643,7 @@ export function buildItineraryFromSelection(state, { selectedIds, date, startHou
       slotId: booking ? booking.slot.id : null,
       experienceTitle: booking ? booking.exp.title : null,
       experiencePrice: booking ? booking.exp.price : 0,
+      pricePerPerson: catalogPrice,
       revenueType: dest.revenueType || 'free_visit',
       isCommunityActivity: !!dest.isCommunityActivity,
       providerType: dest.providerType || null,
@@ -614,7 +651,7 @@ export function buildItineraryFromSelection(state, { selectedIds, date, startHou
       price: booking ? booking.exp.price : 0,
       note: notes.join(' '),
     };
-    if (booking) totalCost += booking.exp.price * partySize;
+    if (catalogPrice) totalCost += catalogPrice * partySize;
     cursorMin = departMin;
     prevDest = dest;
     return stop;
@@ -623,8 +660,9 @@ export function buildItineraryFromSelection(state, { selectedIds, date, startHou
   const totalTravelMin = stops.reduce((s, x) => s + x.travelMinFromPrev, 0);
   const totalDurationMin = stops.length ? stops[stops.length - 1].departMin - (startHour * 60 + startMin) : 0;
   const isBookableTour = stops.some((s) => s.bookable && s.revenueType === 'paid_activity' && s.price > 0);
+  const pricePerPersonTotal = stops.reduce((s, x) => s + (x.pricePerPerson || 0), 0);
 
-  return { stops, totalDurationMin, totalTravelMin, totalCost, isBookableTour, demo: true };
+  return { stops, totalDurationMin, totalTravelMin, totalCost, pricePerPersonTotal, isBookableTour, demo: true };
 }
 
 /**

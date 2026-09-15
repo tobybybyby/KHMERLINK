@@ -3,7 +3,7 @@ import {
   getTripCart, setTripCartItemSelected, setTripCartAllSelected, removeTripCartSelected,
   removeFromTripCart, setTripCartPartySize, logCustomerBehaviourEvent,
 } from '../storage.js';
-import { escapeHtml, uid, categoryEmoji, formatCurrency, formatDurationMin, listingTypeBadge, destinationImageSrc, placeholderImageDataUri, qs, qsa } from '../utils.js';
+import { escapeHtml, uid, categoryEmoji, formatCurrency, formatActivityPrice, formatDurationMin, listingTypeBadge, destinationImageSrc, placeholderImageDataUri, qs, qsa } from '../utils.js';
 import { recalcTimeline, buildItineraryFromSelection, suggestCommunityAdditions, getItineraryRecommendations } from '../services/aiService.js';
 import { INTEREST_OPTIONS } from '../data.js';
 import { NotificationService } from '../services/notificationService.js';
@@ -249,12 +249,18 @@ export function renderItineraryHome(container) {
         <section>
           <div class="section-title"><h2>Đã lưu</h2></div>
           <div class="flex-col gap-3">
-            ${state.itineraries.slice().reverse().map((it) => `
+            ${state.itineraries.slice().reverse().map((it) => {
+              // Làm mới totalCost từ Activity Catalog trước khi hiển thị — tự "vá" hành trình đã
+              // lưu trước bản sửa lỗi giá (không cần migration/tăng schema version riêng, xem
+              // recalcTimeline() trong aiService.js). Chỉ tính lại trong bộ nhớ, không tự persist.
+              recalcTimeline(it);
+              return `
               <a class="gateway-item" href="#/trail/itinerary/${it.id}">
                 <strong>${escapeHtml(it.name)}</strong>
                 <span class="text-sm text-muted">${escapeHtml(STATUS_LABELS[it.status] || it.status)} · ${it.stops.length} điểm · ${formatCurrency(it.totalCost)}</span>
               </a>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         </section>
       ` : ''}
@@ -476,7 +482,10 @@ export function renderItineraryWizard(container) {
   renderWizardStep(container);
 }
 
-function optionCardHtml(option, index) {
+function optionCardHtml(option, index, partySize = 1) {
+  // Mỗi điểm dừng vẫn hiển thị giá riêng (per-stop) bên cạnh tên, cộng với dòng tổng "mỗi khách" +
+  // "cả nhóm" ở cuối — không gọi cả tour là "Miễn phí" chỉ vì một phần điểm dừng miễn phí (trước
+  // đây `formatCurrency(option.totalCost)` luôn ra "Miễn phí" do totalCost bị tính sai bằng 0).
   return `
     <div class="card" style="padding:18px;">
       <h3 style="margin-top:0;">${escapeHtml(option.name)}</h3>
@@ -488,12 +497,13 @@ function optionCardHtml(option, index) {
           : '<span class="badge badge-type">📍 Lịch tham quan tự do</span>'}
       </div>
       <div class="flex-col gap-2" style="margin:12px 0;">
-        ${option.stops.map((s) => `<div class="text-sm">${categoryEmoji(s.category)} ${escapeHtml(s.name)} <span class="text-faint">(${Math.floor(s.arriveMin / 60)}:${String(s.arriveMin % 60).padStart(2, '0')}–${Math.floor(s.departMin / 60)}:${String(s.departMin % 60).padStart(2, '0')})</span>${s.experienceId ? ` — ${escapeHtml(s.experienceTitle)}` : ''}${s.isCommunityActivity && s.bookable ? ' <span class="badge badge-new text-sm">Hoạt động cộng đồng</span>' : ''}</div>`).join('')}
+        ${option.stops.map((s) => `<div class="text-sm">${categoryEmoji(s.category)} ${escapeHtml(s.name)} <span class="text-faint">(${Math.floor(s.arriveMin / 60)}:${String(s.arriveMin % 60).padStart(2, '0')}–${Math.floor(s.departMin / 60)}:${String(s.departMin % 60).padStart(2, '0')})</span>${s.experienceId ? ` — ${escapeHtml(s.experienceTitle)}` : ''} <span class="text-faint">· ${escapeHtml(formatActivityPrice(s.pricePerPerson))}</span>${s.isCommunityActivity && s.bookable ? ' <span class="badge badge-new text-sm">Hoạt động cộng đồng</span>' : ''}</div>`).join('')}
       </div>
       <div class="quick-facts">
         <div class="quick-fact"><span class="quick-fact__label">Tổng thời gian</span><span class="quick-fact__value">${formatDurationMin(option.totalDurationMin)}</span></div>
         <div class="quick-fact"><span class="quick-fact__label">Di chuyển (ước tính)</span><span class="quick-fact__value">${formatDurationMin(option.totalTravelMin)}</span></div>
-        <div class="quick-fact"><span class="quick-fact__label">Chi phí hoạt động</span><span class="quick-fact__value">${formatCurrency(option.totalCost)}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Chi phí mỗi khách</span><span class="quick-fact__value">${escapeHtml(formatActivityPrice(option.pricePerPersonTotal))}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Tổng dự kiến cho nhóm ${partySize} khách</span><span class="quick-fact__value">${formatCurrency(option.totalCost)}</span></div>
       </div>
       <button type="button" class="btn btn-primary btn-block" data-pick-option="${index}" style="margin-top:12px;">Chọn hành trình này</button>
     </div>
@@ -516,7 +526,8 @@ function suggestionCardHtml(s, index, { isPopularFallback = false } = {}) {
       ${s.matchedCriteria && s.matchedCriteria.length ? `<p class="text-sm text-faint" style="margin:0 0 6px;">Đã khớp: ${s.matchedCriteria.map((m) => escapeHtml(m)).join(', ')}</p>` : ''}
       <div class="quick-facts" style="margin:0 0 8px;">
         <div class="quick-fact"><span class="quick-fact__label">Thời lượng dự kiến</span><span class="quick-fact__value">${formatDurationMin(s.durationMin)}</span></div>
-        <div class="quick-fact"><span class="quick-fact__label">Chi phí cho cả nhóm</span><span class="quick-fact__value">${s.totalCost ? formatCurrency(s.totalCost) : 'Miễn phí'}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Chi phí mỗi khách</span><span class="quick-fact__value">${escapeHtml(formatActivityPrice(s.pricePerPerson))}</span></div>
+        <div class="quick-fact"><span class="quick-fact__label">Chi phí cho cả nhóm</span><span class="quick-fact__value">${s.totalCost === null || s.totalCost === undefined ? 'Đang cập nhật giá' : formatCurrency(s.totalCost)}</span></div>
       </div>
       ${s.unmetNote ? `<p class="text-sm" style="margin:0 0 6px;color:var(--color-danger,#b3413a);">⚠️ ${escapeHtml(s.unmetNote)}</p>` : ''}
       <div class="cta-row" style="margin-top:8px;">
@@ -668,10 +679,11 @@ function renderResults(container, rawPrefs) {
   if (result.mode === 'full') {
     const itineraries = wantsBestOnly ? result.itineraries.slice(0, 1) : result.itineraries;
     const anyBookable = itineraries.some((o) => o.isBookableTour);
+    const anyPriced = itineraries.some((o) => o.totalCost > 0);
     container.innerHTML = `${header}
       <p class="text-sm text-muted">${result.label} — dựa trên sở thích và thời gian bạn vừa nhập.</p>
-      ${!anyBookable ? '<div class="demo-note">Hiện chưa có hoạt động cộng đồng phù hợp với thời gian và lịch bạn chọn. Các lựa chọn dưới đây là lịch tham quan tự do (miễn phí, không qua bước đặt/thanh toán).</div>' : ''}
-      <div class="flex-col gap-4">${itineraries.map(optionCardHtml).join('')}</div>
+      ${!anyBookable ? `<div class="demo-note">Hiện chưa có hoạt động nào mở đặt chỗ/thanh toán trực tuyến qua hệ thống cho lịch này. ${anyPriced ? 'Chi phí hiển thị bên dưới là giá niêm yết tham khảo — liên hệ trực tiếp để xác nhận và thanh toán.' : 'Các lựa chọn dưới đây là lịch tham quan tự do (miễn phí, không qua bước đặt/thanh toán).'}</div>` : ''}
+      <div class="flex-col gap-4">${itineraries.map((o, i) => optionCardHtml(o, i, result.prefs.partySize)).join('')}</div>
     ${footer}`;
     qsa('[data-pick-option]', container).forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -686,7 +698,7 @@ function renderResults(container, rawPrefs) {
     const itineraries = wantsBestOnly ? result.itineraries.slice(0, 1) : result.itineraries;
     container.innerHTML = `${header}
       <div class="demo-note"><strong>Chưa có hành trình khớp hoàn toàn</strong><p style="margin:6px 0 0;">Chúng tôi chưa tìm thấy hành trình đáp ứng toàn bộ lựa chọn của bạn. Tuy nhiên, những gợi ý dưới đây vẫn phù hợp với phần lớn nhu cầu và có thể được điều chỉnh thêm trước khi xác nhận.</p></div>
-      <div class="flex-col gap-4">${itineraries.map(optionCardHtml).join('')}</div>
+      <div class="flex-col gap-4">${itineraries.map((o, i) => optionCardHtml(o, i, result.prefs.partySize)).join('')}</div>
       ${quickAdjustBarHtml(result.prefs)}
     ${footer}`;
     qsa('[data-pick-option]', container).forEach((btn) => {
