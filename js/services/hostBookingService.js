@@ -12,6 +12,8 @@
 import { findExperienceAndSlot } from './bookingService.js';
 import { getOperations } from './operationsService.js';
 import { weeklyDemandPattern, demandInsightsSeed, DEMO_REFERENCE_DATE, providerFinancialMeta } from '../../data/pilot-seed-data.js';
+import { t, localize } from './i18nService.js';
+import { localizedDestinationName } from './destinationsService.js';
 
 const REAL_STATUS_MAP = { pending: 'pending', accepted: 'confirmed', completed: 'completed', rejected: 'cancelled', cancelled: 'cancelled' };
 
@@ -39,9 +41,9 @@ function normalizeRealBookingItem(state, bi, providerId) {
     id: bi.id,
     source: 'real',
     providerId,
-    customerName: 'Bạn',
+    customerName: t('common.you'),
     activityId: bi.destinationId,
-    activityName: dest ? dest.name : bi.title,
+    activityName: dest ? localizedDestinationName(dest) : bi.title,
     bookingDate: slot ? new Date(slot.date).toISOString().slice(0, 10) : null,
     startTime: slot ? slot.startTime : null,
     groupSize: bi.quantity,
@@ -68,7 +70,7 @@ function normalizeDemoBooking(state, b) {
     providerId: b.providerId,
     customerName: b.customerName,
     activityId: b.activityId,
-    activityName: dest ? dest.name : b.activityId,
+    activityName: dest ? localizedDestinationName(dest) : b.activityId,
     bookingDate: b.bookingDate,
     startTime: b.startTime,
     groupSize: b.groupSize,
@@ -78,7 +80,7 @@ function normalizeDemoBooking(state, b) {
     providerIncome: b.providerIncome,
     status: b.status,
     createdAt: b.createdAt,
-    customerNote: b.customerNote,
+    customerNote: localize(b.customerNote),
     contactStatus: b.contactStatus,
     proposedTime: b.proposedTime,
     groupType: b.groupType,
@@ -285,7 +287,6 @@ export function getSummaryCards(state, providerId, filters = hostBookingFilters)
 
 // ---------- Weekly demand chart ----------
 const WEEKDAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-const WEEKDAY_LABEL = { monday: 'Thứ 2', tuesday: 'Thứ 3', wednesday: 'Thứ 4', thursday: 'Thứ 5', friday: 'Thứ 6', saturday: 'Thứ 7', sunday: 'Chủ nhật' };
 const WEEKLY_AVG_PARTY_SIZE = 4;
 const WEEKLY_AVG_PRICE = 220000;
 
@@ -294,7 +295,7 @@ export function getWeeklyDemandChartData() {
     const guests = weeklyDemandPattern[key];
     const bookings = Math.max(1, Math.round(guests / WEEKLY_AVG_PARTY_SIZE));
     const revenue = guests * WEEKLY_AVG_PRICE;
-    return { key, label: WEEKDAY_LABEL[key], guests, bookings, revenue, isWeekend: key === 'saturday' || key === 'sunday' };
+    return { key, label: t(`common.weekday.${key}`), guests, bookings, revenue, isWeekend: key === 'saturday' || key === 'sunday' };
   });
 }
 

@@ -5,6 +5,35 @@ import { haversineKm, deriveCategoryVisual, formatCurrency } from '../utils.js';
 import { getSlotRemaining } from './bookingService.js';
 import { getOperations } from './operationsService.js';
 import { getRatingStatsForListing } from './reviewsService.js';
+import { t, registerTranslations } from './i18nService.js';
+
+registerTranslations('customer', {
+  ai: {
+    demoLabel: 'Gợi ý tự động — bản demo',
+    lightExploreName: 'Khám phá gọn nhẹ',
+    lightExploreReason: 'Ưu tiên điểm gần và phù hợp sở thích của bạn, thời gian di chuyển tối thiểu.',
+    cultureExperienceName: 'Văn hoá & Trải nghiệm',
+    cultureExperienceReason: 'Ghép theo mạch tìm hiểu văn hoá → thực hành nghề/ẩm thực địa phương.',
+    deepExperienceName: 'Trải nghiệm chuyên sâu',
+    deepExperienceReason: 'Ít điểm hơn nhưng ở lại lâu hơn mỗi nơi, ưu tiên điểm đánh giá cao.',
+    noDataReason: 'Chưa có dữ liệu địa điểm để tạo hành trình.',
+    notEnoughDataReason: 'Chưa đủ dữ liệu để tạo hành trình hợp lệ trong khung thời gian này. Thử tăng thời gian sẵn có, giảm bớt sở thích đã chọn, hoặc đổi ngày đi.',
+    popularFallbackReason: 'Hệ thống đang sử dụng các gợi ý phổ biến trong lúc cập nhật kết quả cá nhân hoá.',
+  },
+}, {
+  ai: {
+    demoLabel: 'Automated suggestion — demo',
+    lightExploreName: 'Light Exploration',
+    lightExploreReason: 'Prioritises nearby places matching your interests, with minimal travel time.',
+    cultureExperienceName: 'Culture & Experience',
+    cultureExperienceReason: 'Combines cultural discovery → local craft/food practice.',
+    deepExperienceName: 'In-Depth Experience',
+    deepExperienceReason: 'Fewer stops but longer at each place, prioritising highly-rated spots.',
+    noDataReason: 'No place data available yet to build a trip.',
+    notEnoughDataReason: 'Not enough data to build a valid trip in this time window. Try increasing available time, reducing selected interests, or changing the date.',
+    popularFallbackReason: 'The system is using popular suggestions while personalised results are updated.',
+  },
+});
 
 const AVG_SPEED_KMH = 28;
 const DEFAULT_TRAVEL_MIN = 20; // dùng để LẬP LỊCH khi thiếu toạ độ một trong hai đầu — không phải
@@ -255,8 +284,8 @@ function buildItineraryOptions(prefs, { budgetMultiplier = 1, timeToleranceMin =
     : scored;
 
   const opt1 = buildOption({
-    id: 'opt-gon-nhe', name: 'Khám phá gọn nhẹ',
-    reason: 'Ưu tiên điểm gần và phù hợp sở thích của bạn, thời gian di chuyển tối thiểu.',
+    id: 'opt-gon-nhe', name: t('customer.ai.lightExploreName'),
+    reason: t('customer.ai.lightExploreReason'),
     candidates: shortTourCandidates, prefs, maxStops: Math.max(2, paceConfig.maxStops - 1), dwellBiasMin: paceConfig.dwellBias - 10,
     budgetMultiplier, timeToleranceMin,
   });
@@ -273,16 +302,16 @@ function buildItineraryOptions(prefs, { budgetMultiplier = 1, timeToleranceMin =
     return rank(ga) - rank(gb);
   });
   const opt2 = buildOption({
-    id: 'opt-van-hoa', name: 'Văn hoá & Trải nghiệm',
-    reason: 'Ghép theo mạch tìm hiểu văn hoá → thực hành nghề/ẩm thực địa phương.',
+    id: 'opt-van-hoa', name: t('customer.ai.cultureExperienceName'),
+    reason: t('customer.ai.cultureExperienceReason'),
     candidates: cultureFirst, prefs, maxStops: paceConfig.maxStops, dwellBiasMin: paceConfig.dwellBias,
     budgetMultiplier, timeToleranceMin,
   });
   if (opt2 && (!opt1 || opt2.stops.map((s) => s.destinationId).join() !== opt1.stops.map((s) => s.destinationId).join())) options.push(opt2);
 
   const opt3 = buildOption({
-    id: 'opt-chuyen-sau', name: 'Trải nghiệm chuyên sâu',
-    reason: 'Ít điểm hơn nhưng ở lại lâu hơn mỗi nơi, ưu tiên điểm đánh giá cao.',
+    id: 'opt-chuyen-sau', name: t('customer.ai.deepExperienceName'),
+    reason: t('customer.ai.deepExperienceReason'),
     candidates: scored, prefs, maxStops: Math.max(2, paceConfig.maxStops - 1), dwellBiasMin: paceConfig.dwellBias + 20,
     budgetMultiplier, timeToleranceMin,
   });
@@ -303,18 +332,18 @@ function buildItineraryOptions(prefs, { budgetMultiplier = 1, timeToleranceMin =
  */
 export function suggestItineraries(prefs) {
   if (!getState().destinations.length) {
-    return { demo: true, label: 'Gợi ý tự động — bản demo', itineraries: [], reason: 'Chưa có dữ liệu địa điểm để tạo hành trình.' };
+    return { demo: true, label: t('customer.ai.demoLabel'), itineraries: [], reason: t('customer.ai.noDataReason') };
   }
   const options = buildItineraryOptions(prefs, { budgetMultiplier: 1, timeToleranceMin: 0 });
   if (!options.length) {
     return {
       demo: true,
-      label: 'Gợi ý tự động — bản demo',
+      label: t('customer.ai.demoLabel'),
       itineraries: [],
-      reason: 'Chưa đủ dữ liệu để tạo hành trình hợp lệ trong khung thời gian này. Thử tăng thời gian sẵn có, giảm bớt sở thích đã chọn, hoặc đổi ngày đi.',
+      reason: t('customer.ai.notEnoughDataReason'),
     };
   }
-  return { demo: true, label: 'Gợi ý tự động — bản demo', itineraries: options };
+  return { demo: true, label: t('customer.ai.demoLabel'), itineraries: options };
 }
 
 // ---------- PHẦN 1 — Không để cá nhân hoá trả về kết quả trống ----------
@@ -475,7 +504,7 @@ export function getPopularFallbackPlaces(state, limit = 3) {
  */
 export function getItineraryRecommendations(rawPrefs) {
   const prefs = normalizeItineraryPrefs(rawPrefs);
-  const label = 'Gợi ý tự động — bản demo';
+  const label = t('customer.ai.demoLabel');
 
   try {
     const state = getState();
@@ -483,7 +512,7 @@ export function getItineraryRecommendations(rawPrefs) {
       return {
         mode: 'popular-fallback', label, prefs,
         suggestions: [],
-        fallbackReason: 'Hệ thống đang sử dụng các gợi ý phổ biến trong lúc cập nhật kết quả cá nhân hoá.',
+        fallbackReason: t('customer.ai.popularFallbackReason'),
       };
     }
 
@@ -499,7 +528,7 @@ export function getItineraryRecommendations(rawPrefs) {
     return {
       mode: 'popular-fallback', label, prefs,
       suggestions: getPopularFallbackPlaces(state, 3),
-      fallbackReason: 'Hệ thống đang sử dụng các gợi ý phổ biến trong lúc cập nhật kết quả cá nhân hoá.',
+      fallbackReason: t('customer.ai.popularFallbackReason'),
     };
   } catch (err) {
     // Lỗi kỹ thuật (mục 1.7) — không hiện trang trắng/stack trace, dùng địa điểm phổ biến.
@@ -507,7 +536,7 @@ export function getItineraryRecommendations(rawPrefs) {
     return {
       mode: 'popular-fallback', label, prefs,
       suggestions: state.destinations.length ? getPopularFallbackPlaces(state, 3) : [],
-      fallbackReason: 'Hệ thống đang sử dụng các gợi ý phổ biến trong lúc cập nhật kết quả cá nhân hoá.',
+      fallbackReason: t('customer.ai.popularFallbackReason'),
     };
   }
 }

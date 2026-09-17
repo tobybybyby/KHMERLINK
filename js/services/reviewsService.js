@@ -7,6 +7,7 @@
 // cộng với review THẬT phát sinh trong phiên demo (state.reviews, persist qua storage.addReview).
 // average LUÔN tính lại từ (baseline + live), không bao giờ cộng dồn vào 1 con số average đã lưu.
 import { initialReviewStats, seedReviews, tagsForListing } from '../../data/pilot-seed-data.js';
+import { t } from './i18nService.js';
 
 function emptyBaseline() {
   return { ratingSum: 0, reviewCount: 0 };
@@ -73,8 +74,8 @@ export function getDisplayReviewsForListingIds(state, listingIds) {
 /** "⭐ 1,0 · 1 đánh giá" kiểu hiển thị — làm tròn 1 chữ số thập phân CHỈ để hiển thị, giá trị đầy
  * đủ vẫn giữ trong dữ liệu (averageRating trả về từ computeRatingStats không bị làm tròn). */
 export function formatRatingStats({ averageRating, reviewCount }) {
-  if (!reviewCount || averageRating === null) return 'Chưa có đánh giá';
-  return `⭐ ${averageRating.toFixed(1)} · ${reviewCount} đánh giá`;
+  if (!reviewCount || averageRating === null) return t('common.rating.none');
+  return `⭐ ${averageRating.toFixed(1)} · ${t('common.rating.countSuffix', { count: reviewCount })}`;
 }
 
 /** Phân bố 1–5 sao — gồm CẢ baseline lẫn review live có nội dung cụ thể (seedReviews + live) vì

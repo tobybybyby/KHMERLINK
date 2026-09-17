@@ -14,6 +14,7 @@ import {
 } from './hostBookingService.js';
 import { getOperations } from './operationsService.js';
 import { getRatingStatsForListingIds, getDisplayReviewsForListingIds } from './reviewsService.js';
+import { localizedDestinationName } from './destinationsService.js';
 import { categoryGroup } from '../utils.js';
 import {
   activityCatalog, networkMonthlyHistory, interestTrend, INTEREST_TREND_LABELS, customerPreferenceSeed,
@@ -220,7 +221,7 @@ export function getCapacityUtilisation(state, period = getCurrentPeriod(), filte
 
       return {
         activityId,
-        name: dest ? dest.name : activityId,
+        name: dest ? localizedDestinationName(dest) : activityId,
         financialMode: ops.financialMode,
         isFree: ops.financialMode === 'free_visit',
         demandGuests,

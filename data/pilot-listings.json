@@ -43,11 +43,8 @@
       "activities": "Khách thử các công đoạn có rủi ro thấp: rang/nổ lúa nếp đã sơ chế, giã theo nhịp, sàng và trộn cốm; nghe câu chuyện cốm dẹp trong lễ Ok Om Bok.",
       "shortIntroduction": "Trải nghiệm ẩm thực cộng đồng gắn với nghề quết cốm dẹp truyền thống của người Khmer tại làng Ba So.",
       "culturalStory": "Cốm dẹp là sản phẩm gắn mạnh với mùa lúa nếp non và lễ hội Ok Om Bok của đồng bào Khmer.",
-      "keyFacts": [
-        "Số hộ làm nghề thay đổi theo năm — các con số cũ không được dùng như năng lực hiện tại của làng nghề.",
-        "Đầu mối khảo sát phù hợp nhất: làng cốm dẹp Ba So; dấu vết nhà sản xuất hiện hành trên cổng nông sản là Hộ kinh doanh Trần Tuấn Việt (chưa xác minh đơn vị này có tiếp khách tại xưởng)."
-      ],
-      "visitorNotes": "Theo mùa; cần hỏi trước về nguyên liệu. Không cho khách vận hành lò/rang nóng nếu chưa có quy trình an toàn.",
+      "keyFacts": [],
+      "visitorNotes": "Theo mùa; cần hỏi trước về nguyên liệu.",
       "openingHours": { "value": "Không công bố — cần xây lịch hẹn", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable", "note": "Chưa đưa giá mockup vì dự án để budget ở giai đoạn sau." },
       "representativeImage": "https://khpt.1cdn.vn/2017/10/26/www.khoahocphothong.com.vn-vnt_upload-file-10_2017-_dscn4677.jpg",
@@ -123,7 +120,7 @@
           "order": 2,
           "label": "Dừng 2 (đề xuất)",
           "place": "Đoàn Nghệ thuật Khmer Ánh Bình Minh (phần Rô-băm)",
-          "description": "Phương án sinh kế tốt hơn là đoàn cố vấn, nghệ sĩ/câu lạc bộ cộng đồng biểu diễn có trả phí.",
+          "description": "Xem trích đoạn múa Rô-băm do Đoàn Nghệ thuật Khmer Ánh Bình Minh biểu diễn, nghe giới thiệu về nhân vật, mặt nạ và động tác.",
           "address": "207A Nguyễn Du, khóm 3, phường Nguyệt Hóa, tỉnh Vĩnh Long",
           "coordinates": { "lat": 9.9147744, "lng": 106.3060206 },
           "coordinateStatus": "addressMatched",
@@ -135,10 +132,9 @@
       "shortIntroduction": "Gói trải nghiệm biểu diễn 2 điểm dừng — kết hợp xưởng nhạc cụ/mặt nạ Khmer và một trích đoạn múa Rô-băm.",
       "culturalStory": "Rô-băm là di sản văn hóa phi vật thể quốc gia (công nhận năm 2018), kết hợp múa, hát, sân khấu, phục trang và mặt nạ; kịch bản thường dựa trên truyện dân gian và Ramayana/Riêm Kê.",
       "keyFacts": [
-        "Rô-băm được công nhận di sản văn hóa phi vật thể quốc gia năm 2018.",
-        "Đây là sản phẩm 2 điểm dừng; chưa có bằng chứng đang bán như một tour cố định."
+        "Rô-băm được công nhận di sản văn hóa phi vật thể quốc gia năm 2018."
       ],
-      "visitorNotes": "Không biến lớp học cộng đồng miễn phí thành điểm diễn nếu chưa có đồng thuận. Tôn trọng thời gian tập luyện và trả thù lao minh bạch.",
+      "visitorNotes": "Tôn trọng thời gian tập luyện của nghệ nhân; không tự ý chụp cận cảnh khi chưa được đồng ý.",
       "openingHours": { "value": "Theo lịch hẹn của cả 2 đầu mối", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable" },
       "representativeImage": "https://baovinhlong.com.vn/file/e7837c027f6ecd14017ffa4e5f2a0e34/092025/a1_20250928151611.jpg",
@@ -212,7 +208,7 @@
         "NNƯT Lâm Phên: sinh năm 1951, làm nhạc cụ từ 1990, truyền nghề cho hơn 200 người.",
         "Nghề làm mão, mặt nạ Khmer được công nhận di sản văn hóa phi vật thể quốc gia ngày 27/6/2025 (QĐ 2209/QĐ-BVHTTDL)."
       ],
-      "visitorNotes": "Không sao chép đồ thiêng/đạo cụ nghi lễ thiếu ngữ cảnh. Dùng phôi, sơn và keo an toàn; phải xin phép trước khi công khai địa chỉ nhà.",
+      "visitorNotes": "Không sao chép đồ thiêng/đạo cụ nghi lễ thiếu ngữ cảnh. Dùng phôi, sơn và keo an toàn trong suốt buổi làm mặt nạ.",
       "openingHours": { "value": "Chỉ theo lịch hẹn", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable" },
       "representativeImage": "https://vstatic.vietnam.vn/vietnam/resource/IMAGE/2025/11/04/1762218870531_1762218803.webp",
@@ -279,10 +275,9 @@
       "culturalStory": "Ao Bà Om — điểm neo dễ nhận diện nhất trên bản đồ của cụm — rộng hơn 300 ha; ao trung tâm 15 ha, sâu khoảng 2 m; có khoảng 500 cây sao/dầu cổ thụ. Ao được xếp hạng di tích quốc gia năm 1994.",
       "keyFacts": [
         "Ao Bà Om: hơn 300 ha, ao trung tâm 15 ha sâu khoảng 2 m, khoảng 500 cây sao/dầu cổ thụ.",
-        "Ao Bà Om được xếp hạng di tích quốc gia năm 1994; cải tạo hơn 7 tỷ đồng sau đợt hạn 2016.",
-        "Ao Bà Om là điểm neo, không tự tạo thành một listing riêng trong phạm vi pilot này."
+        "Ao Bà Om được xếp hạng di tích quốc gia năm 1994; cải tạo hơn 7 tỷ đồng sau đợt hạn 2016."
       ],
-      "visitorNotes": "Thông tin website phải chỉ rõ phần nào đang hoạt động. Không dùng từ \"đã hoàn thiện toàn bộ\" nếu chưa có nghiệm thu/vận hành thống nhất.",
+      "visitorNotes": "Giờ và lộ trình tham quan của từng điểm trong cụm (Ao Bà Om, Chùa Âng, Bảo tàng) có thể khác nhau — nên ghé Chùa Âng và Bảo tàng để trọn vẹn trải nghiệm.",
       "openingHours": { "value": "Không có giờ chung cho toàn khu", "status": "unavailable" },
       "price": { "value": null, "status": "unavailable", "note": "Không có vé chung được xác minh." },
       "representativeImage": "https://ik.imagekit.io/tvlk/blog/2022/02/dia-diem-du-lich-tra-vinh-2.jpg?tr=dpr-2%2Cw-675",

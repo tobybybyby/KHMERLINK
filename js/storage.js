@@ -1,8 +1,9 @@
 import { createSeedState } from './data.js';
 import { loadDestinations } from './services/destinationsService.js';
-import { buildInitialDemoBookings, CURRENT_DEMO_BOOKINGS_VERSION } from '../data/pilot-seed-data.js';
+import { buildInitialDemoBookings, CURRENT_DEMO_BOOKINGS_VERSION, proposalSeedRecords, contentSubmissionSeedRecords } from '../data/pilot-seed-data.js';
+import { LEGACY_VI_LABEL_TO_TAG_ID } from './services/tagCatalog.js';
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 export const STORAGE_KEY = 'vlt_user_state';
 
 // Nội dung/catalog (destinations, hosts, experiences, events, metrics) được nạp lại mới mỗi lần
@@ -174,9 +175,66 @@ function migrateV6ToV7(parsed) {
  * opportunityActions (trạng thái Host/Management đã xử lý gợi ý nào, keyed theo recommendation id).
  * Không đụng booking/review/hành trình/toạ độ/yêu thích đã có. */
 function migrateV7ToV8(parsed) {
-  const migrated = { ...parsed, schemaVersion: SCHEMA_VERSION };
+  const migrated = { ...parsed, schemaVersion: 8 };
   if (!Array.isArray(migrated.customerBehaviourEvents)) migrated.customerBehaviourEvents = [];
   if (!migrated.opportunityActions || typeof migrated.opportunityActions !== 'object') migrated.opportunityActions = {};
+  return migrated;
+}
+
+/** v8 -> v9: PHASE "Hoàn thiện i18n dữ liệu động" (18/09/2026) — 2 việc:
+ * (1) Tag cảm nhận/đánh giá đổi từ lưu LABEL tiếng Việt trực tiếp sang CANONICAL TAG ID (xem
+ * js/services/tagCatalog.js) để đổi ngôn ngữ không cần dịch lại dữ liệu đã lưu — review/cảm nhận
+ * THẬT đã lưu trước đây (selectedTags/tags dạng label VI) được map ngược sang ID tương ứng qua
+ * LEGACY_VI_LABEL_TO_TAG_ID; tag lạ không khớp được giữ nguyên (không xoá, không throw).
+ * (2) Đề án/đề xuất nội dung MẪU (proposalSeedRecords/contentSubmissionSeedRecords) đổi từ string
+ * sang object song ngữ { vi, en } — bản ghi mẫu đã persist từ trước (theo đúng id mẫu) được cập
+ * nhật lại title/summary/evidence/... theo bản mới; CHỈ áp dụng cho field còn giữ NGUYÊN giá trị
+ * mẫu gốc (so khớp bản tiếng Việt cũ) — nếu Host/Cổng quản lý đã thao tác đổi trạng thái/ghi chú
+ * thật thì managementNote/reviewerNote/status không bị đụng tới (đó là dữ liệu nghiệp vụ thật). */
+function migrateSelectedTags(tags) {
+  if (!Array.isArray(tags)) return tags;
+  return tags.map((tag) => LEGACY_VI_LABEL_TO_TAG_ID[tag] || tag);
+}
+
+function migrateV8ToV9(parsed) {
+  const migrated = { ...parsed, schemaVersion: SCHEMA_VERSION };
+
+  (migrated.reviews || []).forEach((r) => { r.selectedTags = migrateSelectedTags(r.selectedTags); });
+  (migrated.placeImpressions || []).forEach((imp) => { imp.tags = migrateSelectedTags(imp.tags); });
+
+  if (Array.isArray(migrated.proposals)) {
+    migrated.proposals.forEach((p) => {
+      const seed = proposalSeedRecords.find((s) => s.id === p.id);
+      if (!seed) return;
+      ['title', 'summary', 'requestedChange', 'expectedImpact'].forEach((field) => {
+        if (typeof p[field] === 'string') p[field] = seed[field];
+      });
+      // evidence: đề án mẫu lưu dạng mảng string thuần trước migration này (đề án host thật luôn
+      // là 1 string đơn, không phải mảng — xem js/studio/support.js#collect) — an toàn để thay
+      // bằng bản mẫu song ngữ bất cứ khi nào field này vẫn là mảng.
+      if (Array.isArray(p.evidence)) p.evidence = seed.evidence;
+      // managementNote: chỉ thay bằng bản mẫu song ngữ nếu vẫn còn đúng ghi chú mẫu gốc (chưa bị
+      // Cổng quản lý ghi đè bằng nội dung thật) — so khớp bằng bản tiếng Việt gốc cũ.
+      const seedNoteVi = seed.managementNote && typeof seed.managementNote === 'object' ? seed.managementNote.vi : seed.managementNote;
+      if (typeof p.managementNote === 'string' && seedNoteVi && p.managementNote === seedNoteVi) {
+        p.managementNote = seed.managementNote;
+      }
+    });
+  }
+
+  if (Array.isArray(migrated.contentSubmissions)) {
+    migrated.contentSubmissions.forEach((sub) => {
+      const seed = contentSubmissionSeedRecords.find((s) => s.id === sub.id);
+      if (!seed) return;
+      ['name', 'category', 'description', 'tags'].forEach((field) => {
+        if (typeof sub[field] === 'string' || (Array.isArray(sub[field]) && field === 'tags')) sub[field] = seed[field];
+      });
+      if (sub.proposedSchedule && Array.isArray(sub.proposedSchedule.days)) {
+        sub.proposedSchedule = { ...sub.proposedSchedule, days: seed.proposedSchedule.days };
+      }
+    });
+  }
+
   return migrated;
 }
 
@@ -192,7 +250,8 @@ function loadUserData() {
     if (parsed.schemaVersion === 4) parsed = migrateV4ToV5(parsed);
     if (parsed.schemaVersion === 5) parsed = migrateV5ToV6(parsed);
     if (parsed.schemaVersion === 6) parsed = migrateV6ToV7(parsed);
-    if (parsed.schemaVersion === 7) return migrateV7ToV8(parsed);
+    if (parsed.schemaVersion === 7) parsed = migrateV7ToV8(parsed);
+    if (parsed.schemaVersion === 8) return migrateV8ToV9(parsed);
     return parsed.schemaVersion === SCHEMA_VERSION ? parsed : null; // version không xác định/quá cũ — không có đường migration đã định nghĩa
   } catch (err) {
     return null;
@@ -218,6 +277,14 @@ export async function init() {
     const idx = state.experiences.findIndex((e) => e.id === hostExp.id);
     if (idx >= 0) state.experiences[idx] = hostExp;
     else state.experiences.push(hostExp);
+  });
+
+  // Activity được duyệt qua Cổng vận hành (approveContentSubmission, PHẦN 3 mục 3.5) — hợp nhất
+  // vào state.destinations mỗi lần tải, giống hệt cơ chế hostExperiences ở trên. Phần Activity
+  // Catalog tương ứng (customActivityCatalog) được operationsService.getOperations() đọc trực
+  // tiếp làm base dự phòng, không cần hợp nhất ở đây.
+  (state.customDestinations || []).forEach((customDest) => {
+    if (!state.destinations.some((d) => d.id === customDest.id)) state.destinations.push(customDest);
   });
 
   // Huy hiệu "Được ghi nhận" do Cổng vận hành cấp/thu hồi (có lý do) được lưu riêng ở
@@ -251,6 +318,25 @@ export async function init() {
     state.hostDemoBookings = buildInitialDemoBookings();
     state.hostDemoBookingsVersion = CURRENT_DEMO_BOOKINGS_VERSION;
   }
+
+  // Backfill đề án + nội dung đề xuất mẫu (PHẦN 2 mục 2.7, PHẦN 3 mục 3.4) — chèn theo id nếu
+  // chưa có, KHÔNG đè lên bản ghi người dùng đã thao tác (đổi trạng thái...) ở lần tải sau. Không
+  // dùng cơ chế version-reseed như hostDemoBookings vì đây là dữ liệu Host có thể đã xử lý
+  // (duyệt/từ chối) — chỉ thêm 1 lần cho đủ, không bao giờ ghi đè lại.
+  if (!Array.isArray(state.proposals)) state.proposals = [];
+  proposalSeedRecords.forEach((seed) => {
+    if (!state.proposals.some((p) => p.id === seed.id)) {
+      // hostId alias cho providerId — proposalCardHtml ở Studio/admin/proposals.js lọc theo
+      // hostId từ trước khi có mục 2.7; giữ cả hai tên field để không phải sửa lại chỗ lọc đó.
+      state.proposals.push({ ...seed, hostId: seed.providerId, timeline: [{ status: seed.status, at: seed.submittedAt, note: 'Đã gửi đề án.' }] });
+    }
+  });
+  if (!Array.isArray(state.contentSubmissions)) state.contentSubmissions = [];
+  contentSubmissionSeedRecords.forEach((seed) => {
+    if (!state.contentSubmissions.some((s) => s.id === seed.id)) {
+      state.contentSubmissions.push({ ...seed });
+    }
+  });
 
   persist();
   return state;
@@ -470,6 +556,30 @@ export function addNotification({ type, title, message, bookingId = null, itiner
 
 export function getNotifications() {
   return getState().notifications;
+}
+
+// ---------- Thông báo cho Host/đơn vị cung cấp (tách khỏi state.notifications — đó là kênh của
+// Customer/Trail; dùng chung sẽ lẫn thông báo giữa 2 vai trò trong 1 phiên demo). Bắn khi Cổng
+// quản lý xử lý đề án hoặc Cổng vận hành xử lý nội dung đề xuất (PHẦN 2 mục 2.7, PHẦN 3 mục 3.3). ----------
+export function addProviderNotification({ providerId, type, title, message, relatedId = null }) {
+  if (!providerId) return null;
+  const s = getState();
+  if (!Array.isArray(s.providerNotifications)) s.providerNotifications = [];
+  const notif = { id: uidLocal('pnotif'), providerId, type, title, message, relatedId, createdAt: new Date().toISOString(), read: false };
+  s.providerNotifications.unshift(notif);
+  persist();
+  notifyDataChanged('providerNotifications', 'created');
+  return notif;
+}
+
+export function getProviderNotifications(providerId) {
+  return (getState().providerNotifications || []).filter((n) => n.providerId === providerId);
+}
+
+export function markProviderNotificationsRead(providerId) {
+  const s = getState();
+  (s.providerNotifications || []).forEach((n) => { if (n.providerId === providerId) n.read = true; });
+  persist();
 }
 
 export function getUnreadNotificationCount() {
@@ -764,20 +874,30 @@ export function setSuggestionDecision(suggestionId, decision) {
 }
 
 // ---------- Studio: đề án hỗ trợ ----------
-export function createProposal({ hostId, title, problem, desiredSupport, expectedBenefit, evidence, proposedBudget = null, status = 'sent' }) {
+export function createProposal({
+  hostId, providerId = null, activityId = null, title, proposalType = null,
+  problem, desiredSupport, expectedBenefit, evidence, summary, requestedChange, expectedImpact,
+  proposedBudget = null, status = 'sent',
+}) {
   const s = getState();
   const now = new Date().toISOString();
   const proposal = {
     id: uidLocal('proposal'),
     hostId,
+    providerId: providerId || hostId,
+    activityId,
     title,
-    problem,
-    desiredSupport,
-    expectedBenefit,
-    evidence,
+    proposalType,
+    problem, desiredSupport, expectedBenefit, evidence,
+    summary: summary ?? problem,
+    requestedChange: requestedChange ?? desiredSupport,
+    expectedImpact: expectedImpact ?? expectedBenefit,
     proposedBudget,
     status,
+    managementNote: null,
     createdAt: now,
+    submittedAt: now,
+    updatedAt: now,
     timeline: [{ status, at: now, note: status === 'sent' ? 'Đã gửi đề án.' : 'Đã lưu nháp.' }],
   };
   s.proposals.push(proposal);
@@ -794,14 +914,233 @@ export function updateProposal(id, patch) {
   return p;
 }
 
+const PROPOSAL_STATUS_LABEL_VI = {
+  sent: 'Đã gửi', pending_review: 'Chờ duyệt', reviewing: 'Đang xem xét', in_review: 'Đang xem xét',
+  needs_info: 'Cần bổ sung', needs_revision: 'Cần bổ sung', approved: 'Chấp thuận', rejected: 'Từ chối',
+};
+// Trạng thái do CHÍNH Host gây ra (gửi/gửi lại) — không cần tự thông báo cho Host về hành động
+// của họ. Mọi trạng thái khác coi là quyết định của Cổng quản lý — bắn thông báo cho Host.
+const PROPOSAL_HOST_INITIATED_STATUSES = new Set(['draft', 'sent', 'pending_review']);
+
 export function setProposalStatus(id, status, note) {
   const s = getState();
   const p = s.proposals.find((x) => x.id === id);
   if (!p) return null;
   p.status = status;
-  p.timeline.push({ status, at: new Date().toISOString(), note });
+  p.updatedAt = new Date().toISOString();
+  if (!PROPOSAL_HOST_INITIATED_STATUSES.has(status)) p.managementNote = note || null;
+  p.timeline.push({ status, at: p.updatedAt, note });
   persist();
+  if (!PROPOSAL_HOST_INITIATED_STATUSES.has(status)) {
+    addProviderNotification({
+      providerId: p.hostId || p.providerId,
+      type: 'proposal_status',
+      title: `Đề án "${toPlainVi(p.title)}" đã cập nhật trạng thái`,
+      message: `${PROPOSAL_STATUS_LABEL_VI[status] || status}${note ? ` — ${note}` : ''}`,
+      relatedId: p.id,
+    });
+  }
   return p;
+}
+
+// sub.name/category/description/tags/proposedSchedule.days có thể là object song ngữ { vi, en }
+// khi đến từ NỘI DUNG MẪU (contentSubmissionSeedRecords) — khi một đề xuất được duyệt/từ chối/yêu
+// cầu chỉnh sửa, các trường này phải "đóng băng" thành PLAIN STRING tiếng Việt (giống mọi destination
+// khác không thuộc 7 listing pilot, vốn không có cơ chế song ngữ động) trước khi ghi vào dữ liệu
+// nghiệp vụ thật (destinations/Activity Catalog/notification) — không lưu nguyên object song ngữ
+// vào business data. Đề xuất do host thật nhập vẫn là string thường, hàm này trả nguyên văn.
+function toPlainVi(field, fallback = '') {
+  if (field && typeof field === 'object' && !Array.isArray(field)) return field.vi ?? field.en ?? fallback;
+  return field ?? fallback;
+}
+function toPlainViList(field, fallback = []) {
+  if (field && typeof field === 'object' && !Array.isArray(field)) return field.vi ?? field.en ?? fallback;
+  return Array.isArray(field) ? field : fallback;
+}
+
+// ---------- Studio "Thêm trải nghiệm" → Cổng vận hành kiểm duyệt (PHẦN 3, mục 3.3-3.5) ----------
+// contentSubmissions: 1 nguồn DUY NHẤT — dùng chung ở lịch sử "Thêm trải nghiệm" của Host VÀ tab
+// Kiểm duyệt nội dung (Cổng vận hành). Activity đề xuất CHƯA vào Activity Catalog/Customer
+// Interface cho tới khi được duyệt (approveContentSubmission) — trước đó chỉ tồn tại trong mảng
+// này, không đọc được từ getOperations()/state.destinations ở đâu khác.
+export function createContentSubmission(data) {
+  const s = getState();
+  if (!Array.isArray(s.contentSubmissions)) s.contentSubmissions = [];
+  const now = new Date().toISOString();
+  const submission = {
+    id: uidLocal('sub'),
+    proposedActivityId: null,
+    submittedAt: now,
+    status: 'pending_review',
+    reviewerNote: null,
+    reviewedAt: null,
+    images: [],
+    tags: [],
+    ...data,
+  };
+  s.contentSubmissions.push(submission);
+  persist();
+  notifyDataChanged('contentSubmissions', 'created');
+  return submission;
+}
+
+/** Duyệt 1 đề xuất nội dung — tạo activity CHÍNH THỨC (destination + Activity Catalog entry) từ
+ * dữ liệu submission, mượn toạ độ/địa chỉ/ảnh từ địa điểm gốc của cùng đơn vị (submission không tự
+ * có các trường này) để không hiện trống/lỗi trên bản đồ. Lưu vào state.customDestinations/
+ * state.customActivityCatalog (persist) — init() merge vào state.destinations mỗi lần tải, giống
+ * cơ chế hostExperiences; operationsService.getOperations() đọc customActivityCatalog làm base dự
+ * phòng khi activityCatalog tĩnh không có id đó. KHÔNG đụng tới activityCatalog/destinations tĩnh
+ * hiện có (Part 5 — không đổi 7 listing đã duyệt). */
+export function approveContentSubmission(id, reviewerNote = null) {
+  const s = getState();
+  const sub = (s.contentSubmissions || []).find((x) => x.id === id);
+  if (!sub) return null;
+  const host = s.hosts.find((h) => h.id === sub.providerId);
+  const parentDest = host ? s.destinations.find((d) => d.id === host.destinationId) : null;
+  const newId = sub.proposedActivityId || sub.id;
+  const now = new Date().toISOString();
+
+  const subName = toPlainVi(sub.name);
+  const subCategory = toPlainVi(sub.category);
+  const subDescription = toPlainVi(sub.description);
+  const subDays = toPlainViList(sub.proposedSchedule && sub.proposedSchedule.days);
+
+  if (!Array.isArray(s.customDestinations)) s.customDestinations = [];
+  if (!s.customDestinations.some((d) => d.id === newId)) {
+    const newDest = {
+      id: newId,
+      name: subName,
+      altName: null,
+      listingType: 'experience',
+      category: subCategory || (parentDest && parentDest.category) || 'Trải nghiệm cộng đồng',
+      region: parentDest ? parentDest.region : null,
+      isDemoHost: false,
+      interests: (parentDest && parentDest.interests) || [],
+      lat: parentDest ? parentDest.lat : null,
+      lng: parentDest ? parentDest.lng : null,
+      coordinatesStatus: parentDest ? parentDest.coordinatesStatus : 'unavailable',
+      address: parentDest ? parentDest.address : null,
+      addressStatus: parentDest ? parentDest.addressStatus : 'missing',
+      formerAddress: null,
+      mapLinks: (parentDest && parentDest.mapLinks) || [],
+      mapSearchUrl: (parentDest && parentDest.mapSearchUrl) || null,
+      openingHoursStatus: 'unavailable',
+      priceDisplay: null,
+      isFreeEntry: false,
+      priceStatus: 'unavailable',
+      rating: null, ratingCount: null, ratingStatus: 'unavailable',
+      suggestedDurationMin: sub.durationMinutes || null,
+      durationStatus: sub.durationMinutes ? 'estimated' : 'unavailable',
+      revenueType: 'community_paid',
+      providerType: 'household',
+      isCommunityActivity: true,
+      bookable: false,
+      revenuePriceValue: sub.pricePerPerson || null,
+      summary: subDescription || '',
+      activities: subDescription || '',
+      culturalStory: '', keyFacts: [], tips: '',
+      contact: null, contactStatus: 'unavailable',
+      imagePath: (parentDest && parentDest.imagePath) || null,
+      representativeImageUrl: (parentDest && parentDest.representativeImageUrl) || null,
+      imageRef: (parentDest && parentDest.imageRef) || null,
+      galleryImages: [],
+      sources: [], notes: [],
+      recognized: false, recognizedReason: '', isNew: true, dataQuality: 'host-submitted',
+      status: 'Đã duyệt qua Cổng vận hành', readiness: '', bookingStatus: 'notBookable', ctaKind: 'interested',
+      supplierRefs: [], verificationChecklist: [], informationSourcesFull: [], conclusionNote: null,
+      clusterChildren: null, partOfCluster: null, relatedListingIds: parentDest ? [parentDest.id] : [], stops: null,
+    };
+    s.customDestinations.push(newDest);
+    // Thêm ngay vào state.destinations ĐANG DÙNG (không chỉ bản persist) — giống cách
+    // upsertHostExperience cập nhật cả state.experiences lẫn state.hostExperiences, để activity
+    // hiện ngay trên Khám phá mà không cần tải lại trang (init() vẫn merge lại mỗi lần tải sau).
+    if (!s.destinations.some((d) => d.id === newId)) s.destinations.push(newDest);
+  }
+
+  if (!Array.isArray(s.customActivityCatalog)) s.customActivityCatalog = [];
+  const catalogIdx = s.customActivityCatalog.findIndex((c) => c.activityId === newId);
+  const catalogEntry = {
+    activityId: newId,
+    providerAccountId: sub.providerId,
+    partnerProviderIds: null,
+    offeringType: 'paid_experience',
+    financialMode: 'community_paid',
+    platformFeeRate: 0.10,
+    revenueSplitNote: null,
+    openingHours: Object.fromEntries(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((d) => [d, 'closed'])),
+    openingNote: 'Theo lịch hẹn với hộ — xem khung giờ đề xuất bên dưới.',
+    durationMinutes: sub.durationMinutes || 60,
+    pricePerPerson: sub.pricePerPerson || 0,
+    capacityPerSlot: sub.capacity || 1,
+    capacity: sub.capacity || 1,
+    availableTimeSlots: (sub.proposedSchedule && sub.proposedSchedule.timeSlots) || [],
+    culturalNotes: null,
+    visitRegistrationEnabled: false,
+    bookable: true,
+    publicationStatus: 'published',
+    updatedAt: now,
+  };
+  const dayKeyMap = { 'Thứ Hai': 'monday', 'Thứ Ba': 'tuesday', 'Thứ Tư': 'wednesday', 'Thứ Năm': 'thursday', 'Thứ Sáu': 'friday', 'Thứ Bảy': 'saturday', 'Chủ Nhật': 'sunday' };
+  subDays.forEach((d) => {
+    const key = dayKeyMap[d];
+    if (key) catalogEntry.openingHours[key] = (sub.proposedSchedule.timeSlots || []).map((t) => `${t}-${t}`);
+  });
+  if (catalogIdx >= 0) s.customActivityCatalog[catalogIdx] = catalogEntry; else s.customActivityCatalog.push(catalogEntry);
+
+  sub.status = 'approved';
+  sub.proposedActivityId = newId;
+  sub.reviewerNote = reviewerNote;
+  sub.reviewedAt = now;
+  persist();
+  notifyDataChanged('contentSubmissions', 'approved');
+  addProviderNotification({
+    providerId: sub.providerId,
+    type: 'submission_status',
+    title: `Đề xuất "${subName}" đã được duyệt`,
+    message: 'Hoạt động đã được thêm vào Activity Catalog và hiển thị trên giao diện khách.',
+    relatedId: sub.id,
+  });
+  return sub;
+}
+
+export function requestContentSubmissionRevision(id, reviewerNote) {
+  const s = getState();
+  const sub = (s.contentSubmissions || []).find((x) => x.id === id);
+  if (!sub) return null;
+  sub.status = 'needs_revision';
+  sub.reviewerNote = reviewerNote;
+  sub.reviewedAt = new Date().toISOString();
+  persist();
+  addProviderNotification({
+    providerId: sub.providerId,
+    type: 'submission_status',
+    title: `Đề xuất "${toPlainVi(sub.name)}" cần chỉnh sửa`,
+    message: reviewerNote,
+    relatedId: sub.id,
+  });
+  return sub;
+}
+
+export function rejectContentSubmission(id, reviewerNote) {
+  const s = getState();
+  const sub = (s.contentSubmissions || []).find((x) => x.id === id);
+  if (!sub) return null;
+  sub.status = 'rejected';
+  sub.reviewerNote = reviewerNote;
+  sub.reviewedAt = new Date().toISOString();
+  persist();
+  addProviderNotification({
+    providerId: sub.providerId,
+    type: 'submission_status',
+    title: `Đề xuất "${toPlainVi(sub.name)}" đã bị từ chối`,
+    message: reviewerNote,
+    relatedId: sub.id,
+  });
+  return sub;
+}
+
+export function getContentSubmissions() {
+  return getState().contentSubmissions || [];
 }
 
 // ---------- Studio: yêu cầu xem xét ngoại lệ CPS ----------

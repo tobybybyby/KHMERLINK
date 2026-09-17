@@ -2,6 +2,7 @@
 // Triển khai thật cần backend khoá chỗ nguyên tử để tránh overbooking giữa nhiều thiết bị/tab.
 import { getState, persist, addPassportStamp, addPoints, addNotification, scheduleBookingReminders, notifyDataChanged, logCustomerBehaviourEvent } from '../storage.js';
 import { uid, generateBookingCode } from '../utils.js';
+import { t, formatDate, formatTime } from './i18nService.js';
 
 /** Giờ khởi hành thật = giờ điểm dừng sớm nhất có slot trong booking (không phải giờ tạo booking).
  * Dùng cho cả nhắc lịch (24h/2h trước) lẫn chính sách hoàn tiền (computeRefundAmount) — cùng một
@@ -54,12 +55,12 @@ export function reapExpiredHolds() {
   s.bookings.forEach((b) => {
     if (isHoldExpired(b)) {
       b.status = 'expired';
-      b.statusHistory.push({ status: 'expired', at: new Date().toISOString(), note: 'Hết hạn giữ chỗ — chỗ đã được trả lại.' });
+      b.statusHistory.push({ status: 'expired', at: new Date().toISOString(), note: t('common.bookingFlow.holdExpiredReleased') });
       s.bookingItems
         .filter((bi) => bi.bookingId === b.id && bi.status === 'pending')
         .forEach((bi) => {
           bi.status = 'cancelled';
-          bi.statusHistory.push({ status: 'cancelled', at: new Date().toISOString(), note: 'Hết hạn giữ chỗ.' });
+          bi.statusHistory.push({ status: 'cancelled', at: new Date().toISOString(), note: t('common.bookingFlow.holdExpired') });
         });
       changed = true;
     }
@@ -77,10 +78,10 @@ export function createBooking({ itineraryId = null, partySize, items }) {
 
   for (const item of items) {
     const { exp, slot } = findExperienceAndSlot(item.experienceId, item.slotId);
-    if (!exp || !slot) return { ok: false, reason: 'Không tìm thấy hoạt động hoặc khung giờ đã chọn.' };
+    if (!exp || !slot) return { ok: false, reason: t('common.bookingFlow.slotNotFound') };
     const remaining = getSlotRemaining(slot);
     if (item.quantity > remaining) {
-      return { ok: false, reason: `"${exp.title}" (${slot.startTime}–${slot.endTime}) chỉ còn ${remaining} chỗ, không đủ cho ${item.quantity} khách.` };
+      return { ok: false, reason: t('common.bookingFlow.notEnoughSlots', { title: exp.title, start: slot.startTime, end: slot.endTime, remaining, requested: item.quantity }) };
     }
   }
 
@@ -134,10 +135,10 @@ export function createBooking({ itineraryId = null, partySize, items }) {
   const startAt = computeEarliestItemDateTime(bookingItems);
   addNotification({
     type: 'booking_created',
-    title: 'Hành trình đã được ghi nhận',
+    title: t('common.bookingFlow.createdTitle'),
     message: startAt
-      ? `Hành trình sẽ bắt đầu lúc ${startAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' })}, ngày ${startAt.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}. Mã booking ${booking.code}.`
-      : `Đã ghi nhận booking ${booking.code} — đang chờ hộ xác nhận.`,
+      ? t('common.bookingFlow.createdWithTime', { time: formatTime(startAt), date: formatDate(startAt), code: booking.code })
+      : t('common.bookingFlow.createdPending', { code: booking.code }),
     bookingId: booking.id,
     itineraryId,
   });
@@ -155,14 +156,14 @@ export function createBooking({ itineraryId = null, partySize, items }) {
 export function respondToBooking(bookingId, decisions) {
   const s = getState();
   const booking = s.bookings.find((b) => b.id === bookingId);
-  if (!booking) return { ok: false, reason: 'Không tìm thấy booking.' };
+  if (!booking) return { ok: false, reason: t('common.bookingFlow.bookingNotFound') };
   const now = new Date().toISOString();
   const items = s.bookingItems.filter((bi) => bi.bookingId === bookingId);
   // Chặn theo từng mục còn "pending" thay vì trạng thái tổng của booking — combo nhiều hộ
   // thường phản hồi lệch thời điểm nhau; sau lần phản hồi đầu tiên booking chuyển
   // "partially_confirmed" nhưng các mục còn lại vẫn phải xử lý được tiếp.
   if (!items.some((bi) => bi.status === 'pending')) {
-    return { ok: false, reason: 'Booking không còn mục nào đang chờ xác nhận.' };
+    return { ok: false, reason: t('common.bookingFlow.noPendingItems') };
   }
 
   decisions.forEach(({ bookingItemId, decision, reason }) => {
@@ -173,7 +174,7 @@ export function respondToBooking(bookingId, decisions) {
       bi.statusHistory.push({ status: 'accepted', at: now });
     } else {
       bi.status = 'rejected';
-      bi.hostNote = reason || 'Hộ từ chối (demo).';
+      bi.hostNote = reason || t('common.bookingFlow.hostRejectedNote');
       bi.statusHistory.push({ status: 'rejected', at: now, note: bi.hostNote });
     }
   });
@@ -193,14 +194,14 @@ export function respondToBooking(bookingId, decisions) {
   // Thông báo cho khách theo đúng trạng thái tổng vừa tính — KHÔNG nói "đã xác nhận toàn bộ" khi
   // vẫn còn item pending hoặc chỉ partially_confirmed (PHASE mục 6).
   const statusMessage = {
-    confirmed: `Hộ đã xác nhận toàn bộ hoạt động trong booking ${booking.code}.`,
-    partially_confirmed: `Một phần hoạt động trong booking ${booking.code} đã được xác nhận — một số mục vẫn đang chờ hoặc đã bị từ chối, xem chi tiết trong Hành trình.`,
-    rejected: `Rất tiếc, hộ đã từ chối toàn bộ hoạt động trong booking ${booking.code}. Bạn có thể xem hoạt động cộng đồng thay thế ở Khám phá.`,
+    confirmed: t('common.bookingFlow.confirmedAllMsg', { code: booking.code }),
+    partially_confirmed: t('common.bookingFlow.confirmedPartialMsg', { code: booking.code }),
+    rejected: t('common.bookingFlow.rejectedMsg', { code: booking.code }),
   }[booking.status];
   if (statusMessage) {
     addNotification({
       type: booking.status === 'rejected' ? 'booking_rejected' : 'booking_confirmed',
-      title: booking.status === 'rejected' ? 'Hộ đã từ chối booking' : (booking.status === 'confirmed' ? 'Booking đã được xác nhận' : 'Booking đã được xác nhận một phần'),
+      title: booking.status === 'rejected' ? t('common.bookingFlow.rejectedTitle') : (booking.status === 'confirmed' ? t('common.bookingFlow.confirmedAllTitle') : t('common.bookingFlow.confirmedPartialTitle')),
       message: statusMessage,
       bookingId: booking.id,
       itineraryId: booking.itineraryId,
@@ -219,11 +220,11 @@ export function respondToBooking(bookingId, decisions) {
 export function completeBookingItem(bookingItemId) {
   const s = getState();
   const bi = s.bookingItems.find((x) => x.id === bookingItemId);
-  if (!bi) return { ok: false, reason: 'Không tìm thấy mục booking.' };
-  if (bi.status !== 'accepted') return { ok: false, reason: 'Chỉ có thể xác nhận hoàn thành cho mục đã được chấp nhận.' };
+  if (!bi) return { ok: false, reason: t('common.bookingFlow.bookingItemNotFound') };
+  if (bi.status !== 'accepted') return { ok: false, reason: t('common.bookingFlow.onlyAcceptedCanComplete') };
   const now = new Date().toISOString();
   bi.status = 'completed';
-  bi.statusHistory.push({ status: 'completed', at: now, note: 'Hộ xác nhận hoàn thành (Studio).' });
+  bi.statusHistory.push({ status: 'completed', at: now, note: t('common.bookingFlow.hostCompletedNote') });
 
   const booking = s.bookings.find((b) => b.id === bi.bookingId);
   const otherActive = s.bookingItems.some((x) => x.bookingId === bi.bookingId && x.id !== bi.id && x.status !== 'completed' && x.status !== 'cancelled' && x.status !== 'rejected');
@@ -247,11 +248,11 @@ export function releasePayout(bookingId) {
   const s = getState();
   const booking = s.bookings.find((b) => b.id === bookingId);
   if (!booking) return { ok: false };
-  if (booking.payoutStatus !== 'holding') return { ok: false, reason: 'Khoản này chưa ở trạng thái đang giữ.' };
-  const hasOpenTicket = s.supportTickets.some((t) => t.bookingId === bookingId && t.status !== 'da-xu-ly');
-  if (hasOpenTicket) return { ok: false, reason: 'Có ticket hỗ trợ đang mở liên quan đến booking này — cần xử lý xong trước khi giải ngân.' };
+  if (booking.payoutStatus !== 'holding') return { ok: false, reason: t('common.bookingFlow.payoutNotHolding') };
+  const hasOpenTicket = s.supportTickets.some((tk) => tk.bookingId === bookingId && tk.status !== 'da-xu-ly');
+  if (hasOpenTicket) return { ok: false, reason: t('common.bookingFlow.openTicketBlocksPayout') };
   booking.payoutStatus = 'released';
-  booking.statusHistory.push({ status: 'payout_released', at: new Date().toISOString(), note: 'Giải ngân mô phỏng (demo dùng nút thay vì chờ thời gian thật).' });
+  booking.statusHistory.push({ status: 'payout_released', at: new Date().toISOString(), note: t('common.bookingFlow.payoutReleasedNote') });
   persist();
   return { ok: true };
 }
@@ -259,7 +260,7 @@ export function releasePayout(bookingId) {
 export function computeRefundAmount(booking) {
   const s = getState();
   const items = s.bookingItems.filter((bi) => bi.bookingId === booking.id && bi.status === 'accepted');
-  if (!items.length) return { refundAmount: booking.paymentStatus === 'unpaid' ? 0 : booking.totalAmount, policy: 'Chưa có hoạt động nào được xác nhận.' };
+  if (!items.length) return { refundAmount: booking.paymentStatus === 'unpaid' ? 0 : booking.totalAmount, policy: t('common.bookingFlow.refundNoAcceptedItems') };
   let earliest = null;
   items.forEach((bi) => {
     const { slot } = findExperienceAndSlot(bi.experienceId, bi.slotId);
@@ -273,11 +274,11 @@ export function computeRefundAmount(booking) {
     }
   });
   const paid = booking.paymentStatus === 'paid' ? booking.totalAmount : booking.paymentStatus === 'deposit_paid' ? booking.depositAmount : 0;
-  if (!earliest || paid === 0) return { refundAmount: 0, policy: 'Chưa thanh toán, không phát sinh hoàn tiền.' };
+  if (!earliest || paid === 0) return { refundAmount: 0, policy: t('common.bookingFlow.refundNotPaid') };
   const hoursUntil = (earliest.getTime() - Date.now()) / 3600000;
   let pct = 0;
   let policy = '';
-  if (hoursUntil >= 24) { pct = 1; policy = 'Huỷ trước 24 giờ: hoàn 100% (minh hoạ).'; } else if (hoursUntil >= 6) { pct = 0.5; policy = 'Huỷ trong 6–24 giờ: hoàn 50% (minh hoạ).'; } else { pct = 0; policy = 'Huỷ dưới 6 giờ trước giờ hẹn: không hoàn tiền (minh hoạ).'; }
+  if (hoursUntil >= 24) { pct = 1; policy = t('common.bookingFlow.refundFull'); } else if (hoursUntil >= 6) { pct = 0.5; policy = t('common.bookingFlow.refundHalf'); } else { pct = 0; policy = t('common.bookingFlow.refundNone'); }
   return { refundAmount: Math.round((paid * pct) / 1000) * 1000, policy };
 }
 
@@ -285,7 +286,7 @@ export function cancelBooking(bookingId) {
   const s = getState();
   const booking = s.bookings.find((b) => b.id === bookingId);
   if (!booking) return { ok: false };
-  if (booking.status === 'cancelled' || booking.status === 'completed') return { ok: false, reason: 'Booking đã ở trạng thái cuối, không thể huỷ.' };
+  if (booking.status === 'cancelled' || booking.status === 'completed') return { ok: false, reason: t('common.bookingFlow.cannotCancelFinal') };
   const { refundAmount, policy } = computeRefundAmount(booking);
   const now = new Date().toISOString();
   booking.status = 'cancelled';

@@ -12,6 +12,7 @@ import { activityCatalog, TIMEZONE } from '../../data/pilot-seed-data.js';
 import { getSlotRemaining } from './bookingService.js';
 import { formatDateShort } from '../utils.js';
 import { getState } from '../storage.js';
+import { t, formatMoney } from './i18nService.js';
 
 const WEEKDAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -20,16 +21,23 @@ const WEEKDAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'f
  * đồng bộ localStorage giữa các tab (activityCatalogOverrides không phải CONTENT_KEY — xem
  * storage.js). Không throw khi storage chưa init (một số ngữ cảnh gọi sớm) — coi như chưa có override. */
 export function getOperations(listingId) {
-  const base = activityCatalog[listingId];
-  if (!base) return null;
+  let base = activityCatalog[listingId];
   let override = {};
   try {
     // getState() throw nếu Storage.init() chưa chạy (một vài kịch bản gọi sớm/test) — coi như
-    // chưa có override, vẫn trả về bản catalog gốc thay vì lỗi cả trang.
-    override = (getState().activityCatalogOverrides || {})[listingId] || {};
+    // chưa có override/custom catalog, vẫn trả về bản catalog gốc thay vì lỗi cả trang.
+    const s = getState();
+    if (!base) {
+      // Activity được duyệt qua Cổng vận hành (approveContentSubmission) — không có trong
+      // activityCatalog tĩnh, đọc từ customActivityCatalog (persist) làm base dự phòng. Không ảnh
+      // hưởng 7 listing pilot gốc vì chỉ tới đây khi activityCatalog[listingId] không tồn tại.
+      base = (s.customActivityCatalog || []).find((c) => c.activityId === listingId) || null;
+    }
+    override = (s.activityCatalogOverrides || {})[listingId] || {};
   } catch (err) {
     override = {};
   }
+  if (!base) return null;
   return { ...base, ...override };
 }
 
@@ -58,33 +66,33 @@ function parseRange(rangeStr) {
  * status: 'open' | 'closing_soon' | 'closed' | 'by_appointment' | 'unknown'. */
 export function computeOpenStatus(listingId, now = new Date()) {
   const ops = getOperations(listingId);
-  if (!ops) return { status: 'unknown', label: 'Chưa có thông tin giờ mở cửa' };
+  if (!ops) return { status: 'unknown', label: t('common.openStatus.noHoursInfo') };
 
   const { dayIndex, minutesOfDay } = getVnNowParts(now);
   const daySpec = ops.openingHours.everyday || ops.openingHours[WEEKDAY_KEYS[dayIndex]];
 
-  if (daySpec === 'closed') return { status: 'closed', label: 'Đóng cửa hôm nay' };
-  if (daySpec === 'by_appointment') return { status: 'by_appointment', label: 'Cần đặt trước' };
-  if (!Array.isArray(daySpec) || !daySpec.length) return { status: 'unknown', label: 'Chưa có thông tin giờ mở cửa' };
+  if (daySpec === 'closed') return { status: 'closed', label: t('common.openStatus.closedToday') };
+  if (daySpec === 'by_appointment') return { status: 'by_appointment', label: t('common.openStatus.byAppointment') };
+  if (!Array.isArray(daySpec) || !daySpec.length) return { status: 'unknown', label: t('common.openStatus.noHoursInfo') };
 
   for (const rangeStr of daySpec) {
     const { startMin, endMin } = parseRange(rangeStr);
     if (minutesOfDay >= startMin && minutesOfDay < endMin) {
       const closingSoon = endMin - minutesOfDay <= 30;
       return closingSoon
-        ? { status: 'closing_soon', label: `Sắp đóng cửa (${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')})` }
-        : { status: 'open', label: 'Đang mở' };
+        ? { status: 'closing_soon', label: t('common.openStatus.closingSoon', { time: `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}` }) }
+        : { status: 'open', label: t('common.openStatus.open') };
     }
   }
-  return { status: 'closed', label: 'Đóng cửa' };
+  return { status: 'closed', label: t('common.openStatus.closed') };
 }
 
-/** "0" -> Miễn phí, số -> "180.000đ/người", null/undefined -> Đang cập nhật. Không dùng khi hoạt
+/** "0" -> Miễn phí, số -> "180.000đ/khách", null/undefined -> Đang cập nhật. Không dùng khi hoạt
  * động cần đặt trước và chưa có giá xác nhận — nơi gọi tự quyết định hiển thị "Cần đặt trước". */
 export function formatPricePerPerson(price) {
-  if (price === null || price === undefined) return 'Đang cập nhật';
-  if (price === 0) return 'Miễn phí';
-  return `${new Intl.NumberFormat('vi-VN').format(price)}đ/người`;
+  if (price === null || price === undefined) return t('common.price.updating');
+  if (price === 0) return t('common.price.free');
+  return t('common.price.perGuest', { amount: formatMoney(price) });
 }
 
 /** Slot còn chỗ gần nhất (từ experience THẬT do host tạo qua Studio, có slot ngày giờ cụ thể) —

@@ -4,8 +4,44 @@
 // hơn (experience/site/cluster/multiStopExperience, xem listingType). Trước phase pilot, hàm này
 // nạp từ data/destinations.json (37 địa danh) — bản đó đã lưu ở data/archive/destinations-vinhlong-37.json.
 import { deriveInterests, formatCurrency } from '../utils.js';
+import { getCurrentLanguage } from './i18nService.js';
+import { getActivityTranslation } from '../../data/activityTranslations.js';
 
 const DATA_URL = './data/pilot-listings.json';
+
+// Đọc field song ngữ { vi, en } cho 1 listing theo id — chỉ 7 listing pilot (EXP-01..SITE-07) có
+// bản dịch (xem data/activityTranslations.js); các địa danh khác KHÔNG có bản dịch → fallback về
+// đúng field tiếng Việt gốc (KHÔNG hiển thị key/undefined, KHÔNG tự dịch máy). Gọi hàm này ở RENDER
+// TIME (không cache lúc load) để tự phản ánh đúng khi người dùng đổi ngôn ngữ, không cần tải lại dữ liệu.
+function localizedField(destId, field, fallback) {
+  const entry = getActivityTranslation(destId);
+  const bi = entry && entry[field];
+  if (!bi) return fallback;
+  return bi[getCurrentLanguage()] ?? bi.vi ?? fallback;
+}
+
+export function localizedDestinationName(dest) {
+  return dest ? localizedField(dest.id, 'name', dest.name) : '';
+}
+export function localizedDestinationSummary(dest) {
+  return dest ? localizedField(dest.id, 'shortDescription', dest.summary) : '';
+}
+export function localizedDestinationActivities(dest) {
+  return dest ? localizedField(dest.id, 'fullDescription', dest.activities) : '';
+}
+export function localizedDestinationCulturalStory(dest) {
+  return dest ? localizedField(dest.id, 'culturalStory', dest.culturalStory) : '';
+}
+export function localizedDestinationTips(dest) {
+  return dest ? localizedField(dest.id, 'visitorNotes', dest.tips) : '';
+}
+export function localizedDestinationKeyFacts(dest) {
+  if (!dest) return [];
+  const entry = getActivityTranslation(dest.id);
+  const bi = entry && entry.keyFacts;
+  if (!bi) return dest.keyFacts || [];
+  return bi[getCurrentLanguage()] ?? bi.vi ?? dest.keyFacts ?? [];
+}
 
 function resolvePrice(priceField) {
   if (!priceField || priceField.value === null || priceField.value === undefined) {

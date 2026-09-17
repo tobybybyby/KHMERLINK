@@ -1,0 +1,310 @@
+/* ---------- Cổng dữ liệu quản lý — dashboard kiểu Power BI (canvas thống nhất, KHÔNG sao chép
+   màu/nội dung Power BI, chỉ áp dụng nguyên tắc bố cục: grid 12 cột, mật độ cao, cross-filter).
+   Giữ nguyên hệ màu/token thương hiệu KhmerLink hiện có (css/tokens.css) — không thêm màu mới. ---------- */
+
+.mdash {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mdash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.mdash-header h1 { margin-bottom: 2px; }
+.mdash-header__meta { font-size: 0.78rem; color: var(--color-text-faint); white-space: nowrap; }
+
+/* ---------- Grid 12 cột — collapse 6 cột (tablet) rồi 1 cột (mobile) ---------- */
+.mdash-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+.mdash-grid > * { min-width: 0; }
+
+.mdash-col-2 { grid-column: span 2; }
+.mdash-col-3 { grid-column: span 3; }
+.mdash-col-4 { grid-column: span 4; }
+.mdash-col-5 { grid-column: span 5; }
+.mdash-col-6 { grid-column: span 6; }
+.mdash-col-7 { grid-column: span 7; }
+.mdash-col-8 { grid-column: span 8; }
+.mdash-col-9 { grid-column: span 9; }
+.mdash-col-12 { grid-column: span 12; }
+
+@media (max-width: 1199px) {
+  .mdash-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  /* KPI (2/12 ở desktop) -> 3 thẻ/hàng trên tablet */
+  .mdash-grid > .mdash-col-2 { grid-column: span 2; }
+  /* Visual vừa (3/12) -> 2/hàng trên tablet */
+  .mdash-grid > .mdash-col-3 { grid-column: span 3; }
+  /* Visual lớn hơn -> chiếm nửa hàng (3/6) hoặc cả hàng, tuỳ độ ưu tiên đã đặt qua data-tablet-full */
+  .mdash-grid > .mdash-col-4,
+  .mdash-grid > .mdash-col-5 { grid-column: span 3; }
+  .mdash-grid > .mdash-col-6,
+  .mdash-grid > .mdash-col-7,
+  .mdash-grid > .mdash-col-8,
+  .mdash-grid > .mdash-col-9,
+  .mdash-grid > .mdash-col-12 { grid-column: span 6; }
+  .mdash-grid > [data-tablet-full="true"] { grid-column: span 6 !important; }
+}
+
+@media (max-width: 767px) {
+  .mdash-grid { grid-template-columns: 1fr; }
+  /* Phải lặp lại selector [data-tablet-full] ở đây (không chỉ ".mdash-grid > *") — attribute
+     selector trong rule tablet ở trên có độ đặc hiệu CAO HƠN "> *", nên dù cả hai đều !important,
+     rule tablet vẫn thắng theo độ đặc hiệu nếu không có 1 rule cùng độ đặc hiệu xuất hiện SAU nó. */
+  .mdash-grid > *,
+  .mdash-grid > [data-tablet-full="true"] { grid-column: span 1 !important; }
+}
+
+/* ---------- Card (visual) ---------- */
+.mdash-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: none;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mdash-card--flush { padding: 0; overflow: hidden; }
+.mdash-card--interactive { cursor: pointer; transition: border-color var(--transition-fast); }
+.mdash-card--interactive:hover { border-color: var(--color-accent); }
+
+.mdash-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mdash-card__heading { min-width: 0; }
+.mdash-card__title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.mdash-card__subtitle {
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  margin: 1px 0 0;
+}
+.mdash-card__actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.mdash-card__action-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0;
+}
+.mdash-card__action-btn:hover { background: var(--color-primary-soft); color: var(--color-primary-dark); }
+
+.mdash-card__body { min-height: 0; display: flex; flex-direction: column; }
+/* Chart.js (maintainAspectRatio:false) cần chiều cao TƯỜNG MINH trên container cha — nếu chỉ
+   dùng flex:1/min-height, canvas và flex item có thể "đẩy nhau" phình cao vô hạn (gotcha CSS
+   flexbox + Chart.js responsive) — height được set trực tiếp qua inline style ở dashCardHtml(). */
+.mdash-card__chart-wrap { position: relative; width: 100%; }
+.mdash-card__chart-wrap canvas { max-width: 100%; }
+
+/* ---------- KPI card ---------- */
+.mdash-kpi { justify-content: space-between; }
+.mdash-kpi__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+.mdash-kpi__value {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.15;
+  font-family: var(--font-display);
+}
+.mdash-kpi__row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.mdash-kpi__delta { font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+.mdash-kpi__delta--up { color: var(--color-success); }
+.mdash-kpi__delta--down { color: var(--color-danger); }
+.mdash-kpi__delta--flat { color: var(--color-text-faint); }
+.mdash-kpi__unit { font-size: 0.76rem; color: var(--color-text-faint); }
+
+/* ---------- Filter bar (compact slicer style) ---------- */
+.mdash-filterbar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mdash-filterbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.mdash-filterbar__field { display: flex; flex-direction: column; gap: 2px; min-width: 132px; flex: 1 1 132px; max-width: 220px; }
+.mdash-filterbar__field label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-text-faint);
+}
+.mdash-filterbar__field select {
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-cream);
+  min-height: 32px;
+}
+.mdash-filterbar__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+.mdash-filterbar__clear {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+.mdash-filterbar__clear:hover { background: var(--color-primary-soft); }
+.mdash-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.mdash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px 3px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  border: none;
+}
+.mdash-chip:hover { background: var(--color-accent-soft); }
+
+/* ---------- Cross-filter / cross-highlight ---------- */
+.mdash-list-item { transition: opacity var(--transition-fast), background-color var(--transition-fast); cursor: pointer; }
+.mdash-list-item.is-dimmed { opacity: 0.42; }
+.mdash-list-item.is-selected { background: var(--color-primary-soft); }
+
+/* ---------- Quick alerts ---------- */
+.mdash-alert-list { display: flex; flex-direction: column; gap: 6px; }
+.mdash-alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-cream);
+  font-size: 0.78rem;
+}
+.mdash-alert-item__label { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.mdash-alert-item__count {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.76rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  color: #7a530f;
+}
+.mdash-alert-item__count--danger { background: var(--color-danger-soft); color: var(--color-danger); }
+.mdash-alert-item__count--success { background: var(--color-success-soft); color: var(--color-success); }
+.mdash-alert-item[role="button"]:hover { border-color: var(--color-accent); }
+
+/* ---------- Map visual ---------- */
+.mdash-map-wrap { position: relative; width: 100%; height: 260px; border-radius: 6px; overflow: hidden; }
+.mdash-map-wrap .leaflet-container { height: 100%; width: 100%; background: var(--color-cream); }
+.mdash-map-legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: var(--z-panel);
+  background: rgba(255,255,255,0.94);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  max-width: 90%;
+}
+
+/* ---------- Compact legend near chart ---------- */
+.mdash-legend-inline { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 4px; }
+.mdash-legend-inline__dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+/* ---------- Focus mode modal ---------- */
+.mdash-focus-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 18, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--space-4);
+}
+.mdash-focus-modal {
+  background: var(--color-surface);
+  border-radius: 10px;
+  width: min(96vw, 1100px);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.mdash-focus-modal__header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--color-border); }
+.mdash-focus-modal__body { padding: 18px; flex: 1; min-height: 0; overflow-y: auto; }
+.mdash-focus-modal__chart { position: relative; height: min(60vh, 520px); }
+
+/* ---------- Row section label (khi cần chia nhóm rõ trong 1 grid dài) ---------- */
+.mdash-row-label {
+  grid-column: 1 / -1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+  margin: 6px 0 -4px;
+}
+
+@media (max-width: 767px) {
+  .mdash-filterbar__field { max-width: none; }
+  .mdash-card__chart-wrap { min-height: 220px; }
+}

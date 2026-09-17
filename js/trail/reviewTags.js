@@ -1,51 +1,53 @@
 // Bộ tiêu chí đánh giá nhanh theo nhóm loại hình (mô hình kết hợp sao + tag như Grab) — mỗi
 // địa điểm chỉ hiện tối đa 6 tiêu chí phù hợp, khách chọn nhiều tiêu chí không cần chấm điểm
 // từng câu. Nhóm lấy từ categoryGroup() (utils.js) — nhóm nào chưa có bộ riêng dùng GENERAL.
+// Giá trị là CANONICAL TAG ID (xem js/services/tagCatalog.js#REVIEW_TAG_LABELS) — không lưu label
+// theo ngôn ngữ trực tiếp, để đổi ngôn ngữ không cần dịch lại dữ liệu cảm nhận đã lưu.
 import { categoryGroup } from '../utils.js';
 
 const MAX_TAGS = 6;
 
 const GENERAL_TAGS = [
-  'Đáng để ghé thăm', 'Không gian sạch sẽ', 'Dễ tìm đường', 'Nhân viên/người dân thân thiện',
-  'Thông tin rõ ràng', 'Giá cả hợp lý', 'Phù hợp với gia đình', 'Có nhiều góc chụp đẹp',
+  'worth_visiting', 'clean_space', 'easy_wayfinding', 'friendly_locals',
+  'clear_info_general', 'reasonable_price', 'family_friendly', 'good_photo_spots',
 ];
 
 const GROUP_TAGS = {
   'Thiên nhiên': [
-    'Cảnh quan đẹp', 'Không gian yên bình', 'Sạch sẽ', 'Nhiều góc chụp ảnh',
-    'Có chỗ nghỉ chân', 'Phù hợp đi cùng gia đình', 'Cảnh quan được bảo tồn tốt',
+    'beautiful_scenery', 'peaceful_space', 'tidy_clean', 'many_photo_spots',
+    'rest_spots', 'family_friendly', 'well_preserved_scenery',
   ],
   'Tôn giáo': [
-    'Kiến trúc ấn tượng', 'Không gian trang nghiêm', 'Hiểu thêm về văn hoá', 'Câu chuyện được giải thích rõ',
-    'Có hướng dẫn tham quan', 'Biển chỉ dẫn rõ ràng', 'Sạch sẽ, được bảo tồn tốt',
+    'impressive_architecture', 'solemn_atmosphere', 'learn_culture', 'story_well_explained',
+    'guided_tour_available', 'clear_signage', 'clean_well_preserved',
   ],
   'Làng nghề & cộng đồng': [
-    'Nghệ nhân hướng dẫn tận tình', 'Dễ làm theo', 'Được trực tiếp thực hành', 'Hiểu thêm về nghề truyền thống',
-    'Hoạt động thú vị', 'Thời lượng phù hợp', 'Có sản phẩm mang về',
+    'attentive_artisan_guidance', 'easy_to_follow', 'hands_on_practice', 'learn_traditional_craft',
+    'fun_activity', 'suitable_duration', 'has_takeaway_product',
   ],
   'Trải nghiệm tại hộ dân': [
-    'Nghệ nhân hướng dẫn tận tình', 'Dễ làm theo', 'Được trực tiếp thực hành', 'Hoạt động thú vị',
-    'Thời lượng phù hợp', 'Có sản phẩm mang về',
+    'attentive_artisan_guidance', 'easy_to_follow', 'hands_on_practice', 'fun_activity',
+    'suitable_duration', 'has_takeaway_product',
   ],
   'Bảo tàng / Di tích': [
-    'Nội dung dễ hiểu', 'Câu chuyện hấp dẫn', 'Hiện vật phong phú', 'Trưng bày trực quan',
-    'Có thuyết minh/audio guide', 'Biển thông tin rõ ràng', 'Được bảo tồn tốt',
+    'clear_content', 'engaging_story', 'rich_collection', 'visual_display',
+    'has_audio_guide', 'clear_info_signage', 'well_preserved',
   ],
   'Khu tưởng niệm': [
-    'Nội dung dễ hiểu', 'Câu chuyện hấp dẫn', 'Trưng bày trực quan', 'Biển thông tin rõ ràng', 'Được bảo tồn tốt',
+    'clear_content', 'engaging_story', 'visual_display', 'clear_info_signage', 'well_preserved',
   ],
   'Nhà cổ': [
-    'Kiến trúc ấn tượng', 'Nội dung dễ hiểu', 'Câu chuyện hấp dẫn', 'Biển thông tin rõ ràng', 'Được bảo tồn tốt',
+    'impressive_architecture', 'clear_content', 'engaging_story', 'clear_info_signage', 'well_preserved',
   ],
   'Ẩm thực': [
-    'Món ăn ngon', 'Đặc trưng địa phương', 'Nguyên liệu tươi', 'Giá cả hợp lý',
-    'Phục vụ thân thiện', 'Không gian sạch sẽ', 'Đáng để thử lại',
+    'delicious_food', 'local_character', 'fresh_ingredients', 'reasonable_price',
+    'friendly_service', 'clean_space', 'worth_trying_again',
   ],
 };
 
 const LOW_RATING_TAGS = [
-  'Vệ sinh', 'Biển chỉ dẫn', 'Chất lượng dịch vụ', 'Thái độ phục vụ',
-  'Giá cả', 'Nội dung trải nghiệm', 'Cơ sở vật chất', 'Thông tin chưa rõ ràng', 'Khó tìm đường hoặc di chuyển',
+  'hygiene_issue', 'signage_issue', 'service_quality_issue', 'staff_attitude_issue',
+  'price_issue', 'experience_content_issue', 'facilities_issue', 'unclear_info_issue', 'hard_to_find_issue',
 ];
 
 /** rating <= 3: đổi sang hỏi "cần cải thiện điều gì" thay vì khen — dùng chung một bộ cho mọi loại hình. */

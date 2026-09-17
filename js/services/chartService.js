@@ -3,6 +3,8 @@
 // trước khi tạo lại trên cùng 1 id để không chồng canvas/rò rỉ instance khi chuyển tab/đổi bộ lọc.
 // LƯU Ý: cdnjs định kỳ gỡ các bản cũ khỏi CDN — 4.4.4 (dùng ở phase trước) đã bị gỡ, phát hiện lúc
 // kiểm thử phase này (404 thật, không phải mạng chặn). Pin đúng bản còn tồn tại thay vì "latest".
+import { getCurrentLanguage } from './i18nService.js';
+
 const CHART_JS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js';
 let chartJsPromise = null;
 
@@ -51,7 +53,7 @@ export function destroyAllCharts() {
 export const CHART_COLORS = ['#6b4423', '#b8862e', '#2f6690', '#8a5a34', '#6b4b8a', '#2f7d4f', '#b3413a', '#c8862e'];
 
 export function formatVndTick(v) {
-  return new Intl.NumberFormat('vi-VN').format(v);
+  return new Intl.NumberFormat(getCurrentLanguage() === 'en' ? 'en-US' : 'vi-VN').format(v);
 }
 
 export function formatPercent1(v) {

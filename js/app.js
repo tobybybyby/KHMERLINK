@@ -29,6 +29,8 @@ import { renderOpsTickets } from './ops/tickets.js';
 import { renderOpsQuality } from './ops/quality.js';
 import { renderOpsPilot } from './ops/pilot.js';
 import { renderCommunityAdvisor } from './ops/community.js';
+import * as NavHistory from './services/navHistoryService.js';
+import { t } from './services/i18nService.js';
 
 const appRoot = document.getElementById('app');
 
@@ -103,13 +105,32 @@ function matchRoute(hash) {
   return null;
 }
 
-function renderCurrent({ scrollTop = false } = {}) {
+function renderCurrent({ scrollTop = false, restore = null } = {}) {
   const hash = window.location.hash || '#/';
   try {
     const found = matchRoute(hash);
     if (found) {
+      // Trang đích có thể tự hỏi NavHistory.isRestoring() trong lúc render (đồng bộ) để biết đây
+      // là lượt "quay lại" hay "tới mới" — vd itinerary.js dùng để không reset wizard/tính lại gợi
+      // ý AI chỉ vì khách vừa xem rồi đóng 1 trang chi tiết địa điểm.
+      NavHistory.setRestoring(!!restore);
       found.route.handler(found.match);
-      if (scrollTop) window.scrollTo(0, 0);
+      NavHistory.setRestoring(false);
+      if (restore) {
+        // Quay lại đúng vị trí cuộn + focus của trang trước đó (nút Quay lại/× của trang chi tiết
+        // địa điểm, hoặc Back/vuốt back của trình duyệt — cả hai đều xử lý giống nhau, xem render()
+        // bên dưới). Dùng setTimeout thay vì requestAnimationFrame — rAF có thể bị trình duyệt trì
+        // hoãn/không chạy khi tab không ở trạng thái đang vẽ (nền/không active), khiến khôi phục
+        // cuộn/focus im lặng không xảy ra; setTimeout(0) là macrotask, luôn chạy ngay sau khi DOM
+        // của route mới đã gắn xong.
+        setTimeout(() => {
+          NavHistory.restoreScroll(restore.scroll);
+          const target = restore.focusHint ? appRoot.querySelector(restore.focusHint) : null;
+          target?.focus?.({ preventScroll: true });
+        }, 0);
+      } else if (scrollTop) {
+        window.scrollTo(0, 0);
+      }
       return;
     }
     window.location.hash = '#/';
@@ -118,10 +139,10 @@ function renderCurrent({ scrollTop = false } = {}) {
       <div class="page-generic">
         <div class="coming-soon">
           ${renderErrorState({
-            title: 'Đã có lỗi xảy ra',
-            message: 'Vui lòng quay lại trang chào và thử lại.',
+            title: t('common.error.title'),
+            message: t('common.error.backToHomeMessage'),
           })}
-          <a class="btn btn-primary" href="#/">Về trang chào</a>
+          <a class="btn btn-primary" href="#/">${t('common.nav.homeLink')}</a>
         </div>
       </div>
     `;
@@ -129,8 +150,40 @@ function renderCurrent({ scrollTop = false } = {}) {
   }
 }
 
+// Nếu route đích là trang chi tiết địa điểm, ghi nhớ cách tìm lại nút "Xem chi tiết"/"Xem" đã dẫn
+// tới đó — dùng để trả focus đúng chỗ khi khách quay lại trang đang rời đi (mục 8, accessibility).
+function deriveFocusHint(hash) {
+  const m = hash.match(/^#\/trail\/place\/([\w-]+)$/);
+  if (!m) return null;
+  const id = m[1];
+  // Chỉ nhắm phần tử THẬT SỰ nhận được focus (button/a) — bỏ qua thẻ bọc ngoài như .place-card
+  // (div data-id="…" dùng để bắt click cả card, không tự focus() được đáng tin cậy dù có
+  // tabindex="-1").
+  return `a[href="#/trail/place/${id}"], button[data-detail="${id}"], button[data-id="${id}"], button[data-goto="${id}"]`;
+}
+
+let lastHash = window.location.hash || '#/';
+
 function render() {
-  renderCurrent({ scrollTop: true });
+  const newHash = window.location.hash || '#/';
+  const top = NavHistory.peekTop();
+  if (top && top.hash === newHash) {
+    // Hash mới khớp đúng đỉnh ngăn xếp "đã ghé qua" — đây là một lượt QUAY LẠI, dù do nút Quay
+    // lại/× trong trang, nút Back của trình duyệt, hay vuốt back trên di động (cả 3 chỉ khác nhau
+    // ở NƠI location.hash bị đổi, không phải ở kết quả) — pop và khôi phục đúng scroll/focus thay
+    // vì cuộn lên đầu như điều hướng thường.
+    NavHistory.popTop();
+    renderCurrent({ restore: top });
+  } else {
+    // Điều hướng "tiến" bình thường — ghi nhớ trang sắp rời đi (hash + scroll hiện tại, còn nguyên
+    // vì DOM chưa bị thay) để có thể quay lại đúng chỗ sau này. Bỏ qua ở lần render đầu tiên khi
+    // boot app (lastHash === newHash, chưa có điều hướng thật nào xảy ra).
+    if (lastHash !== newHash) {
+      NavHistory.recordDeparture(lastHash, deriveFocusHint(newHash));
+    }
+    renderCurrent({ scrollTop: true });
+  }
+  lastHash = newHash;
 }
 
 // Render lại route hiện tại (KHÔNG cuộn lên đầu, KHÔNG reload toàn bộ app) khi dữ liệu vừa đổi —
@@ -145,6 +198,11 @@ function scheduleRerender() {
 
 window.addEventListener('hashchange', render);
 window.addEventListener('khmerlink:data-changed', scheduleRerender);
+// Đổi ngôn ngữ (cùng tab qua i18nService.setLanguage, hoặc tab khác qua sự kiện storage đã được
+// i18nService tự redispatch thành sự kiện này) chỉ render lại route hiện tại — KHÔNG cuộn lên đầu,
+// KHÔNG điều hướng về Home/Explore, giữ nguyên Trip Cart/hành trình/filter/modal đang mở vì tất cả
+// đều sống trong `state`/singleton filter object, không phải biến cục bộ trong DOM bị mất khi re-render.
+window.addEventListener('khmerlink:language-changed', scheduleRerender);
 window.addEventListener('storage', (e) => {
   // e.key null nghĩa là localStorage.clear() (vd tab khác bấm "Khôi phục dữ liệu mẫu") — vẫn cần
   // đồng bộ lại. Phải đọc lại localStorage vào state trong bộ nhớ TRƯỚC khi render lại — ghi
@@ -163,7 +221,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <div class="page-generic">
       <div class="state-block">
         <div class="state-block__icon" aria-hidden="true">⏳</div>
-        <h3>Đang tải dữ liệu…</h3>
+        <h3>${t('common.loading')}</h3>
       </div>
     </div>
   `;

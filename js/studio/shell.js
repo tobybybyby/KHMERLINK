@@ -1,13 +1,16 @@
 import { getState, setCurrentHostId, getCurrentHostId } from '../storage.js';
 import { escapeHtml, qs, qsa } from '../utils.js';
+import { t, languageSwitcherHtml, wireLanguageSwitchers } from '../services/i18nService.js';
 
-const TABS = [
-  { key: 'overview', label: 'Tổng quan', icon: '📊', href: '#/studio/overview' },
-  { key: 'experiences', label: 'Trải nghiệm', icon: '🧭', href: '#/studio/experiences' },
-  { key: 'bookings', label: 'Lịch & Booking', icon: '🗓️', href: '#/studio/bookings' },
-  { key: 'reports', label: 'Báo cáo', icon: '📈', href: '#/studio/reports' },
-  { key: 'support', label: 'Hỗ trợ & Đề án', icon: '🤝', href: '#/studio/support' },
-];
+function getTabs() {
+  return [
+    { key: 'overview', label: t('common.nav.overview'), icon: '📊', href: '#/studio/overview' },
+    { key: 'experiences', label: t('common.nav.experiences'), icon: '🧭', href: '#/studio/experiences' },
+    { key: 'bookings', label: t('common.nav.calendarBookings'), icon: '🗓️', href: '#/studio/bookings' },
+    { key: 'reports', label: t('common.nav.reports'), icon: '📈', href: '#/studio/reports' },
+    { key: 'support', label: t('common.nav.supportProposals'), icon: '🤝', href: '#/studio/support' },
+  ];
+}
 
 function hostOptionsHtml(state, currentId) {
   return state.hosts.map((h) => `<option value="${h.id}" ${h.id === currentId ? 'selected' : ''}>${escapeHtml(h.name)}${h.isDemoHost ? ' (demo)' : ''}</option>`).join('');
@@ -25,28 +28,30 @@ export function renderStudioShell(root, activeKey) {
     setCurrentHostId(currentHostId);
   }
 
+  const TABS = getTabs();
   root.innerHTML = `
     <div class="studio-shell">
       <header class="trail-topbar">
-        <a class="trail-topbar__brand" href="#/">🏡 KhmerLink Studio</a>
+        <a class="trail-topbar__brand" href="#/">🏡 ${t('common.brand.studio')}</a>
         <div class="trail-topbar__spacer"></div>
-        <label class="text-sm host-switcher-label" for="studio-host-switcher">Đơn vị cung cấp</label>
-        <select class="host-switcher" id="studio-host-switcher" aria-label="Đơn vị cung cấp — chọn để xem demo">
+        <label class="text-sm host-switcher-label" for="studio-host-switcher">${t('common.providerLabel')}</label>
+        <select class="host-switcher" id="studio-host-switcher" aria-label="${t('common.hostSwitcherA11y')}">
           ${hostOptionsHtml(state, currentHostId)}
         </select>
+        ${languageSwitcherHtml()}
       </header>
-      <p class="demo-note" style="margin:0;border-radius:0;text-align:center;">Demo chuyển vai trò: bạn đang xem Studio như thể đang đăng nhập bằng đơn vị cung cấp đã chọn ở trên — không phải xác thực thật. Không phải mọi đơn vị đều là hộ kinh doanh (có chùa, bảo tàng, ban quản lý cụm).</p>
+      <div class="studio-data-label-row"><span class="demo-data-label demo-data-label--neutral">${t('common.demoDataLabel')}</span></div>
       <div class="studio-body">
-        <nav class="studio-sidebar" aria-label="Điều hướng Studio">
-          ${TABS.map((t) => `<a class="studio-sidebar__item" href="${t.href}" ${t.key === activeKey ? 'aria-current="page"' : ''}>${t.icon} ${t.label}</a>`).join('')}
+        <nav class="studio-sidebar" aria-label="${t('common.a11y.studioNav')}">
+          ${TABS.map((tab) => `<a class="studio-sidebar__item" href="${tab.href}" ${tab.key === activeKey ? 'aria-current="page"' : ''}>${tab.icon} ${tab.label}</a>`).join('')}
         </nav>
         <main id="main-content" class="studio-content" tabindex="-1"></main>
       </div>
-      <nav class="bottom-nav" aria-label="Điều hướng Studio">
-        ${TABS.map((t) => `
-          <a class="bottom-nav__item" href="${t.href}" ${t.key === activeKey ? 'aria-current="page"' : ''}>
-            <span class="bottom-nav__icon" aria-hidden="true">${t.icon}</span>
-            <span>${t.label}</span>
+      <nav class="bottom-nav" aria-label="${t('common.a11y.studioNav')}">
+        ${TABS.map((tab) => `
+          <a class="bottom-nav__item" href="${tab.href}" ${tab.key === activeKey ? 'aria-current="page"' : ''}>
+            <span class="bottom-nav__icon" aria-hidden="true">${tab.icon}</span>
+            <span>${tab.label}</span>
           </a>`).join('')}
       </nav>
     </div>
@@ -56,6 +61,7 @@ export function renderStudioShell(root, activeKey) {
     setCurrentHostId(e.target.value);
     window.dispatchEvent(new Event('hashchange'));
   });
+  wireLanguageSwitchers(root);
 
   return { content: root.querySelector('.studio-content'), hostId: currentHostId };
 }

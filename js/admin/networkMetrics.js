@@ -7,6 +7,7 @@ import { historicalMetrics, visitMetrics, TIMEZONE } from '../../data/pilot-seed
 import { adminFilters, getScopedDestinations, providerInScope } from './filters.js';
 import { getRatingStatsForListingIds, getRecommendRate, getDisplayReviewsForListingIds } from '../services/reviewsService.js';
 import { monthLabel, currentMonthKey } from '../services/metricsService.js';
+import { localizedDestinationName } from '../services/destinationsService.js';
 
 function scopedListingIds(state) {
   return getScopedDestinations(state).map((d) => d.id);
@@ -194,7 +195,7 @@ export function getRatingByListingBar(state) {
   return listingIds.map((id) => {
     const dest = state.destinations.find((d) => d.id === id);
     const stats = getRatingStatsForListingIds(state, [id]);
-    return { listingId: id, name: dest ? dest.name : id, averageRating: stats.averageRating, reviewCount: stats.reviewCount };
+    return { listingId: id, name: dest ? localizedDestinationName(dest) : id, averageRating: stats.averageRating, reviewCount: stats.reviewCount };
   }).filter((r) => r.reviewCount > 0);
 }
 
@@ -208,7 +209,7 @@ export function getTopFeedbackTable(state, limit = 8) {
     .slice(0, limit)
     .map((r) => {
       const dest = state.destinations.find((d) => d.id === r.listingId);
-      return { ...r, listingName: dest ? dest.name : r.listingId };
+      return { ...r, listingName: dest ? localizedDestinationName(dest) : r.listingId };
     });
 }
 

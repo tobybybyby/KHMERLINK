@@ -7,6 +7,7 @@ import { renderErrorState } from '../ui.js';
 import { NotificationService } from '../services/notificationService.js';
 import { openPlaceImpressionModal } from './placeImpression.js';
 import { openReviewModal, voucherCatalogHtml } from './passport.js';
+import { localizeTag } from '../services/tagCatalog.js';
 
 function impressionForStop(state, itineraryId, destinationId) {
   const stopKey = `${itineraryId}:${destinationId}`;
@@ -26,7 +27,7 @@ function stopSummaryCardHtml(state, itinerary, stop) {
         <strong>${categoryEmoji(stop.category)} ${escapeHtml(stop.name)}</strong>
         ${impression ? `
           <div class="stars" style="font-size:1rem;">${renderStars(impression.rating)}</div>
-          ${impression.tags.length ? `<p class="text-sm text-muted" style="margin:2px 0;">${impression.tags.map(escapeHtml).join(' · ')}</p>` : ''}
+          ${impression.tags.length ? `<p class="text-sm text-muted" style="margin:2px 0;">${impression.tags.map((tagId) => escapeHtml(localizeTag(tagId))).join(' · ')}</p>` : ''}
           ${impression.comment ? `<p class="text-sm text-faint" style="margin:2px 0;">“${escapeHtml(impression.comment)}”</p>` : ''}
         ` : '<p class="text-sm text-faint" style="margin:2px 0;">Chưa có cảm nhận cho điểm này.</p>'}
         <div class="cta-row" style="margin-top:4px;">

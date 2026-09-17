@@ -224,12 +224,14 @@ export const initialReviewStats = {
 };
 
 // ---------- 3. Bộ tag cảm nhận theo loại listing ----------
+// Giá trị là CANONICAL TAG ID (xem js/services/tagCatalog.js#REVIEW_TAG_LABELS) — không lưu label
+// theo ngôn ngữ trực tiếp, để đổi ngôn ngữ không cần dịch lại dữ liệu đã chọn.
 export const reviewTagsByCategory = {
-  amThuc: ['Món ăn ngon', 'Đặc trưng địa phương', 'Nguyên liệu tươi', 'Giá cả hợp lý', 'Phục vụ thân thiện', 'Không gian sạch sẽ'],
-  amNhacBieuDien: ['Biểu diễn cuốn hút', 'Đậm nét văn hóa', 'Nghệ sĩ thân thiện', 'Câu chuyện dễ hiểu', 'Âm thanh tốt', 'Hoạt động tương tác thú vị'],
-  thuCong: ['Hướng dẫn dễ hiểu', 'Nghệ nhân thân thiện', 'Hoạt động sáng tạo', 'Vật liệu phù hợp', 'Sản phẩm mang về đẹp', 'Hiểu thêm về văn hóa Khmer'],
-  chuaVaVanHoa: ['Không gian yên bình', 'Kiến trúc đẹp', 'Giá trị văn hóa', 'Cảnh quan sạch sẽ', 'Thông tin dễ hiểu', 'Dễ tìm đường'],
-  baoTang: ['Hiện vật phong phú', 'Nội dung dễ hiểu', 'Không gian trưng bày tốt', 'Nhân viên hỗ trợ', 'Hiểu thêm về văn hóa Khmer', 'Đáng để giới thiệu'],
+  amThuc: ['delicious_food', 'local_character', 'fresh_ingredients', 'reasonable_price', 'friendly_service', 'clean_space'],
+  amNhacBieuDien: ['engaging_performance', 'cultural_identity', 'friendly_artists', 'easy_story', 'good_sound', 'interactive_activity'],
+  thuCong: ['clear_guidance', 'friendly_artisan', 'creative_activity', 'suitable_materials', 'beautiful_takeaway', 'learn_khmer_culture'],
+  chuaVaVanHoa: ['peaceful_space', 'beautiful_architecture', 'cultural_value', 'clean_scenery', 'clear_information', 'easy_wayfinding'],
+  baoTang: ['rich_collection', 'clear_content', 'good_display_space', 'helpful_staff', 'learn_khmer_culture', 'worth_recommending'],
 };
 
 // listingId -> nhóm tag áp dụng (dựa theo category thật của từng listing)
@@ -272,86 +274,86 @@ function sr({ listingId, hostId, travellerName, overallRating, tags, comment, wo
 
 export const seedReviews = [
   // EXP-01 — Trải nghiệm giã cốm dẹp (hostId: host-com-dep-tuan-viet)
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Nguyễn Thị Hoa', overallRating: 5, tags: ['Món ăn ngon', 'Đặc trưng địa phương', 'Phục vụ thân thiện'], comment: 'Phần giã cốm rất vui, cô chú hướng dẫn chậm và dễ hiểu. Cả nhà mình ai cũng thử được.', wouldRecommend: true, visitDate: '2026-06-14' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Trần Văn Nam', overallRating: 5, tags: ['Nguyên liệu tươi', 'Đặc trưng địa phương'], comment: 'Lúa nếp non thơm, giã xong ăn liền tại chỗ luôn, khác hẳn cốm mua ngoài chợ.', wouldRecommend: true, visitDate: '2026-06-22' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Lê Thị Mai', overallRating: 4, tags: ['Món ăn ngon', 'Giá cả hợp lý'], comment: 'Trải nghiệm hay, chỉ hơi nắng lúc trưa nên mong có thêm chỗ ngồi có mái che.', wouldRecommend: true, visitDate: '2026-07-02' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Sarah K.', overallRating: 5, tags: ['Đặc trưng địa phương', 'Phục vụ thân thiện', 'Không gian sạch sẽ'], comment: 'A very authentic experience, the family who hosted us was so warm and patient with our kids.', wouldRecommend: true, visitDate: '2026-07-10' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Phạm Minh Tuấn', overallRating: 5, tags: ['Món ăn ngon', 'Phục vụ thân thiện'], comment: 'Được nghe kể chuyện Ok Om Bok trong lúc giã cốm, vừa ăn vừa học thêm văn hoá, rất đáng nhớ.', wouldRecommend: true, visitDate: '2026-07-18' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Đỗ Thị Lan', overallRating: 4, tags: ['Món ăn ngon', 'Không gian sạch sẽ'], comment: 'Ngon và vui, nhưng nên báo trước là cần đặt lịch sớm vì phụ thuộc mùa lúa.', wouldRecommend: true, visitDate: '2026-08-01' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Vũ Đức Anh', overallRating: 5, tags: ['Giá cả hợp lý', 'Đặc trưng địa phương'], comment: 'Giá hợp lý cho trải nghiệm tay chân đúng chất miền Tây, nhóm bạn mình 6 người ai cũng thích.', wouldRecommend: true, visitDate: '2026-08-09' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Hoàng Thị Thu', overallRating: 5, tags: ['Phục vụ thân thiện', 'Món ăn ngon'], comment: 'Cô chủ nhà vui tính, chỉ từng bước một, cốm dẹp trộn dừa ăn xong muốn mua thêm về làm quà.', wouldRecommend: true, visitDate: '2026-08-20' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Bùi Văn Long', overallRating: 4, tags: ['Đặc trưng địa phương', 'Giá cả hợp lý'], comment: 'Trải nghiệm chân thực, chỉ mong đường vào xưởng dễ đi hơn cho xe lớn.', wouldRecommend: true, visitDate: '2026-08-28' }),
-  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Ngô Thị Hương', overallRating: 5, tags: ['Không gian sạch sẽ', 'Phục vụ thân thiện'], comment: 'Sạch sẽ, gọn gàng, các bé nhà mình được tự tay giã cốm nên thích lắm.', wouldRecommend: true, visitDate: '2026-09-05' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Nguyễn Thị Hoa', overallRating: 5, tags: ['delicious_food', 'local_character', 'friendly_service'], comment: { vi: "Phần giã cốm rất vui, cô chú hướng dẫn chậm và dễ hiểu. Cả nhà mình ai cũng thử được.", en: "Pounding the rice was a lot of fun — the hosts guided us slowly and clearly, so everyone in the family got to try it." }, wouldRecommend: true, visitDate: '2026-06-14' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Trần Văn Nam', overallRating: 5, tags: ['fresh_ingredients', 'local_character'], comment: { vi: "Lúa nếp non thơm, giã xong ăn liền tại chỗ luôn, khác hẳn cốm mua ngoài chợ.", en: "The young sticky rice smelled great, and we ate the cốm right after pounding it — completely different from what you'd buy at the market." }, wouldRecommend: true, visitDate: '2026-06-22' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Lê Thị Mai', overallRating: 4, tags: ['delicious_food', 'reasonable_price'], comment: { vi: "Trải nghiệm hay, chỉ hơi nắng lúc trưa nên mong có thêm chỗ ngồi có mái che.", en: "A great experience, just a bit hot around midday — some covered seating would be nice." }, wouldRecommend: true, visitDate: '2026-07-02' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Sarah K.', overallRating: 5, tags: ['local_character', 'friendly_service', 'clean_space'], comment: { vi: "Một trải nghiệm rất chân thực, gia đình chủ nhà rất nồng hậu và kiên nhẫn với các con của chúng tôi.", en: "A very authentic experience, the family who hosted us was so warm and patient with our kids." }, wouldRecommend: true, visitDate: '2026-07-10' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Phạm Minh Tuấn', overallRating: 5, tags: ['delicious_food', 'friendly_service'], comment: { vi: "Được nghe kể chuyện Ok Om Bok trong lúc giã cốm, vừa ăn vừa học thêm văn hoá, rất đáng nhớ.", en: "We got to hear the story of Ok Om Bok while pounding the rice — eating and learning about the culture at once, very memorable." }, wouldRecommend: true, visitDate: '2026-07-18' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Đỗ Thị Lan', overallRating: 4, tags: ['delicious_food', 'clean_space'], comment: { vi: "Ngon và vui, nhưng nên báo trước là cần đặt lịch sớm vì phụ thuộc mùa lúa.", en: "Delicious and fun, but it would help to mention in advance that booking early is needed since it depends on the rice season." }, wouldRecommend: true, visitDate: '2026-08-01' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Vũ Đức Anh', overallRating: 5, tags: ['reasonable_price', 'local_character'], comment: { vi: "Giá hợp lý cho trải nghiệm tay chân đúng chất miền Tây, nhóm bạn mình 6 người ai cũng thích.", en: "Reasonable price for a real hands-on Mekong Delta experience — all 6 of us in the group loved it." }, wouldRecommend: true, visitDate: '2026-08-09' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Hoàng Thị Thu', overallRating: 5, tags: ['friendly_service', 'delicious_food'], comment: { vi: "Cô chủ nhà vui tính, chỉ từng bước một, cốm dẹp trộn dừa ăn xong muốn mua thêm về làm quà.", en: "The host was cheerful and showed us every step — the cốm dẹp mixed with coconut was so good we wanted to buy more to take home as gifts." }, wouldRecommend: true, visitDate: '2026-08-20' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Bùi Văn Long', overallRating: 4, tags: ['local_character', 'reasonable_price'], comment: { vi: "Trải nghiệm chân thực, chỉ mong đường vào xưởng dễ đi hơn cho xe lớn.", en: "A genuine experience — just wish the road to the workshop were easier for larger vehicles." }, wouldRecommend: true, visitDate: '2026-08-28' }),
+  sr({ listingId: 'EXP-01', hostId: 'host-com-dep-tuan-viet', travellerName: 'Ngô Thị Hương', overallRating: 5, tags: ['clean_space', 'friendly_service'], comment: { vi: "Sạch sẽ, gọn gàng, các bé nhà mình được tự tay giã cốm nên thích lắm.", en: "Clean and tidy — our kids loved getting to pound the rice themselves." }, wouldRecommend: true, visitDate: '2026-09-05' }),
 
   // EXP-02 — Trải nghiệm âm nhạc và múa truyền thống Khmer (hostId: host-nhac-mua-khmer)
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Đặng Minh Khôi', overallRating: 5, tags: ['Biểu diễn cuốn hút', 'Đậm nét văn hóa'], comment: 'Xem nghệ nhân Lâm Phên chế tác nhạc cụ rồi qua xem Rô-băm, hai trải nghiệm bổ trợ nhau rất khéo.', wouldRecommend: true, visitDate: '2026-06-20' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Trịnh Thị Nga', overallRating: 5, tags: ['Nghệ sĩ thân thiện', 'Câu chuyện dễ hiểu'], comment: 'Chú Lâm Phên giải thích cấu tạo dàn ngũ âm rất dễ hiểu, cả nhóm hỏi gì cũng trả lời nhiệt tình.', wouldRecommend: true, visitDate: '2026-06-30' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Marco R.', overallRating: 4, tags: ['Đậm nét văn hóa', 'Âm thanh tốt'], comment: 'The Robam excerpt was mesmerizing, though we had to wait a bit between the two stops.', wouldRecommend: true, visitDate: '2026-07-08' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Nguyễn Thành Đạt', overallRating: 5, tags: ['Biểu diễn cuốn hút', 'Hoạt động tương tác thú vị'], comment: 'Được thử đánh vài nhịp trên nhạc cụ, cảm giác rất đặc biệt, không chỉ đứng xem.', wouldRecommend: true, visitDate: '2026-07-16' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Phan Thị Bích', overallRating: 4, tags: ['Đậm nét văn hóa', 'Câu chuyện dễ hiểu'], comment: 'Nội dung hay, chỉ hơi ngắn thời gian ở điểm dừng thứ hai so với kỳ vọng.', wouldRecommend: true, visitDate: '2026-07-24' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Lâm Văn Phúc', overallRating: 5, tags: ['Nghệ sĩ thân thiện', 'Đậm nét văn hóa'], comment: 'Ấn tượng nhất là được nghe câu chuyện về mặt nạ Rô-băm trước khi xem biểu diễn.', wouldRecommend: true, visitDate: '2026-08-02' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Trương Thị Diễm', overallRating: 5, tags: ['Biểu diễn cuốn hút', 'Âm thanh tốt'], comment: 'Âm thanh sống động, không gian biểu diễn tuy nhỏ nhưng gần gũi, xem rất đã.', wouldRecommend: true, visitDate: '2026-08-11' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Hồ Minh Quân', overallRating: 4, tags: ['Câu chuyện dễ hiểu', 'Đậm nét văn hóa'], comment: 'Rất đáng xem, mong sau này có thêm phụ đề tiếng Anh cho khách nước ngoài.', wouldRecommend: true, visitDate: '2026-08-19' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Châu Thị Kim', overallRating: 5, tags: ['Nghệ sĩ thân thiện', 'Hoạt động tương tác thú vị'], comment: 'Đoàn Ánh Bình Minh biểu diễn nhiệt huyết, cuối buổi còn cho chụp ảnh cùng trang phục.', wouldRecommend: true, visitDate: '2026-08-30' }),
-  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Lý Gia Bảo', overallRating: 5, tags: ['Đậm nét văn hóa', 'Biểu diễn cuốn hút'], comment: 'Một buổi trải nghiệm văn hoá trọn vẹn, đúng thứ mình tìm khi đến Vĩnh Long.', wouldRecommend: true, visitDate: '2026-09-06' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Đặng Minh Khôi', overallRating: 5, tags: ['engaging_performance', 'cultural_identity'], comment: { vi: "Xem nghệ nhân Lâm Phên chế tác nhạc cụ rồi qua xem Rô-băm, hai trải nghiệm bổ trợ nhau rất khéo.", en: "Watching artisan Lâm Phên craft instruments and then seeing the Rô-băm performance — the two experiences complemented each other really well." }, wouldRecommend: true, visitDate: '2026-06-20' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Trịnh Thị Nga', overallRating: 5, tags: ['friendly_artists', 'easy_story'], comment: { vi: "Chú Lâm Phên giải thích cấu tạo dàn ngũ âm rất dễ hiểu, cả nhóm hỏi gì cũng trả lời nhiệt tình.", en: "Mr. Lâm Phên explained the pin peat ensemble very clearly, and answered every question from our group enthusiastically." }, wouldRecommend: true, visitDate: '2026-06-30' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Marco R.', overallRating: 4, tags: ['cultural_identity', 'good_sound'], comment: { vi: "Trích đoạn Rô-băm rất cuốn hút, dù chúng tôi phải chờ hơi lâu giữa hai điểm dừng.", en: "The Robam excerpt was mesmerizing, though we had to wait a bit between the two stops." }, wouldRecommend: true, visitDate: '2026-07-08' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Nguyễn Thành Đạt', overallRating: 5, tags: ['engaging_performance', 'interactive_activity'], comment: { vi: "Được thử đánh vài nhịp trên nhạc cụ, cảm giác rất đặc biệt, không chỉ đứng xem.", en: "Got to try playing a few beats on the instruments — a really special feeling, not just standing and watching." }, wouldRecommend: true, visitDate: '2026-07-16' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Phan Thị Bích', overallRating: 4, tags: ['cultural_identity', 'easy_story'], comment: { vi: "Nội dung hay, chỉ hơi ngắn thời gian ở điểm dừng thứ hai so với kỳ vọng.", en: "Great content, just a bit shorter than expected at the second stop." }, wouldRecommend: true, visitDate: '2026-07-24' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Lâm Văn Phúc', overallRating: 5, tags: ['friendly_artists', 'cultural_identity'], comment: { vi: "Ấn tượng nhất là được nghe câu chuyện về mặt nạ Rô-băm trước khi xem biểu diễn.", en: "The most memorable part was hearing the story behind the Rô-băm masks before watching the performance." }, wouldRecommend: true, visitDate: '2026-08-02' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Trương Thị Diễm', overallRating: 5, tags: ['engaging_performance', 'good_sound'], comment: { vi: "Âm thanh sống động, không gian biểu diễn tuy nhỏ nhưng gần gũi, xem rất đã.", en: "Vivid sound — the performance space was small but intimate, a really satisfying show." }, wouldRecommend: true, visitDate: '2026-08-11' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Hồ Minh Quân', overallRating: 4, tags: ['easy_story', 'cultural_identity'], comment: { vi: "Rất đáng xem, mong sau này có thêm phụ đề tiếng Anh cho khách nước ngoài.", en: "Well worth seeing — hoping for English subtitles for foreign guests in the future." }, wouldRecommend: true, visitDate: '2026-08-19' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Châu Thị Kim', overallRating: 5, tags: ['friendly_artists', 'interactive_activity'], comment: { vi: "Đoàn Ánh Bình Minh biểu diễn nhiệt huyết, cuối buổi còn cho chụp ảnh cùng trang phục.", en: "The Ánh Bình Minh troupe performed with real passion, and let us take photos with the costumes afterward." }, wouldRecommend: true, visitDate: '2026-08-30' }),
+  sr({ listingId: 'EXP-02', hostId: 'host-nhac-mua-khmer', travellerName: 'Lý Gia Bảo', overallRating: 5, tags: ['cultural_identity', 'engaging_performance'], comment: { vi: "Một buổi trải nghiệm văn hoá trọn vẹn, đúng thứ mình tìm khi đến Vĩnh Long.", en: "A truly complete cultural experience — exactly what I was looking for when visiting Vĩnh Long." }, wouldRecommend: true, visitDate: '2026-09-06' }),
 
   // EXP-03 — Trải nghiệm làm mặt nạ Khmer thu nhỏ (hostId: host-mat-na-khmer)
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Trần Thị Ngọc', overallRating: 5, tags: ['Nghệ nhân thân thiện', 'Hiểu thêm về văn hóa Khmer'], comment: 'Chú Lâm Phên kiên nhẫn chỉ từng bước tô mặt nạ, mình mang về một món quà lưu niệm rất ý nghĩa.', wouldRecommend: true, visitDate: '2026-06-17' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Nguyễn Hữu Phát', overallRating: 5, tags: ['Hoạt động sáng tạo', 'Sản phẩm mang về đẹp'], comment: 'Workshop nhỏ gọn nhưng chất lượng, mặt nạ tự tô xong đẹp hơn mình tưởng nhiều.', wouldRecommend: true, visitDate: '2026-06-27' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Lê Thị Kiều', overallRating: 5, tags: ['Hướng dẫn dễ hiểu', 'Nghệ nhân thân thiện'], comment: 'Được nghe giải thích ý nghĩa từng vai khỉ, chằn trước khi vẽ nên hiểu sâu hơn nhiều.', wouldRecommend: true, visitDate: '2026-07-05' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Emily T.', overallRating: 5, tags: ['Hiểu thêm về văn hóa Khmer', 'Hoạt động sáng tạo'], comment: 'Such a thoughtful, hands-on way to learn about Khmer mask-making traditions. Loved it.', wouldRecommend: true, visitDate: '2026-07-13' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Phạm Văn Hùng', overallRating: 4, tags: ['Vật liệu phù hợp', 'Nghệ nhân thân thiện'], comment: 'Rất thú vị, chỉ hơi ít thời gian cho phần sơn màu vì cả nhóm 8 người phải chia lượt.', wouldRecommend: true, visitDate: '2026-07-21' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Đinh Thị Yến', overallRating: 5, tags: ['Sản phẩm mang về đẹp', 'Hoạt động sáng tạo'], comment: 'Con mình mê mẩn cả buổi, về nhà còn khoe mặt nạ tự làm với cả lớp.', wouldRecommend: true, visitDate: '2026-08-04' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Trịnh Văn Sơn', overallRating: 5, tags: ['Hướng dẫn dễ hiểu', 'Hiểu thêm về văn hóa Khmer'], comment: 'Nghệ nhân giải thích rõ ràng, dễ hiểu, không hề khô khan như mình tưởng ban đầu.', wouldRecommend: true, visitDate: '2026-08-14' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Mai Thị Thảo', overallRating: 5, tags: ['Nghệ nhân thân thiện', 'Sản phẩm mang về đẹp'], comment: 'Trải nghiệm ấm cúng, đúng kiểu gặp gỡ nghệ nhân thật chứ không phải trình diễn cho có.', wouldRecommend: true, visitDate: '2026-08-23' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Vương Đức Thịnh', overallRating: 5, tags: ['Hoạt động sáng tạo', 'Hiểu thêm về văn hóa Khmer'], comment: 'Một trong những hoạt động đáng nhớ nhất chuyến đi Vĩnh Long của mình.', wouldRecommend: true, visitDate: '2026-09-01' }),
-  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Chu Thị Hằng', overallRating: 5, tags: ['Nghệ nhân thân thiện', 'Hướng dẫn dễ hiểu'], comment: 'Chỉ tiếc là chưa đặt được lịch sớm hơn, may mà chú Lâm Phên sắp xếp linh động.', wouldRecommend: true, visitDate: '2026-09-08' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Trần Thị Ngọc', overallRating: 5, tags: ['friendly_artisan', 'learn_khmer_culture'], comment: { vi: "Chú Lâm Phên kiên nhẫn chỉ từng bước tô mặt nạ, mình mang về một món quà lưu niệm rất ý nghĩa.", en: "Mr. Lâm Phên patiently guided us through every step of painting the mask — I took home a really meaningful souvenir." }, wouldRecommend: true, visitDate: '2026-06-17' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Nguyễn Hữu Phát', overallRating: 5, tags: ['creative_activity', 'beautiful_takeaway'], comment: { vi: "Workshop nhỏ gọn nhưng chất lượng, mặt nạ tự tô xong đẹp hơn mình tưởng nhiều.", en: "A small but high-quality workshop — the mask I painted turned out much better than I expected." }, wouldRecommend: true, visitDate: '2026-06-27' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Lê Thị Kiều', overallRating: 5, tags: ['clear_guidance', 'friendly_artisan'], comment: { vi: "Được nghe giải thích ý nghĩa từng vai khỉ, chằn trước khi vẽ nên hiểu sâu hơn nhiều.", en: "We heard the meaning behind the monkey and giant roles before painting, which gave us a much deeper understanding." }, wouldRecommend: true, visitDate: '2026-07-05' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Emily T.', overallRating: 5, tags: ['learn_khmer_culture', 'creative_activity'], comment: { vi: "Một cách trải nghiệm chu đáo, thực hành trực tiếp để tìm hiểu truyền thống làm mặt nạ Khmer. Rất thích.", en: "Such a thoughtful, hands-on way to learn about Khmer mask-making traditions. Loved it." }, wouldRecommend: true, visitDate: '2026-07-13' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Phạm Văn Hùng', overallRating: 4, tags: ['suitable_materials', 'friendly_artisan'], comment: { vi: "Rất thú vị, chỉ hơi ít thời gian cho phần sơn màu vì cả nhóm 8 người phải chia lượt.", en: "Really interesting, just a bit short on time for painting since our group of 8 had to take turns." }, wouldRecommend: true, visitDate: '2026-07-21' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Đinh Thị Yến', overallRating: 5, tags: ['beautiful_takeaway', 'creative_activity'], comment: { vi: "Con mình mê mẩn cả buổi, về nhà còn khoe mặt nạ tự làm với cả lớp.", en: "My child was captivated the whole session and showed off the mask they made to the whole class back home." }, wouldRecommend: true, visitDate: '2026-08-04' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Trịnh Văn Sơn', overallRating: 5, tags: ['clear_guidance', 'learn_khmer_culture'], comment: { vi: "Nghệ nhân giải thích rõ ràng, dễ hiểu, không hề khô khan như mình tưởng ban đầu.", en: "The artisan explained things clearly and simply — not dry at all like I first expected." }, wouldRecommend: true, visitDate: '2026-08-14' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Mai Thị Thảo', overallRating: 5, tags: ['friendly_artisan', 'beautiful_takeaway'], comment: { vi: "Trải nghiệm ấm cúng, đúng kiểu gặp gỡ nghệ nhân thật chứ không phải trình diễn cho có.", en: "A warm, genuine experience — really meeting the artisan in person, not just a staged show." }, wouldRecommend: true, visitDate: '2026-08-23' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Vương Đức Thịnh', overallRating: 5, tags: ['creative_activity', 'learn_khmer_culture'], comment: { vi: "Một trong những hoạt động đáng nhớ nhất chuyến đi Vĩnh Long của mình.", en: "One of the most memorable activities of my whole trip to Vĩnh Long." }, wouldRecommend: true, visitDate: '2026-09-01' }),
+  sr({ listingId: 'EXP-03', hostId: 'host-mat-na-khmer', travellerName: 'Chu Thị Hằng', overallRating: 5, tags: ['friendly_artisan', 'clear_guidance'], comment: { vi: "Chỉ tiếc là chưa đặt được lịch sớm hơn, may mà chú Lâm Phên sắp xếp linh động.", en: "The only regret is not booking earlier — luckily Mr. Lâm Phên was flexible with the schedule." }, wouldRecommend: true, visitDate: '2026-09-08' }),
 
   // SITE-04 — Làng Văn hóa – Du lịch dân tộc Khmer và Ao Bà Om (hostId: host-lang-van-hoa-nguyet-hoa)
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Nguyễn Văn Bình', overallRating: 5, tags: ['Cảnh quan sạch sẽ', 'Không gian yên bình'], comment: 'Đi dạo quanh Ao Bà Om lúc chiều mát rất dễ chịu, cây cổ thụ tán rộng che bóng cả lối đi.', wouldRecommend: true, visitDate: '2026-06-16' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Lê Thị Kim Anh', overallRating: 4, tags: ['Giá trị văn hóa', 'Dễ tìm đường'], comment: 'Cụm điểm khá rộng, có bảng chỉ dẫn nhưng mong có thêm bản đồ tổng thể ở lối vào.', wouldRecommend: true, visitDate: '2026-06-25' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'James L.', overallRating: 4, tags: ['Không gian yên bình', 'Cảnh quan sạch sẽ'], comment: 'Peaceful spot to combine with the pagoda and museum nearby, worth a half-day visit.', wouldRecommend: true, visitDate: '2026-07-03' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Phạm Thị Tuyết', overallRating: 5, tags: ['Cảnh quan sạch sẽ', 'Giá trị văn hóa'], comment: 'Không gian rộng rãi, sạch sẽ, đi cả gia đình 3 thế hệ đều thoải mái dạo bộ.', wouldRecommend: true, visitDate: '2026-07-14' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Trần Công Danh', overallRating: 3, tags: ['Dễ tìm đường'], comment: 'Cảnh đẹp nhưng cuối tuần khá đông, bãi đậu xe hơi hạn chế nên phải chờ lâu.', wouldRecommend: true, visitDate: '2026-07-27' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Đoàn Thị Ngân', overallRating: 4, tags: ['Không gian yên bình', 'Giá trị văn hóa'], comment: 'Kết hợp tham quan Ao Bà Om, Chùa Âng và bảo tàng trong một buổi rất hợp lý.', wouldRecommend: true, visitDate: '2026-08-06' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Huỳnh Văn Tài', overallRating: 5, tags: ['Cảnh quan sạch sẽ', 'Không gian yên bình'], comment: 'Sáng sớm ở đây rất yên tĩnh, nghe chim hót, đi bộ quanh ao rất thư giãn.', wouldRecommend: true, visitDate: '2026-08-15' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Nguyễn Thị Kim Phượng', overallRating: 4, tags: ['Giá trị văn hóa', 'Dễ tìm đường'], comment: 'Nơi tốt để tìm hiểu văn hoá Khmer trong vùng, bảng thông tin viết khá đầy đủ.', wouldRecommend: true, visitDate: '2026-08-24' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Võ Minh Trí', overallRating: 5, tags: ['Cảnh quan sạch sẽ', 'Giá trị văn hóa'], comment: 'Địa điểm rất đáng ghé nếu thích chụp ảnh, cây cổ thụ và mặt ao tạo khung hình đẹp.', wouldRecommend: true, visitDate: '2026-09-02' }),
-  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Lâm Thị Bích Trâm', overallRating: 4, tags: ['Không gian yên bình', 'Dễ tìm đường'], comment: 'Miễn phí tham quan mà không gian đẹp và sạch, gia đình mình sẽ quay lại lần nữa.', wouldRecommend: true, visitDate: '2026-09-09' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Nguyễn Văn Bình', overallRating: 5, tags: ['clean_scenery', 'peaceful_space'], comment: { vi: "Đi dạo quanh Ao Bà Om lúc chiều mát rất dễ chịu, cây cổ thụ tán rộng che bóng cả lối đi.", en: "Walking around Ao Bà Om in the cool afternoon was very pleasant — the old trees' wide canopies shade the whole path." }, wouldRecommend: true, visitDate: '2026-06-16' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Lê Thị Kim Anh', overallRating: 4, tags: ['cultural_value', 'easy_wayfinding'], comment: { vi: "Cụm điểm khá rộng, có bảng chỉ dẫn nhưng mong có thêm bản đồ tổng thể ở lối vào.", en: "The cluster is quite large — there are signs, but an overall map at the entrance would help." }, wouldRecommend: true, visitDate: '2026-06-25' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'James L.', overallRating: 4, tags: ['peaceful_space', 'clean_scenery'], comment: { vi: "Điểm dừng chân yên bình để kết hợp với chùa và bảo tàng gần đó, đáng dành nửa ngày để ghé thăm.", en: "Peaceful spot to combine with the pagoda and museum nearby, worth a half-day visit." }, wouldRecommend: true, visitDate: '2026-07-03' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Phạm Thị Tuyết', overallRating: 5, tags: ['clean_scenery', 'cultural_value'], comment: { vi: "Không gian rộng rãi, sạch sẽ, đi cả gia đình 3 thế hệ đều thoải mái dạo bộ.", en: "Spacious and clean — comfortable for a 3-generation family to walk around together." }, wouldRecommend: true, visitDate: '2026-07-14' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Trần Công Danh', overallRating: 3, tags: ['easy_wayfinding'], comment: { vi: "Cảnh đẹp nhưng cuối tuần khá đông, bãi đậu xe hơi hạn chế nên phải chờ lâu.", en: "Beautiful scenery, but quite crowded on weekends — limited parking meant a long wait." }, wouldRecommend: true, visitDate: '2026-07-27' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Đoàn Thị Ngân', overallRating: 4, tags: ['peaceful_space', 'cultural_value'], comment: { vi: "Kết hợp tham quan Ao Bà Om, Chùa Âng và bảo tàng trong một buổi rất hợp lý.", en: "Visiting Ao Bà Om, Ang Pagoda and the museum together in one session works out really well." }, wouldRecommend: true, visitDate: '2026-08-06' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Huỳnh Văn Tài', overallRating: 5, tags: ['clean_scenery', 'peaceful_space'], comment: { vi: "Sáng sớm ở đây rất yên tĩnh, nghe chim hót, đi bộ quanh ao rất thư giãn.", en: "Early mornings here are very quiet — listening to birdsong and walking around the pond is really relaxing." }, wouldRecommend: true, visitDate: '2026-08-15' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Nguyễn Thị Kim Phượng', overallRating: 4, tags: ['cultural_value', 'easy_wayfinding'], comment: { vi: "Nơi tốt để tìm hiểu văn hoá Khmer trong vùng, bảng thông tin viết khá đầy đủ.", en: "A good place to learn about local Khmer culture — the information boards are quite thorough." }, wouldRecommend: true, visitDate: '2026-08-24' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Võ Minh Trí', overallRating: 5, tags: ['clean_scenery', 'cultural_value'], comment: { vi: "Địa điểm rất đáng ghé nếu thích chụp ảnh, cây cổ thụ và mặt ao tạo khung hình đẹp.", en: "Well worth visiting if you like photography — the old trees and the pond surface make for beautiful shots." }, wouldRecommend: true, visitDate: '2026-09-02' }),
+  sr({ listingId: 'SITE-04', hostId: 'host-lang-van-hoa-nguyet-hoa', travellerName: 'Lâm Thị Bích Trâm', overallRating: 4, tags: ['peaceful_space', 'easy_wayfinding'], comment: { vi: "Miễn phí tham quan mà không gian đẹp và sạch, gia đình mình sẽ quay lại lần nữa.", en: "Free to visit and the space is beautiful and clean — my family will definitely come back." }, wouldRecommend: true, visitDate: '2026-09-09' }),
 
   // SITE-05 — Chùa Âng (hostId: host-chua-ang)
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Trương Thị Hồng', overallRating: 5, tags: ['Kiến trúc đẹp', 'Không gian yên bình'], comment: 'Kiến trúc chùa cổ rất đẹp, các cột gỗ chạm rồng sơn son thếp vàng nhìn công phu.', wouldRecommend: true, visitDate: '2026-06-12' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Ngô Văn Khải', overallRating: 5, tags: ['Giá trị văn hóa', 'Cảnh quan sạch sẽ'], comment: 'Không gian trang nghiêm, khuôn viên nhiều cây xanh, đi chậm rãi ngắm kiến trúc rất thích.', wouldRecommend: true, visitDate: '2026-06-24' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Anna P.', overallRating: 4, tags: ['Kiến trúc đẹp', 'Thông tin dễ hiểu'], comment: 'Beautiful old pagoda, would love a bit more signage in English to understand the history.', wouldRecommend: true, visitDate: '2026-07-01' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Đặng Thị Thanh', overallRating: 5, tags: ['Không gian yên bình', 'Kiến trúc đẹp'], comment: 'Ghé vào buổi sáng sớm, gần như không có ai, cảm giác thanh tịnh khó tả.', wouldRecommend: true, visitDate: '2026-07-12' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Phan Đình Khang', overallRating: 5, tags: ['Giá trị văn hóa', 'Dễ tìm đường'], comment: 'Chùa nằm ngay trong cụm Ao Bà Om nên dễ đi, đáng để dành thời gian tham quan kỹ.', wouldRecommend: true, visitDate: '2026-07-23' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Lê Thị Ngọc Diễm', overallRating: 4, tags: ['Kiến trúc đẹp', 'Cảnh quan sạch sẽ'], comment: 'Rất đẹp, chỉ tiếc hôm mình đi có đoàn quay phim nên hơi đông người ở chánh điện.', wouldRecommend: true, visitDate: '2026-08-03' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Trần Quốc Việt', overallRating: 5, tags: ['Không gian yên bình', 'Giá trị văn hóa'], comment: 'Một trong những ngôi chùa Khmer đẹp nhất mình từng ghé, rất nên đi khi đến Vĩnh Long.', wouldRecommend: true, visitDate: '2026-08-13' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Huỳnh Thị Mỹ Duyên', overallRating: 4, tags: ['Thông tin dễ hiểu', 'Kiến trúc đẹp'], comment: 'Có bảng giới thiệu ở cổng vào khá dễ hiểu, giúp mình biết thêm về lịch sử chùa.', wouldRecommend: true, visitDate: '2026-08-22' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Dương Minh Nhật', overallRating: 5, tags: ['Kiến trúc đẹp', 'Cảnh quan sạch sẽ'], comment: 'Chụp ảnh cực đẹp, ánh sáng buổi chiều chiếu vào mái chùa rất nổi bật.', wouldRecommend: true, visitDate: '2026-08-31' }),
-  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Nguyễn Thị Xuân Mai', overallRating: 5, tags: ['Giá trị văn hóa', 'Không gian yên bình'], comment: 'Đi lễ Phật kết hợp tìm hiểu văn hoá Khmer Nam Bộ, mình thấy rất ý nghĩa.', wouldRecommend: true, visitDate: '2026-09-07' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Trương Thị Hồng', overallRating: 5, tags: ['beautiful_architecture', 'peaceful_space'], comment: { vi: "Kiến trúc chùa cổ rất đẹp, các cột gỗ chạm rồng sơn son thếp vàng nhìn công phu.", en: "The ancient pagoda's architecture is beautiful — the dragon-carved, red-lacquered and gilded wooden columns look incredibly intricate." }, wouldRecommend: true, visitDate: '2026-06-12' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Ngô Văn Khải', overallRating: 5, tags: ['cultural_value', 'clean_scenery'], comment: { vi: "Không gian trang nghiêm, khuôn viên nhiều cây xanh, đi chậm rãi ngắm kiến trúc rất thích.", en: "A solemn atmosphere with lots of greenery in the grounds — walking slowly to admire the architecture is a real pleasure." }, wouldRecommend: true, visitDate: '2026-06-24' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Anna P.', overallRating: 4, tags: ['beautiful_architecture', 'clear_information'], comment: { vi: "Ngôi chùa cổ rất đẹp, mong có thêm biển thông tin bằng tiếng Anh để hiểu rõ hơn về lịch sử.", en: "Beautiful old pagoda, would love a bit more signage in English to understand the history." }, wouldRecommend: true, visitDate: '2026-07-01' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Đặng Thị Thanh', overallRating: 5, tags: ['peaceful_space', 'beautiful_architecture'], comment: { vi: "Ghé vào buổi sáng sớm, gần như không có ai, cảm giác thanh tịnh khó tả.", en: "Visited early in the morning when there was almost no one around — an indescribable sense of serenity." }, wouldRecommend: true, visitDate: '2026-07-12' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Phan Đình Khang', overallRating: 5, tags: ['cultural_value', 'easy_wayfinding'], comment: { vi: "Chùa nằm ngay trong cụm Ao Bà Om nên dễ đi, đáng để dành thời gian tham quan kỹ.", en: "The pagoda sits right within the Ao Bà Om cluster so it's easy to reach — well worth taking the time to explore properly." }, wouldRecommend: true, visitDate: '2026-07-23' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Lê Thị Ngọc Diễm', overallRating: 4, tags: ['beautiful_architecture', 'clean_scenery'], comment: { vi: "Rất đẹp, chỉ tiếc hôm mình đi có đoàn quay phim nên hơi đông người ở chánh điện.", en: "Very beautiful — just a shame a film crew was there the day I visited, making the main hall a bit crowded." }, wouldRecommend: true, visitDate: '2026-08-03' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Trần Quốc Việt', overallRating: 5, tags: ['peaceful_space', 'cultural_value'], comment: { vi: "Một trong những ngôi chùa Khmer đẹp nhất mình từng ghé, rất nên đi khi đến Vĩnh Long.", en: "One of the most beautiful Khmer pagodas I've ever visited — a must when you're in Vĩnh Long." }, wouldRecommend: true, visitDate: '2026-08-13' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Huỳnh Thị Mỹ Duyên', overallRating: 4, tags: ['clear_information', 'beautiful_architecture'], comment: { vi: "Có bảng giới thiệu ở cổng vào khá dễ hiểu, giúp mình biết thêm về lịch sử chùa.", en: "There's an easy-to-understand introduction board at the entrance that helped me learn more about the pagoda's history." }, wouldRecommend: true, visitDate: '2026-08-22' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Dương Minh Nhật', overallRating: 5, tags: ['beautiful_architecture', 'clean_scenery'], comment: { vi: "Chụp ảnh cực đẹp, ánh sáng buổi chiều chiếu vào mái chùa rất nổi bật.", en: "Fantastic for photos — the afternoon light hitting the pagoda roof really makes it stand out." }, wouldRecommend: true, visitDate: '2026-08-31' }),
+  sr({ listingId: 'SITE-05', hostId: 'host-chua-ang', travellerName: 'Nguyễn Thị Xuân Mai', overallRating: 5, tags: ['cultural_value', 'peaceful_space'], comment: { vi: "Đi lễ Phật kết hợp tìm hiểu văn hoá Khmer Nam Bộ, mình thấy rất ý nghĩa.", en: "Combining a visit to pray with learning about Southern Khmer culture felt really meaningful to me." }, wouldRecommend: true, visitDate: '2026-09-07' }),
 
   // SITE-06 — Bảo tàng Văn hóa dân tộc Khmer (hostId: host-bao-tang-khmer)
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Lý Thị Thu Trang', overallRating: 5, tags: ['Hiện vật phong phú', 'Hiểu thêm về văn hóa Khmer'], comment: 'Nhiều hiện vật đặc sắc về nhạc cụ và trang phục, đi một vòng mất gần 1 tiếng mà vẫn muốn xem thêm.', wouldRecommend: true, visitDate: '2026-06-18' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Phạm Nhật Anh', overallRating: 4, tags: ['Hiện vật phong phú', 'Hiểu thêm về văn hóa Khmer'], comment: 'Nhiều hiện vật thú vị, nếu có thêm audio guide sẽ dễ theo dõi hơn.', wouldRecommend: true, visitDate: '2026-06-29' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Đỗ Văn Kiên', overallRating: 4, tags: ['Nội dung dễ hiểu', 'Không gian trưng bày tốt'], comment: 'Bố cục trưng bày theo 4 nhóm chủ đề khá rõ ràng, dễ theo mạch tham quan.', wouldRecommend: true, visitDate: '2026-07-06' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Sophie M.', overallRating: 5, tags: ['Hiện vật phong phú', 'Nhân viên hỗ trợ'], comment: 'The staff were very helpful explaining the ritual objects, a great stop to understand Khmer heritage.', wouldRecommend: true, visitDate: '2026-07-17' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Trịnh Thị Kim Ngân', overallRating: 4, tags: ['Không gian trưng bày tốt', 'Đáng để giới thiệu'], comment: 'Không gian mát mẻ, sạch sẽ, phù hợp ghé vào buổi trưa nắng gắt.', wouldRecommend: true, visitDate: '2026-07-28' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Nguyễn Đình Phong', overallRating: 3, tags: ['Hiện vật phong phú'], comment: 'Hiện vật phong phú nhưng một số bảng chú thích đã cũ, khó đọc hết nội dung.', wouldRecommend: true, visitDate: '2026-08-05' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Lâm Thị Yến Nhi', overallRating: 5, tags: ['Hiểu thêm về văn hóa Khmer', 'Đáng để giới thiệu'], comment: 'Ghé qua trước khi đi Chùa Âng, giúp mình hiểu bối cảnh văn hoá trước khi tham quan chùa.', wouldRecommend: true, visitDate: '2026-08-16' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Vũ Thị Hải Yến', overallRating: 5, tags: ['Nhân viên hỗ trợ', 'Nội dung dễ hiểu'], comment: 'Nhân viên nhiệt tình giải thích thêm khi mình hỏi về mặt nạ Rô-băm trưng bày.', wouldRecommend: true, visitDate: '2026-08-25' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Hoàng Văn Đức', overallRating: 4, tags: ['Hiện vật phong phú', 'Không gian trưng bày tốt'], comment: 'Bảo tàng nhỏ gọn nhưng sắp xếp khoa học, đáng ghé nếu thích tìm hiểu lịch sử.', wouldRecommend: true, visitDate: '2026-09-03' }),
-  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Đinh Thị Thu Hà', overallRating: 5, tags: ['Hiểu thêm về văn hóa Khmer', 'Hiện vật phong phú'], comment: 'Kết hợp với chuyến workshop mặt nạ, mình hiểu thêm nhiều về ý nghĩa hiện vật đang trưng bày.', wouldRecommend: true, visitDate: '2026-09-10' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Lý Thị Thu Trang', overallRating: 5, tags: ['rich_collection', 'learn_khmer_culture'], comment: { vi: "Nhiều hiện vật đặc sắc về nhạc cụ và trang phục, đi một vòng mất gần 1 tiếng mà vẫn muốn xem thêm.", en: "Many remarkable artifacts on instruments and costumes — a full walk-through took almost an hour and I still wanted to see more." }, wouldRecommend: true, visitDate: '2026-06-18' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Phạm Nhật Anh', overallRating: 4, tags: ['rich_collection', 'learn_khmer_culture'], comment: { vi: "Nhiều hiện vật thú vị, nếu có thêm audio guide sẽ dễ theo dõi hơn.", en: "Lots of interesting artifacts — an audio guide would make it easier to follow." }, wouldRecommend: true, visitDate: '2026-06-29' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Đỗ Văn Kiên', overallRating: 4, tags: ['clear_content', 'good_display_space'], comment: { vi: "Bố cục trưng bày theo 4 nhóm chủ đề khá rõ ràng, dễ theo mạch tham quan.", en: "The display is organised clearly into 4 theme groups, making it easy to follow the visit." }, wouldRecommend: true, visitDate: '2026-07-06' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Sophie M.', overallRating: 5, tags: ['rich_collection', 'helpful_staff'], comment: { vi: "Nhân viên rất nhiệt tình giải thích về các vật phẩm nghi lễ, một điểm dừng tuyệt vời để hiểu về di sản Khmer.", en: "The staff were very helpful explaining the ritual objects, a great stop to understand Khmer heritage." }, wouldRecommend: true, visitDate: '2026-07-17' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Trịnh Thị Kim Ngân', overallRating: 4, tags: ['good_display_space', 'worth_recommending'], comment: { vi: "Không gian mát mẻ, sạch sẽ, phù hợp ghé vào buổi trưa nắng gắt.", en: "Cool and clean space — a good stop during the harsh midday sun." }, wouldRecommend: true, visitDate: '2026-07-28' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Nguyễn Đình Phong', overallRating: 3, tags: ['rich_collection'], comment: { vi: "Hiện vật phong phú nhưng một số bảng chú thích đã cũ, khó đọc hết nội dung.", en: "Rich collection, but some of the caption boards are worn and hard to read fully." }, wouldRecommend: true, visitDate: '2026-08-05' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Lâm Thị Yến Nhi', overallRating: 5, tags: ['learn_khmer_culture', 'worth_recommending'], comment: { vi: "Ghé qua trước khi đi Chùa Âng, giúp mình hiểu bối cảnh văn hoá trước khi tham quan chùa.", en: "Visiting before Ang Pagoda helped me understand the cultural context before touring the pagoda." }, wouldRecommend: true, visitDate: '2026-08-16' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Vũ Thị Hải Yến', overallRating: 5, tags: ['helpful_staff', 'clear_content'], comment: { vi: "Nhân viên nhiệt tình giải thích thêm khi mình hỏi về mặt nạ Rô-băm trưng bày.", en: "The staff kindly explained more when I asked about the Rô-băm masks on display." }, wouldRecommend: true, visitDate: '2026-08-25' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Hoàng Văn Đức', overallRating: 4, tags: ['rich_collection', 'good_display_space'], comment: { vi: "Bảo tàng nhỏ gọn nhưng sắp xếp khoa học, đáng ghé nếu thích tìm hiểu lịch sử.", en: "A compact museum but well organised — worth visiting if you enjoy learning history." }, wouldRecommend: true, visitDate: '2026-09-03' }),
+  sr({ listingId: 'SITE-06', hostId: 'host-bao-tang-khmer', travellerName: 'Đinh Thị Thu Hà', overallRating: 5, tags: ['learn_khmer_culture', 'rich_collection'], comment: { vi: "Kết hợp với chuyến workshop mặt nạ, mình hiểu thêm nhiều về ý nghĩa hiện vật đang trưng bày.", en: "Combined with the mask-making workshop, I gained a much deeper understanding of the meaning behind the displayed artifacts." }, wouldRecommend: true, visitDate: '2026-09-10' }),
 
   // SITE-07 — Chùa Lò Gạch (hostId: host-chua-lo-gach)
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Bùi Thị Kim Loan', overallRating: 5, tags: ['Không gian yên bình', 'Giá trị văn hóa'], comment: 'Chùa nhỏ nhưng yên tĩnh, cạnh khu khảo cổ Bờ Lũy nên vừa lễ Phật vừa tìm hiểu lịch sử.', wouldRecommend: true, visitDate: '2026-06-19' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Trần Minh Hiếu', overallRating: 5, tags: ['Giá trị văn hóa', 'Dễ tìm đường'], comment: 'Ít khách nên rất yên tĩnh, sư thầy sẵn lòng kể chuyện lịch sử chùa và khu khai quật.', wouldRecommend: true, visitDate: '2026-07-04' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'David N.', overallRating: 4, tags: ['Không gian yên bình', 'Kiến trúc đẹp'], comment: 'A quiet, lesser-known pagoda, interesting to learn it sits next to a national archaeological site.', wouldRecommend: true, visitDate: '2026-07-15' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Nguyễn Thị Cẩm Tú', overallRating: 5, tags: ['Không gian yên bình', 'Cảnh quan sạch sẽ'], comment: 'Không gian trong lành, thoáng đãng, thích hợp cho ai muốn tránh chỗ đông khách.', wouldRecommend: true, visitDate: '2026-07-26' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Lê Văn Quang', overallRating: 5, tags: ['Giá trị văn hóa', 'Không gian yên bình'], comment: 'Đi cùng người thân lớn tuổi, đường vào dễ, không gian rất tĩnh lặng để nghỉ ngơi.', wouldRecommend: true, visitDate: '2026-08-07' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Phạm Thị Bảo Trân', overallRating: 4, tags: ['Dễ tìm đường', 'Giá trị văn hóa'], comment: 'Đường vào hơi nhỏ nhưng dễ tìm nhờ chỉ dẫn trên bản đồ, đáng để kết hợp với xưởng Lâm Phên gần đó.', wouldRecommend: true, visitDate: '2026-08-17' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Nguyễn Hoàng Long', overallRating: 5, tags: ['Không gian yên bình', 'Kiến trúc đẹp'], comment: 'Ít người biết đến nên rất riêng tư, kiến trúc chùa giản dị nhưng có nét đẹp riêng.', wouldRecommend: true, visitDate: '2026-08-26' }),
-  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Tô Thị Diễm My', overallRating: 5, tags: ['Cảnh quan sạch sẽ', 'Giá trị văn hóa'], comment: 'Cảnh quan gọn gàng, sạch sẽ, mình ấn tượng với câu chuyện khu khảo cổ Bờ Lũy bên cạnh.', wouldRecommend: true, visitDate: '2026-09-04' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Bùi Thị Kim Loan', overallRating: 5, tags: ['peaceful_space', 'cultural_value'], comment: { vi: "Chùa nhỏ nhưng yên tĩnh, cạnh khu khảo cổ Bờ Lũy nên vừa lễ Phật vừa tìm hiểu lịch sử.", en: "A small but quiet pagoda, right next to the Bờ Lũy archaeological site — a chance to both pray and learn history." }, wouldRecommend: true, visitDate: '2026-06-19' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Trần Minh Hiếu', overallRating: 5, tags: ['cultural_value', 'easy_wayfinding'], comment: { vi: "Ít khách nên rất yên tĩnh, sư thầy sẵn lòng kể chuyện lịch sử chùa và khu khai quật.", en: "Few visitors, so it's very quiet — the monk was happy to tell us about the pagoda's history and the excavation site." }, wouldRecommend: true, visitDate: '2026-07-04' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'David N.', overallRating: 4, tags: ['peaceful_space', 'beautiful_architecture'], comment: { vi: "Một ngôi chùa yên tĩnh, ít người biết đến, thú vị khi biết chùa nằm cạnh một di tích khảo cổ cấp quốc gia.", en: "A quiet, lesser-known pagoda, interesting to learn it sits next to a national archaeological site." }, wouldRecommend: true, visitDate: '2026-07-15' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Nguyễn Thị Cẩm Tú', overallRating: 5, tags: ['peaceful_space', 'clean_scenery'], comment: { vi: "Không gian trong lành, thoáng đãng, thích hợp cho ai muốn tránh chỗ đông khách.", en: "Fresh, open space — good for anyone wanting to avoid the crowds." }, wouldRecommend: true, visitDate: '2026-07-26' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Lê Văn Quang', overallRating: 5, tags: ['cultural_value', 'peaceful_space'], comment: { vi: "Đi cùng người thân lớn tuổi, đường vào dễ, không gian rất tĩnh lặng để nghỉ ngơi.", en: "Went with an elderly relative — easy access, and a very calm space to rest." }, wouldRecommend: true, visitDate: '2026-08-07' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Phạm Thị Bảo Trân', overallRating: 4, tags: ['easy_wayfinding', 'cultural_value'], comment: { vi: "Đường vào hơi nhỏ nhưng dễ tìm nhờ chỉ dẫn trên bản đồ, đáng để kết hợp với xưởng Lâm Phên gần đó.", en: "The access road is a bit narrow but easy to find with the map directions — worth combining with the nearby Lâm Phên workshop." }, wouldRecommend: true, visitDate: '2026-08-17' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Nguyễn Hoàng Long', overallRating: 5, tags: ['peaceful_space', 'beautiful_architecture'], comment: { vi: "Ít người biết đến nên rất riêng tư, kiến trúc chùa giản dị nhưng có nét đẹp riêng.", en: "Not widely known, so it feels very private — the pagoda's architecture is simple but has its own charm." }, wouldRecommend: true, visitDate: '2026-08-26' }),
+  sr({ listingId: 'SITE-07', hostId: 'host-chua-lo-gach', travellerName: 'Tô Thị Diễm My', overallRating: 5, tags: ['clean_scenery', 'cultural_value'], comment: { vi: "Cảnh quan gọn gàng, sạch sẽ, mình ấn tượng với câu chuyện khu khảo cổ Bờ Lũy bên cạnh.", en: "Tidy, clean grounds — I was impressed by the story of the nearby Bờ Lũy archaeological site." }, wouldRecommend: true, visitDate: '2026-09-04' }),
 ];
 
 // ---------- 5. Dữ liệu tham gia/lượt ghé 12 tháng (09/2025 – 08/2026) ----------
@@ -479,7 +481,7 @@ export const visitMetrics = buildVisitMetrics();
 // booking/trạng thái/dashboard không đổi theo ngày thật máy chạy (xem hostBookingService.js,
 // metricsService.js dùng hằng số này thay vì `new Date()` khi tính "tháng này"/"hôm nay").
 export const DEMO_REFERENCE_DATE = '2026-09-14T09:00:00+07:00';
-export const CURRENT_DEMO_BOOKINGS_VERSION = 2; // tăng số này nếu đổi lại công thức sinh dữ liệu — seed lại 1 lần, không đụng booking/review thật của người dùng
+export const CURRENT_DEMO_BOOKINGS_VERSION = 3; // tăng số này nếu đổi lại công thức sinh dữ liệu — seed lại 1 lần, không đụng booking/review thật của người dùng (v3: customerNote đổi sang object song ngữ { vi, en })
 
 // Phân loại cơ chế tài chính theo ĐÚNG bản chất từng đơn vị (mục 2 yêu cầu 15/09/2026) — không
 // hiển thị "thu nhập hộ" giống nhau cho cả chùa/bảo tàng/hộ kinh doanh. TỪ PHASE "Data Linkage"
@@ -526,7 +528,16 @@ const CUSTOMER_NAME_POOL = [
   'Đoàn hưu trí phường Nguyệt Hóa', 'Sarah Johnson', 'Nhóm Khánh Vy', 'Gia đình Minh Quân',
   'Đoàn sinh viên Ngọc Ánh', 'Nhóm bạn Tuấn Kiệt', 'Gia đình Hà My', 'Nhóm Đức Thịnh',
 ];
-const CUSTOMER_NOTE_POOL = ['Có người lớn tuổi đi cùng, mong hỗ trợ đi lại.', 'Xin hướng dẫn thêm cho trẻ nhỏ trong đoàn.', 'Đoàn đi từ xa đến, mong linh động giờ giấc.', 'Cần chỗ đậu xe cho đoàn đông người.', ''];
+// Ghi chú khách demo — object song ngữ { vi, en }, đọc qua localize() ở nơi hiển thị (không phải
+// nội dung khách thật nhập, xem js/services/hostBookingService.js#normalizeRealBookingItem cho
+// customerNote thật — giữ nguyên văn, không dịch).
+const CUSTOMER_NOTE_POOL = [
+  { vi: 'Có người lớn tuổi đi cùng, mong hỗ trợ đi lại.', en: 'An elderly member is joining — appreciate help getting around.' },
+  { vi: 'Xin hướng dẫn thêm cho trẻ nhỏ trong đoàn.', en: 'Please give extra guidance for the young children in the group.' },
+  { vi: 'Đoàn đi từ xa đến, mong linh động giờ giấc.', en: "We're travelling from far away — hoping for some flexibility on timing." },
+  { vi: 'Cần chỗ đậu xe cho đoàn đông người.', en: 'We need parking space for a large group.' },
+  '',
+];
 
 function classifyGroupType(name) {
   if (/Gia đình/i.test(name)) return 'family';
@@ -696,3 +707,116 @@ export const OPPORTUNITY_COPY_BY_ACTIVITY = {
 export const FORECAST_DISCLAIMER = 'Dự báo được tạo từ xu hướng của dữ liệu mô phỏng 6 tháng gần nhất và chỉ phục vụ mục đích trình diễn prototype — không phải dự báo chính thức của tỉnh Vĩnh Long hay Sở Văn hóa, Thể thao và Du lịch.';
 export const MANAGEMENT_SIMULATED_NOTE = 'Dữ liệu hoạt động và dự báo trong bản mẫu được mô phỏng cho mục đích trình diễn.';
 export const LOW_SAMPLE_NOTE = 'Dữ liệu trong nhóm được chọn còn hạn chế; forecast có thể kém ổn định.';
+
+// ---------- Đề án Host gửi lên Cổng quản lý — NGUỒN DUY NHẤT, dùng chung ở cả Studio (lịch sử đề
+// án của hộ), Cổng dữ liệu quản lý (tab Đề án), notification của Host, và lịch sử xử lý (PHẦN 2,
+// mục 2.7). providerId lấy trực tiếp từ activityCatalog[activityId].providerAccountId — không
+// dùng id giả lập song song với hostId thật, để 1 đề án luôn hiện đúng ở Studio của đúng hộ. ----------
+// title/summary/evidence/requestedChange/expectedImpact/managementNote là object song ngữ
+// { vi, en } — đây là NỘI DUNG MẪU (seed), không phải đề án do host thật nhập (host tự nhập qua
+// Studio thì các field này là string thường, xem js/services/i18nService.js#localize/localizeList
+// tự trả nguyên văn nếu không phải object song ngữ, không cần phân biệt ở nơi đọc).
+export const proposalSeedRecords = [
+  {
+    id: 'PRP-001',
+    providerId: activityCatalog['EXP-01'].providerAccountId,
+    activityId: 'EXP-01',
+    title: { vi: 'Mở thêm suất trải nghiệm cốm dẹp cuối tuần', en: 'Add More Weekend Cốm Dẹp Sessions' },
+    proposalType: 'capacity_expansion',
+    summary: { vi: 'Đề xuất mở thêm một suất trải nghiệm vào cuối tuần để đáp ứng nhu cầu tăng cao.', en: 'Proposal to add an extra weekend session to meet rising demand.' },
+    evidence: {
+      vi: ['Nhu cầu cuối tuần cao hơn ngày thường', 'Một số khung giờ hiện đạt công suất cao'],
+      en: ['Weekend demand is higher than weekdays', 'Some time slots are currently near full capacity'],
+    },
+    requestedChange: { vi: 'Mở thêm suất 16:30–18:00 vào Thứ Bảy và Chủ Nhật.', en: 'Add a 16:30–18:00 session on Saturdays and Sundays.' },
+    expectedImpact: { vi: 'Tăng khả năng phục vụ thêm tối đa 24 khách mỗi cuối tuần.', en: 'Increases capacity to serve up to 24 more guests each weekend.' },
+    submittedAt: '2026-09-13T09:30:00+07:00',
+    status: 'pending_review',
+    managementNote: null,
+    updatedAt: '2026-09-13T09:30:00+07:00',
+  },
+  {
+    id: 'PRP-002',
+    providerId: activityCatalog['EXP-03'].providerAccountId,
+    activityId: 'EXP-03',
+    title: { vi: 'Tổ chức thêm workshop mặt nạ Khmer song song', en: 'Run an Additional Parallel Khmer Mask Workshop' },
+    proposalType: 'capacity_expansion',
+    summary: { vi: 'Đề xuất tổ chức thêm một nhóm workshop song song trong các khung giờ có nhu cầu cao.', en: 'Proposal to run an additional parallel workshop group during high-demand time slots.' },
+    evidence: {
+      vi: ['Capacity hiện tại chỉ 10 khách/lượt', 'Nhu cầu trải nghiệm thủ công đang tăng'],
+      en: ['Current capacity is only 10 guests per session', 'Demand for handicraft experiences is rising'],
+    },
+    requestedChange: { vi: 'Bổ sung một nhóm tối đa 8 khách vào khung 09:30 cuối tuần.', en: 'Add a group of up to 8 guests to the 09:30 weekend slot.' },
+    expectedImpact: { vi: 'Giảm số khách không tìm được time slot phù hợp.', en: 'Reduces the number of guests unable to find a suitable time slot.' },
+    submittedAt: '2026-09-10T14:15:00+07:00',
+    status: 'in_review',
+    managementNote: null,
+    updatedAt: '2026-09-10T14:15:00+07:00',
+  },
+  {
+    id: 'PRP-003',
+    providerId: activityCatalog['EXP-02'].providerAccountId,
+    activityId: 'EXP-02',
+    title: { vi: 'Thử nghiệm suất biểu diễn dành cho nhóm gia đình', en: 'Pilot a Family-Focused Performance Session' },
+    proposalType: 'service_development',
+    summary: { vi: 'Điều chỉnh cách giới thiệu và tương tác để phù hợp hơn với gia đình có trẻ em.', en: 'Adjust the introduction and interaction style to better suit families with children.' },
+    evidence: {
+      vi: ['Gia đình chiếm tỷ trọng lớn trong nhóm khách', 'Khách quan tâm đến hoạt động tương tác văn hóa'],
+      en: ['Families make up a large share of guests', 'Guests are interested in interactive cultural activities'],
+    },
+    requestedChange: { vi: 'Thử nghiệm một suất cuối tuần có phần giới thiệu nhạc cụ và tương tác ngắn với nghệ sĩ.', en: 'Pilot a weekend session with an instrument introduction and a short interaction with the artists.' },
+    expectedImpact: { vi: 'Tăng mức độ phù hợp của trải nghiệm đối với nhóm gia đình.', en: 'Increases how well the experience fits family groups.' },
+    submittedAt: '2026-09-08T10:00:00+07:00',
+    status: 'needs_revision',
+    managementNote: { vi: 'Cần mô tả rõ hơn cách đảm bảo an toàn cho trẻ em khi tương tác với nhạc cụ.', en: 'Please clarify how child safety will be ensured during instrument interaction.' },
+    updatedAt: '2026-09-09T08:00:00+07:00',
+  },
+];
+
+// ---------- Nội dung Host đề xuất qua "Thêm trải nghiệm" (Studio) — NGUỒN DUY NHẤT, dùng chung ở
+// lịch sử "Thêm trải nghiệm" của Host, tab Kiểm duyệt nội dung (Cổng vận hành) và notification của
+// Host (PHẦN 3, mục 3.3-3.4). Activity CHƯA vào Activity Catalog/Customer Interface cho tới khi
+// được duyệt — xem approveContentSubmission() trong storage.js. ----------
+// name/category/description/tags/proposedSchedule.days là object song ngữ { vi, en } — NỘI DUNG
+// MẪU (seed); đề xuất do host thật gửi qua Studio thì các field này là string/mảng string thường
+// (xem js/services/i18nService.js#localize/localizeList).
+export const contentSubmissionSeedRecords = [
+  {
+    id: 'SUB-EXP-001',
+    providerId: activityCatalog['EXP-01'].providerAccountId,
+    submissionType: 'new_experience',
+    proposedActivityId: null,
+    name: { vi: 'Trải nghiệm cốm dẹp dành cho gia đình', en: 'Family Cốm Dẹp Experience' },
+    category: { vi: 'Ẩm thực và văn hóa', en: 'Cuisine & Culture' },
+    description: { vi: 'Phiên bản trải nghiệm ngắn dành cho gia đình, tập trung vào hoạt động giã cốm và thưởng thức thành phẩm.', en: 'A shorter family version of the experience, focused on pounding the rice and enjoying the finished cốm.' },
+    pricePerPerson: 150000,
+    durationMinutes: 60,
+    capacity: 8,
+    proposedSchedule: { days: { vi: ['Thứ Bảy', 'Chủ Nhật'], en: ['Saturday', 'Sunday'] }, timeSlots: ['09:00', '14:30'] },
+    tags: { vi: ['Gia đình', 'Ẩm thực địa phương', 'Trải nghiệm thực hành'], en: ['Family', 'Local food', 'Hands-on experience'] },
+    images: [],
+    submittedAt: '2026-09-14T10:20:00+07:00',
+    status: 'pending_review',
+    reviewerNote: null,
+    reviewedAt: null,
+  },
+  {
+    id: 'SUB-EXP-002',
+    providerId: activityCatalog['EXP-03'].providerAccountId,
+    submissionType: 'new_experience',
+    proposedActivityId: null,
+    name: { vi: 'Workshop tô màu mặt nạ Khmer mini cho trẻ em', en: 'Mini Khmer Mask Coloring Workshop for Kids' },
+    category: { vi: 'Thủ công và nghệ thuật', en: 'Handicraft & Art' },
+    description: { vi: 'Workshop ngắn giúp trẻ em tìm hiểu họa tiết Khmer thông qua hoạt động tô màu mặt nạ mini.', en: 'A short workshop that helps children learn about Khmer motifs through painting a mini mask.' },
+    pricePerPerson: 160000,
+    durationMinutes: 60,
+    capacity: 8,
+    proposedSchedule: { days: { vi: ['Thứ Bảy', 'Chủ Nhật'], en: ['Saturday', 'Sunday'] }, timeSlots: ['09:30', '14:30'] },
+    tags: { vi: ['Trẻ em', 'Gia đình', 'Thủ công', 'Văn hóa Khmer'], en: ['Children', 'Family', 'Handicraft', 'Khmer culture'] },
+    images: [],
+    submittedAt: '2026-09-12T15:45:00+07:00',
+    status: 'in_review',
+    reviewerNote: null,
+    reviewedAt: null,
+  },
+];

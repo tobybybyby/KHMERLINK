@@ -5,10 +5,54 @@
 import { historicalMetrics, visitMetrics, MONTHS_12, TIMEZONE, DEMO_REFERENCE_DATE } from '../../data/pilot-seed-data.js';
 import { getRatingStatsForListingIds, getTagShareForListings, getRecommendRate, getDisplayReviewsForListingIds } from './reviewsService.js';
 import { getProviderMetrics, getCurrentPeriod } from './hostBookingService.js';
+import { t, localize, registerTranslations, getCurrentLanguage } from './i18nService.js';
+import { localizeTag } from './tagCatalog.js';
+
+registerTranslations('host', {
+  recommendations: {
+    strengthTitle: 'Điểm mạnh: "{tag}"',
+    strengthBasis: '{count}/{total} lượt chọn tag gần đây nhắc đến "{tag}".',
+    strengthAction: 'Có thể nhấn mạnh điểm này trong mô tả trải nghiệm hoặc ảnh đại diện.',
+    opportunityTitle: 'Cơ hội cải thiện: "{tag}"',
+    opportunityBasis: 'Chỉ {count}/{total} lượt chọn tag nhắc đến "{tag}" — thấp nhất trong các tag được chọn.',
+    opportunityAction: 'Cân nhắc xem đây có phải điểm cần đầu tư thêm không.',
+    lowRatedTitle: '{count} phản hồi từ 3 sao trở xuống cần xem lại',
+    lowRatedAction: 'Xem chi tiết trong danh sách phản hồi gần đây bên dưới.',
+    keywordTitle: 'Gợi ý liên quan: {label}',
+    keywordBasis: '{count}/{total} phản hồi gần đây nhắc đến "{keyword}".',
+    keywordAction: 'Cân nhắc bổ sung {label}.',
+    keyword: {
+      shadeWater: 'nhu cầu bóng mát/nước uống',
+      coldWater: 'nhu cầu nước uống lạnh',
+      directions: 'chỉ dẫn đường đi',
+      audioGuide: 'thuyết minh/audio guide',
+    },
+  },
+}, {
+  recommendations: {
+    strengthTitle: 'Strength: "{tag}"',
+    strengthBasis: '{count}/{total} recent tag selections mention "{tag}".',
+    strengthAction: 'Consider highlighting this in the experience description or cover photo.',
+    opportunityTitle: 'Opportunity to improve: "{tag}"',
+    opportunityBasis: 'Only {count}/{total} tag selections mention "{tag}" — the lowest among selected tags.',
+    opportunityAction: 'Consider whether this is worth investing more in.',
+    lowRatedTitle: '{count} reviews rated 3 stars or below need a look',
+    lowRatedAction: 'See details in the recent feedback list below.',
+    keywordTitle: 'Related suggestion: {label}',
+    keywordBasis: '{count}/{total} recent reviews mention "{keyword}".',
+    keywordAction: 'Consider adding {label}.',
+    keyword: {
+      shadeWater: 'shade/drinking water availability',
+      coldWater: 'cold drinking water availability',
+      directions: 'wayfinding/directions',
+      audioGuide: 'narration/audio guide',
+    },
+  },
+});
 
 export function monthLabel(monthKey) {
   const [y, m] = monthKey.split('-');
-  return `T${Number(m)}/${y}`;
+  return getCurrentLanguage() === 'vi' ? `T${Number(m)}/${y}` : `${Number(m)}/${y}`;
 }
 
 // Mốc "hiện tại" dùng DEMO_REFERENCE_DATE cố định (không phải `new Date()` thật) — khớp với
@@ -102,9 +146,22 @@ export function getTopTagShares(state, listingIds, topN = 5) {
   const top = sorted.slice(0, topN);
   const restCount = sorted.slice(topN).reduce((s, [, c]) => s + c, 0);
   const items = top.map(([tag, count]) => ({ tag, count, share: totalSelections ? count / totalSelections : 0 }));
-  if (restCount > 0) items.push({ tag: 'Khác', count: restCount, share: totalSelections ? restCount / totalSelections : 0 });
+  // tag: '__other__' — sentinel KHÔNG phải canonical tag ID, nơi hiển thị (studio/reports.js) tự
+  // dịch nhãn "Khác/Other" qua t(), không tra tagCatalog cho sentinel này.
+  if (restCount > 0) items.push({ tag: '__other__', count: restCount, share: totalSelections ? restCount / totalSelections : 0 });
   return { items, totalSelections };
 }
+
+// Bảng từ khoá dò trong BÌNH LUẬN THẬT của khách (luôn tiếng Việt, không tự dịch nội dung người
+// dùng nhập — xem PHẦN 9 yêu cầu i18n) — nên khớp theo từ khoá tiếng Việt bất kể ngôn ngữ giao
+// diện đang chọn là gì. Chỉ NHÃN hiển thị (labelKey) mới đổi theo ngôn ngữ hiện tại.
+const KEYWORD_MAP = {
+  'nóng': 'shadeWater',
+  'thiếu nước': 'coldWater',
+  'khó tìm': 'directions',
+  'thiếu audio': 'audioGuide',
+  'audio guide': 'audioGuide',
+};
 
 /** Gợi ý cải thiện cho Host, có căn cứ số liệu cụ thể — không tự bịa tỷ lệ không có trong dữ liệu. */
 export function generateHostRecommendations(state, hostId) {
@@ -117,21 +174,23 @@ export function generateHostRecommendations(state, hostId) {
 
   if (tagItems.length) {
     const top = tagItems[0];
+    const topLabel = top.tag === '__other__' ? t('host.reports.otherTag') : localizeTag(top.tag);
     recs.push({
       id: `rec-strength-${hostId}`,
       kind: 'strength',
-      title: `Điểm mạnh: "${top.tag}"`,
-      basis: `${top.count}/${tagItems.reduce((s, t) => s + t.count, 0)} lượt chọn tag gần đây nhắc đến "${top.tag}".`,
-      action: 'Có thể nhấn mạnh điểm này trong mô tả trải nghiệm hoặc ảnh đại diện.',
+      title: t('host.recommendations.strengthTitle', { tag: topLabel }),
+      basis: t('host.recommendations.strengthBasis', { count: top.count, total: tagItems.reduce((s, tg) => s + tg.count, 0), tag: topLabel }),
+      action: t('host.recommendations.strengthAction'),
     });
-    const weakest = [...tagItems].filter((t) => t.tag !== 'Khác').sort((a, b) => a.count - b.count)[0];
+    const weakest = [...tagItems].filter((tg) => tg.tag !== '__other__').sort((a, b) => a.count - b.count)[0];
     if (weakest && weakest.tag !== top.tag) {
+      const weakestLabel = localizeTag(weakest.tag);
       recs.push({
         id: `rec-opportunity-${hostId}`,
         kind: 'opportunity',
-        title: `Cơ hội cải thiện: "${weakest.tag}"`,
-        basis: `Chỉ ${weakest.count}/${tagItems.reduce((s, t) => s + t.count, 0)} lượt chọn tag nhắc đến "${weakest.tag}" — thấp nhất trong các tag được chọn.`,
-        action: 'Cân nhắc xem đây có phải điểm cần đầu tư thêm không.',
+        title: t('host.recommendations.opportunityTitle', { tag: weakestLabel }),
+        basis: t('host.recommendations.opportunityBasis', { count: weakest.count, total: tagItems.reduce((s, tg) => s + tg.count, 0), tag: weakestLabel }),
+        action: t('host.recommendations.opportunityAction'),
       });
     }
   }
@@ -141,25 +200,28 @@ export function generateHostRecommendations(state, hostId) {
     recs.push({
       id: `rec-lowrated-${hostId}`,
       kind: 'issue',
-      title: `${lowRated.length} phản hồi từ 3 sao trở xuống cần xem lại`,
-      basis: lowRated.slice(0, 2).map((r) => `"${r.comment}"`).join(' · '),
-      action: 'Xem chi tiết trong danh sách phản hồi gần đây bên dưới.',
+      title: t('host.recommendations.lowRatedTitle', { count: lowRated.length }),
+      basis: lowRated.slice(0, 2).map((r) => `"${localize(r.comment)}"`).join(' · '),
+      action: t('host.recommendations.lowRatedAction'),
     });
   }
 
-  const keywordMap = { 'nóng': 'nhu cầu bóng mát/nước uống', 'thiếu nước': 'nhu cầu nước uống lạnh', 'khó tìm': 'chỉ dẫn đường đi', 'thiếu audio': 'thuyết minh/audio guide', 'audio guide': 'thuyết minh/audio guide' };
   const keywordHits = {};
   reviews.forEach((r) => {
-    const text = (r.comment || '').toLowerCase();
-    Object.keys(keywordMap).forEach((kw) => { if (text.includes(kw)) { keywordHits[kw] = (keywordHits[kw] || 0) + 1; } });
+    // Dò từ khoá TIẾNG VIỆT trong nội dung gốc — luôn dùng bản .vi (kể cả khi UI đang English) vì
+    // đây là bảng từ khoá cố định tiếng Việt, không phải nội dung hiển thị (xem KEYWORD_MAP ở trên).
+    const raw = r.comment && typeof r.comment === 'object' ? (r.comment.vi ?? r.comment.en ?? '') : (r.comment || '');
+    const text = raw.toLowerCase();
+    Object.keys(KEYWORD_MAP).forEach((kw) => { if (text.includes(kw)) { keywordHits[kw] = (keywordHits[kw] || 0) + 1; } });
   });
   Object.entries(keywordHits).forEach(([kw, count]) => {
+    const label = t(`host.recommendations.keyword.${KEYWORD_MAP[kw]}`);
     recs.push({
       id: `rec-keyword-${hostId}-${kw}`,
       kind: 'opportunity',
-      title: `Gợi ý liên quan: ${keywordMap[kw]}`,
-      basis: `${count}/${reviews.length} phản hồi gần đây nhắc đến "${kw}".`,
-      action: `Cân nhắc bổ sung ${keywordMap[kw]}.`,
+      title: t('host.recommendations.keywordTitle', { label }),
+      basis: t('host.recommendations.keywordBasis', { count, total: reviews.length, keyword: kw }),
+      action: t('host.recommendations.keywordAction', { label }),
     });
   });
 

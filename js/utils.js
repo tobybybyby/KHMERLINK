@@ -1,3 +1,5 @@
+import { t, getCurrentLanguage, formatCurrency as i18nFormatCurrency, formatMoney as i18nFormatMoney, formatDate as i18nFormatDate } from './services/i18nService.js';
+
 export function escapeHtml(value) {
   const str = value === null || value === undefined ? '' : String(value);
   return str
@@ -21,16 +23,15 @@ export function matchesQuery(text, query) {
   return stripDiacritics(text).includes(stripDiacritics(query));
 }
 
+/** Vẫn dùng VND cho cả 2 ngôn ngữ, chỉ đổi CÁCH hiển thị (xem i18nService.js) — 0 hiện "Miễn
+ * phí"/"Free". Giữ tên hàm cũ vì rất nhiều nơi đang import formatCurrency từ utils.js. */
 export function formatCurrency(vnd) {
-  if (vnd === 0) return 'Miễn phí';
-  if (vnd === null || vnd === undefined) return '—';
-  return new Intl.NumberFormat('vi-VN').format(vnd) + ' đ';
+  return i18nFormatCurrency(vnd);
 }
 
-/** Dùng cho số tiền tài chính (doanh thu, giải ngân, thanh toán) — 0 hiện "0 đ", không phải "Miễn phí". */
+/** Dùng cho số tiền tài chính (doanh thu, giải ngân, thanh toán) — 0 hiện đúng số 0, không phải "Miễn phí". */
 export function formatMoney(vnd) {
-  if (vnd === null || vnd === undefined) return '—';
-  return new Intl.NumberFormat('vi-VN').format(vnd) + ' đ';
+  return i18nFormatMoney(vnd);
 }
 
 /** Giá/khách của 1 hoạt động trong tour/hành trình (Activity Catalog) — phân biệt RÕ "Miễn phí"
@@ -39,16 +40,15 @@ export function formatMoney(vnd) {
  * phí: nơi gọi PHẢI dùng `activity?.pricePerPerson ?? null`, KHÔNG dùng `... || 0` (biến giá chưa
  * biết thành 0, bị hàm này hiểu nhầm thành miễn phí thật). */
 export function formatActivityPrice(pricePerPerson) {
-  if (pricePerPerson === 0) return 'Miễn phí';
+  if (pricePerPerson === 0) return t('common.price.free');
   const n = Number(pricePerPerson);
-  if (pricePerPerson === null || pricePerPerson === undefined || !Number.isFinite(n)) return 'Đang cập nhật giá';
-  return `${n.toLocaleString('vi-VN')}₫/khách`;
+  if (pricePerPerson === null || pricePerPerson === undefined || !Number.isFinite(n)) return t('common.price.updating');
+  const amount = getCurrentLanguage() === 'vi' ? `${n.toLocaleString('vi-VN')}₫` : `VND ${n.toLocaleString('en-US')}`;
+  return t('common.price.perGuest', { amount });
 }
 
 export function formatDateShort(isoOrDate) {
-  const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return i18nFormatDate(isoOrDate);
 }
 
 export function formatTimeRange(startHHmm, endHHmm) {
@@ -85,7 +85,8 @@ export function minutesBetween(a, b) {
 }
 
 export function formatTimeHHmm(date) {
-  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const locale = getCurrentLanguage() === 'vi' ? 'vi-VN' : 'en-US';
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 export function formatDateTimeShort(date) {
@@ -93,17 +94,17 @@ export function formatDateTimeShort(date) {
 }
 
 export function formatDurationMin(min) {
-  if (min < 60) return `${min} phút`;
+  if (min < 60) return t('common.duration.minutes', { count: min });
   const h = Math.floor(min / 60);
   const rem = min % 60;
-  return rem ? `${h} giờ ${rem} phút` : `${h} giờ`;
+  return rem ? t('common.duration.hoursMinutes', { hours: h, minutes: rem }) : t('common.duration.hours', { count: h });
 }
 
 const CROWD_LEVELS = [
-  { key: 'vang', label: 'Vắng', color: '#2f7d4f' },
-  { key: 'vua', label: 'Vừa', color: '#c8862e' },
-  { key: 'dong', label: 'Đông', color: '#b3413a' },
-  { key: 'gan-het', label: 'Gần hết sức chứa', color: '#7a1f1f' },
+  { key: 'vang', labelKey: 'common.crowd.vang', color: '#2f7d4f' },
+  { key: 'vua', labelKey: 'common.crowd.vua', color: '#c8862e' },
+  { key: 'dong', labelKey: 'common.crowd.dong', color: '#b3413a' },
+  { key: 'gan-het', labelKey: 'common.crowd.ganHet', color: '#7a1f1f' },
 ];
 
 function hashString(str) {
@@ -120,7 +121,7 @@ export function getSimulatedCrowdLevel(destinationId, atDate = new Date()) {
   const dayKey = atDate.toISOString().slice(0, 10);
   const h = hashString(`${destinationId}|${dayKey}|${hourBucket}`);
   const level = CROWD_LEVELS[h % CROWD_LEVELS.length];
-  return { ...level, updatedAt: atDate };
+  return { ...level, label: t(level.labelKey), updatedAt: atDate };
 }
 
 export function debounce(fn, wait = 250) {
@@ -192,8 +193,39 @@ export function deriveCategoryVisual(rawCategory) {
   return { group: text || 'Khác', emoji: '📍', color: hashColor(text) };
 }
 
+// group (tiếng Việt, trả về bởi deriveCategoryVisual/categoryGroup) được dùng làm KHOÁ nội bộ ở
+// nhiều nơi (giá trị <option>, so sánh filter đang chọn...) — đổi ngôn ngữ KHÔNG được làm khoá này
+// đổi theo (sẽ làm filter Management đang chọn bị vô hiệu khi chuyển VI/EN, phá acceptance test
+// "đổi ngôn ngữ không đổi filter"). Vì vậy tách riêng: group vẫn luôn là tiếng Việt (ổn định), còn
+// hàm dưới đây CHỈ dùng để hiển thị — dịch nhãn group sang ngôn ngữ hiện tại mà không đổi khoá.
+const CATEGORY_GROUP_I18N_KEY = {
+  'Chùa Khmer': 'common.category.chuaKhmer',
+  'Bảo tàng': 'common.category.baoTang',
+  'Thủ công': 'common.category.thuCong',
+  'Ẩm thực': 'common.category.amThuc',
+  'Âm nhạc và biểu diễn': 'common.category.amNhacBieuDien',
+  'Địa điểm văn hóa': 'common.category.diaDiemVanHoa',
+  'Tôn giáo': 'common.category.tonGiao',
+  'Bảo tàng / Di tích': 'common.category.baoTangDiTich',
+  'Khu tưởng niệm': 'common.category.khuTuongNiem',
+  'Nhà cổ': 'common.category.nhaCo',
+  'Thiên nhiên': 'common.category.thienNhien',
+  'Làng nghề & cộng đồng': 'common.category.langNgheCongDong',
+  'Khu vui chơi': 'common.category.khuVuiChoi',
+  'Trải nghiệm tại hộ dân': 'common.category.traiNghiemHoDan',
+  'Lễ hội': 'common.category.leHoi',
+  'Khác': 'common.category.khac',
+};
+
+/** Nhãn HIỂN THỊ (dịch theo ngôn ngữ hiện tại) cho 1 group — dùng ở label/option text/chart,
+ * KHÔNG dùng làm value/khoá so sánh (dùng categoryGroup()/deriveCategoryVisual().group cho việc đó). */
+export function categoryGroupLabel(groupVi) {
+  const key = CATEGORY_GROUP_I18N_KEY[groupVi];
+  return key ? t(key) : (groupVi || t('common.category.khac'));
+}
+
 export function categoryLabel(cat) {
-  return cat || 'Khác';
+  return cat || t('common.category.khac');
 }
 
 export function categoryEmoji(cat) {
@@ -242,7 +274,7 @@ export function placeholderImageDataUri(category, label) {
   <rect width="480" height="270" fill="url(#g)"/>
   <text x="240" y="120" font-size="64" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
   <text x="240" y="170" font-size="16" fill="#ffffff" text-anchor="middle" font-family="Segoe UI, sans-serif" opacity="0.9">${safeLabel}</text>
-  <text x="240" y="196" font-size="12" fill="#ffffff" text-anchor="middle" font-family="Segoe UI, sans-serif" opacity="0.7">Ảnh minh hoạ</text>
+  <text x="240" y="196" font-size="12" fill="#ffffff" text-anchor="middle" font-family="Segoe UI, sans-serif" opacity="0.7">${escapeHtml(t('common.illustrativeImage'))}</text>
 </svg>`.trim();
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
@@ -260,28 +292,29 @@ export function renderStars(rating) {
 /** An toàn khi rating chưa có dữ liệu (vd 7 listing pilot chưa có đánh giá thật) — không được
  * gọi .toFixed() trực tiếp trên rating có thể null ở bất kỳ đâu khác ngoài hàm này. */
 export function ratingDisplay(rating) {
-  return typeof rating === 'number' ? `⭐ ${rating.toFixed(1)}` : 'Chưa có đánh giá';
+  return typeof rating === 'number' ? `⭐ ${rating.toFixed(1)}` : t('common.rating.none');
 }
 
 // Nhãn/CTA theo listingType + trạng thái booking — dùng chung cho card Khám phá và trang chi tiết
 // (xem PHASE "Thu gọn dữ liệu thành pilot 7 listing Khmer" mục 5).
 const LISTING_TYPE_BADGE = {
-  site: { label: 'Điểm tham quan', cls: 'badge-type' },
-  cluster: { label: 'Cụm điểm đến', cls: 'badge-demo' },
-  experience: { label: 'Trải nghiệm đề xuất', cls: 'badge-new' },
-  multiStopExperience: { label: 'Trải nghiệm đề xuất — 2 điểm dừng', cls: 'badge-new' },
+  site: { labelKey: 'common.listingType.site', cls: 'badge-type' },
+  cluster: { labelKey: 'common.listingType.cluster', cls: 'badge-demo' },
+  experience: { labelKey: 'common.listingType.experience', cls: 'badge-new' },
+  multiStopExperience: { labelKey: 'common.listingType.multiStopExperience', cls: 'badge-new' },
 };
 
 export function listingTypeBadge(listingType) {
-  return LISTING_TYPE_BADGE[listingType] || { label: 'Điểm tham quan', cls: 'badge-type' };
+  const entry = LISTING_TYPE_BADGE[listingType] || LISTING_TYPE_BADGE.site;
+  return { label: t(entry.labelKey), cls: entry.cls };
 }
 
 const CTA_LABELS = {
-  interested: 'Quan tâm trải nghiệm',
-  notify: 'Đăng ký nhận thông báo',
-  preparing: 'Đang chuẩn bị pilot',
+  interested: 'common.cta.interested',
+  notify: 'common.cta.notify',
+  preparing: 'common.cta.preparing',
 };
 
 export function ctaLabel(ctaKind) {
-  return CTA_LABELS[ctaKind] || 'Quan tâm trải nghiệm';
+  return t(CTA_LABELS[ctaKind] || CTA_LABELS.interested);
 }

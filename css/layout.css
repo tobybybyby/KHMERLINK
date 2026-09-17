@@ -5,7 +5,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
 }
 
 .trail-topbar {
@@ -17,7 +17,8 @@
   color: #fff;
   display: flex;
   align-items: center;
-  padding: var(--space-2) var(--space-4);
+  padding-block: var(--space-2);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
   gap: var(--space-3);
   box-shadow: var(--shadow-sm);
 }
@@ -30,6 +31,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 .trail-topbar__brand:hover { text-decoration: none; }
 .trail-topbar__back {
@@ -37,8 +43,19 @@
   background: rgba(255,255,255,0.15);
   border-radius: var(--radius-pill);
   padding: 8px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.trail-topbar__spacer { flex: 1; }
+.trail-topbar__spacer { flex: 1; min-width: var(--space-2); }
+
+/* Tiếng Anh dài hơn tiếng Việt đáng kể ở nhãn thương hiệu/nút quay lại (vd "Management Data
+   Portal", "← Management Portal") — trên màn hẹp (≤480px), ưu tiên co gọn tên thương hiệu (ellipsis,
+   đã có ở trên) và cho topbar tự xuống dòng thay vì tràn ngang, thay vì cắt cứng nút quay lại/ngôn
+   ngữ (cả hai đều cần giữ nguyên văn bản đầy đủ vì lý do khả dụng/rõ nghĩa). */
+@media (max-width: 480px) {
+  .trail-topbar { flex-wrap: wrap; row-gap: 6px; }
+  .trail-topbar__brand { max-width: 100%; flex-basis: 100%; order: -1; }
+}
 .trail-topbar__bell {
   position: relative;
   color: #fff;
@@ -76,7 +93,9 @@
 .bottom-nav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  height: var(--bottom-nav-height);
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   display: flex;
@@ -109,12 +128,31 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
   background: var(--color-cream);
 }
 .studio-body { flex: 1; display: flex; min-height: 0; }
 .studio-sidebar { display: none; }
-.studio-content { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: var(--space-4); gap: var(--space-4); }
+.studio-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding-block: var(--space-4);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  gap: var(--space-4);
+  box-sizing: border-box;
+}
+/* Con trực tiếp là flex item trong flex-column — mặc định min-width:auto khiến item không co lại
+   dưới độ rộng nội dung intrinsic (vd bảng nhiều cột với white-space:nowrap, dài hơn hẳn khi text
+   tiếng Anh dài hơn tiếng Việt), đẩy tràn ngang toàn trang dù bên trong đã có overflow-x:auto riêng
+   (overflow-x:auto chỉ kiểm soát được cuộn SAU KHI đã có bề rộng — không tự co bề rộng flex item).
+   Áp dụng cho mọi trang dùng .studio-content (Cổng dữ liệu quản lý/Cổng vận hành/Studio). */
+.studio-content > * { min-width: 0; }
+.studio-data-label-row {
+  padding-block: var(--space-2) 0;
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+}
 .host-switcher-label { color: #fff; opacity: 0.85; flex-shrink: 0; white-space: nowrap; }
 .host-switcher {
   max-width: 220px;
@@ -130,6 +168,86 @@
 @media (max-width: 480px) {
   .host-switcher-label { display: none; } /* nhãn nhìn thấy chỉ hiện khi đủ chỗ — aria-label vẫn giữ khả năng tiếp cận trên mobile */
   .host-switcher { max-width: 150px; }
+}
+
+/* ---------- Language switcher: nút tròn tối giản (Home + shared header của cả 4 cổng) ----------
+   1 nút duy nhất hiện mã ngôn ngữ ĐANG DÙNG (VI/EN), bấm là đổi sang ngôn ngữ còn lại — không phải
+   segmented control 2 nút/dropdown. Nền sáng cố định (không phân biệt nền tối/sáng của trang chứa)
+   vì border+shadow đã đủ tương phản trên cả topbar nâu đậm lẫn nền kem sáng (card Cá nhân). */
+.language-toggle {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid rgba(107, 68, 35, 0.25); /* ~ color-primary với alpha thấp */
+  box-shadow: 0 2px 8px rgba(43, 32, 22, 0.14);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.language-toggle:hover { background: var(--color-cream); border-color: var(--color-accent); }
+.language-toggle:active { transform: scale(0.96); }
+.language-toggle:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+
+/* Vùng chạm mở rộng tới ~44px trên mobile mà không đổi kích thước hình tròn hiển thị (pseudo-element
+   trong suốt, không ảnh hưởng layout xung quanh vì position:absolute không chiếm không gian). */
+.language-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+/* Tooltip nhỏ CSS thuần, hiện khi hover LẪN khi focus bàn phím (khác với thuộc tính title chỉ hiện
+   khi hover chuột) — nội dung lấy từ data-tooltip để không lặp lại chuỗi trong HTML. */
+.language-toggle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  white-space: nowrap;
+  background: var(--color-primary-dark);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: var(--z-nav);
+}
+.language-toggle:hover::after,
+.language-toggle:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Đặt nổi ở góc trên-phải khi header không phải flexbox (Home/Cổng quản lý) — các shared header còn
+   lại (trail/studio/admin/ops) đã là flex row sẵn, chỉ cần đặt nút làm phần tử cuối cùng, không cần
+   position:absolute (tránh che nội dung khi cuộn, đúng yêu cầu). */
+.language-toggle--floating {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 20;
+}
+
+@media (max-width: 480px) {
+  .language-toggle { width: 36px; height: 36px; min-width: 36px; }
 }
 
 @media (min-width: 768px) {
@@ -155,7 +273,7 @@
   }
   .studio-sidebar__item:hover { background: var(--color-primary-soft); text-decoration: none; }
   .studio-sidebar__item[aria-current="page"] { background: var(--color-primary-soft); color: var(--color-primary-dark); }
-  .studio-content { padding: var(--space-6); }
+  .studio-content { padding-block: var(--space-6); padding-inline: var(--space-6); }
 }
 
 /* ---------- Bảng dữ liệu dùng ở Cổng dữ liệu quản lý / Cổng vận hành ---------- */
@@ -187,7 +305,8 @@
 .explore-page { flex: 1; display: flex; flex-direction: column; }
 
 .explore-toolbar {
-  padding: var(--space-3) var(--space-4);
+  padding-block: var(--space-3);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
@@ -214,7 +333,8 @@
 }
 
 .explore-category-row {
-  padding: 0 var(--space-4) var(--space-3);
+  padding-block: 0 var(--space-3);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
   background: var(--color-cream);
   display: flex;
   gap: var(--space-2);
@@ -222,7 +342,8 @@
 }
 
 .explore-stats {
-  padding: var(--space-2) var(--space-4);
+  padding-block: var(--space-2);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
   font-size: 0.85rem;
   color: var(--color-text-muted);
   background: var(--color-cream);
@@ -278,7 +399,14 @@
 .explore-panel__handle { display: none; }
 .explore-panel__body { flex: 1; overflow-y: auto; }
 
-.explore-sections { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-5); }
+.explore-sections {
+  padding-block: var(--space-4);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-sizing: border-box;
+}
 
 .place-grid {
   display: grid;
@@ -323,7 +451,10 @@
     flex-shrink: 0;
   }
   .explore-panel__grip { width: 44px; height: 5px; border-radius: var(--radius-pill); background: var(--color-border-strong); }
-  .explore-panel__body { padding: 0 var(--space-4) var(--space-4); }
+  .explore-panel__body {
+    padding-block: 0 var(--space-4);
+    padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  }
 }
 
 /* ---------- Place detail ---------- */
@@ -339,7 +470,17 @@
   background: var(--color-primary-soft);
   flex-shrink: 0;
 }
-.place-detail__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4); max-width: 900px; margin: 0 auto; width: 100%; }
+.place-detail__body {
+  padding-block: var(--space-4);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .quick-facts {
   display: grid;
@@ -356,7 +497,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6) var(--space-4);
+  padding-block: var(--space-6);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  box-sizing: border-box;
 }
 .coming-soon {
   max-width: 480px;
@@ -369,6 +512,7 @@
 
 /* ---------- Welcome ---------- */
 .welcome-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -482,6 +626,7 @@
   );
 }
 .welcome-page--hero > * { position: relative; z-index: 2; }
+.welcome-page--hero .language-toggle--floating { position: absolute; z-index: 20; }
 .welcome-page--hero .welcome-title { color: var(--khmer-warm-ivory); text-shadow: 0 2px 16px rgba(0,0,0,0.6); }
 .welcome-page--hero .welcome-subtitle { color: var(--khmer-antique-gold); text-shadow: 0 1px 10px rgba(0,0,0,0.55); opacity: 1; }
 .welcome-page--hero .welcome-tagline { color: var(--khmer-warm-ivory); text-shadow: 0 1px 8px rgba(0,0,0,0.65); }
@@ -493,4 +638,34 @@
 .welcome-divider { display: block; margin: var(--space-3) auto 0; }
 
 /* ---------- Profile / demo page ---------- */
-.profile-page { padding: var(--space-4); max-width: 640px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
+.profile-page {
+  padding-block: var(--space-4);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left)) max(var(--space-4), env(safe-area-inset-right));
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-sizing: border-box;
+}
+/* Trang Trip Builder (giỏ hành trình + tạo hành trình mới) cần rộng hơn để 2 lựa chọn đặt
+   cạnh nhau cân bằng trên desktop — xem .trip-builder-grid bên dưới. */
+.profile-page--wide { max-width: 960px; }
+
+/* Khu vực "2 lựa chọn tạo hành trình": giỏ hành trình (từ điểm đã chọn) + tạo hành trình mới
+   (AI customisation). 1 cột trên mobile theo đúng thứ tự DOM, 2 cột cân bằng từ tablet trở lên. */
+.trip-builder-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  width: 100%;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .trip-builder-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+}
+.trip-builder-grid > * { min-width: 0; width: 100%; margin: 0; }

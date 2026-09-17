@@ -4,6 +4,59 @@
 import { getState } from '../storage.js';
 import { getSlotRemaining } from './bookingService.js';
 import { getRatingStatsForListingIds } from './reviewsService.js';
+import { t, registerTranslations } from './i18nService.js';
+
+registerTranslations('host', {
+  cps: {
+    status: {
+      'new-spotlight': 'New Spotlight (hộ mới)',
+      'needs-improvement': 'Cần cải thiện (nội bộ)',
+      standard: 'Standard (nội bộ)',
+      'recognized-eligible': 'Đủ điều kiện đề xuất "Được ghi nhận"',
+    },
+  },
+}, {
+  cps: {
+    status: {
+      'new-spotlight': 'New Spotlight (new provider)',
+      'needs-improvement': 'Needs Improvement (internal)',
+      standard: 'Standard (internal)',
+      'recognized-eligible': 'Eligible for "Recognized" status',
+    },
+  },
+});
+
+registerTranslations('host', {
+  suggestions: {
+    missingDescTitle: 'Bổ sung mô tả cho "{title}"',
+    missingDescBasis: 'Mô tả hiện tại dưới 20 ký tự — khách khó hình dung trải nghiệm.',
+    missingDescAction: 'Vào "Trải nghiệm" → chỉnh sửa mô tả chi tiết hơn.',
+    missingCondTitle: 'Thêm điều kiện phù hợp cho "{title}"',
+    missingCondBasis: 'Chưa có ghi chú điều kiện tham gia (độ tuổi, thể lực...).',
+    missingCondAction: 'Bổ sung điều kiện để khách chọn đúng nhu cầu.',
+    viewsNoBookingTitle: 'Nhiều lượt xem nhưng chưa có booking{dest}',
+    viewsNoBookingBasis: '{views} lượt xem trang chi tiết trong phiên demo này, 0 booking hiệu lực.',
+    viewsNoBookingAction: 'Xem lại giá, ảnh hoặc mô tả có đang rõ ràng, hấp dẫn không.',
+    lowSupplyTitle: 'Các khung giờ sắp tới của "{title}" gần hết chỗ',
+    lowSupplyBasis: '{count} khung giờ sắp tới đều còn ≤1 chỗ trống.',
+    lowSupplyAction: 'Cân nhắc mở thêm khung giờ mới nếu còn khả năng đón khách.',
+  },
+}, {
+  suggestions: {
+    missingDescTitle: 'Add a description for "{title}"',
+    missingDescBasis: "The current description is under 20 characters — guests can't picture the experience.",
+    missingDescAction: 'Go to "Experiences" → edit a more detailed description.',
+    missingCondTitle: 'Add suitable conditions for "{title}"',
+    missingCondBasis: 'No participation condition note yet (age, fitness...).',
+    missingCondAction: 'Add conditions so guests can pick what fits their needs.',
+    viewsNoBookingTitle: 'Many views but no bookings yet{dest}',
+    viewsNoBookingBasis: '{views} detail page views in this demo session, 0 confirmed bookings.',
+    viewsNoBookingAction: 'Review whether the price, photos or description are clear and appealing.',
+    lowSupplyTitle: 'Upcoming time slots for "{title}" are nearly full',
+    lowSupplyBasis: '{count} upcoming time slots all have ≤1 spot left.',
+    lowSupplyAction: 'Consider opening new time slots if you can still host more guests.',
+  },
+});
 
 export const CPS_WEIGHTS = { response: 0.3, completion: 0.4, rating: 0.3 };
 export const NEW_SPOTLIGHT_MIN_BOOKINGS = 3;
@@ -101,15 +154,8 @@ export function computeCps(hostId) {
   };
 }
 
-const STATUS_LABELS = {
-  'new-spotlight': 'New Spotlight (hộ mới)',
-  'needs-improvement': 'Cần cải thiện (nội bộ)',
-  standard: 'Standard (nội bộ)',
-  'recognized-eligible': 'Đủ điều kiện đề xuất "Được ghi nhận"',
-};
-
 export function cpsStatusLabel(status) {
-  return STATUS_LABELS[status] || status;
+  return t(`host.cps.status.${status}`) || status;
 }
 
 /**
@@ -126,18 +172,18 @@ export function generateSuggestions(hostId) {
     if (!exp.description || exp.description.trim().length < 20) {
       suggestions.push({
         id: `missing-desc-${exp.id}`,
-        title: `Bổ sung mô tả cho "${exp.title}"`,
-        basis: 'Mô tả hiện tại dưới 20 ký tự — khách khó hình dung trải nghiệm.',
-        action: 'Vào "Trải nghiệm" → chỉnh sửa mô tả chi tiết hơn.',
+        title: t('host.suggestions.missingDescTitle', { title: exp.title }),
+        basis: t('host.suggestions.missingDescBasis'),
+        action: t('host.suggestions.missingDescAction'),
         actionHref: '#/studio/experiences',
       });
     }
     if (!exp.conditions || exp.conditions.trim().length < 5) {
       suggestions.push({
         id: `missing-cond-${exp.id}`,
-        title: `Thêm điều kiện phù hợp cho "${exp.title}"`,
-        basis: 'Chưa có ghi chú điều kiện tham gia (độ tuổi, thể lực...).',
-        action: 'Bổ sung điều kiện để khách chọn đúng nhu cầu.',
+        title: t('host.suggestions.missingCondTitle', { title: exp.title }),
+        basis: t('host.suggestions.missingCondBasis'),
+        action: t('host.suggestions.missingCondAction'),
         actionHref: '#/studio/experiences',
       });
     }
@@ -150,9 +196,9 @@ export function generateSuggestions(hostId) {
       const dest = state.destinations.find((d) => d.id === destId);
       suggestions.push({
         id: `views-no-booking-${destId}`,
-        title: `Nhiều lượt xem nhưng chưa có booking${dest ? ` — ${dest.name}` : ''}`,
-        basis: `${views} lượt xem trang chi tiết trong phiên demo này, 0 booking hiệu lực.`,
-        action: 'Xem lại giá, ảnh hoặc mô tả có đang rõ ràng, hấp dẫn không.',
+        title: t('host.suggestions.viewsNoBookingTitle', { dest: dest ? ` — ${dest.name}` : '' }),
+        basis: t('host.suggestions.viewsNoBookingBasis', { views }),
+        action: t('host.suggestions.viewsNoBookingAction'),
         actionHref: `#/trail/place/${destId}`,
       });
     }
@@ -164,9 +210,9 @@ export function generateSuggestions(hostId) {
     if (upcoming.length && upcoming.every((s) => getSlotRemaining(s) <= 1)) {
       suggestions.push({
         id: `low-supply-${exp.id}`,
-        title: `Các khung giờ sắp tới của "${exp.title}" gần hết chỗ`,
-        basis: `${upcoming.length} khung giờ sắp tới đều còn ≤1 chỗ trống.`,
-        action: 'Cân nhắc mở thêm khung giờ mới nếu còn khả năng đón khách.',
+        title: t('host.suggestions.lowSupplyTitle', { title: exp.title }),
+        basis: t('host.suggestions.lowSupplyBasis', { count: upcoming.length }),
+        action: t('host.suggestions.lowSupplyAction'),
         actionHref: '#/studio/experiences',
       });
     }

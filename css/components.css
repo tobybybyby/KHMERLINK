@@ -148,6 +148,24 @@
 .badge-demo { background: var(--color-warning-soft); color: var(--color-warning); }
 .badge-danger { background: var(--color-danger-soft); color: var(--color-danger); }
 
+/* Nhãn "Dữ liệu mô phỏng" duy nhất ở đầu KhmerLink Studio — trung tính, không phải màu cảnh
+   báo, không lặp lại trong từng tab/card (xem js/studio/shell.js). */
+.demo-data-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+.demo-data-label--neutral {
+  background: var(--color-primary-soft);
+  color: var(--color-text-muted);
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -336,3 +354,52 @@
 }
 
 .map-locate-btn.is-picking { outline: 3px solid var(--color-accent); }
+
+/* ---------- Cổng dữ liệu quản lý: Top phản hồi / Nhu cầu cần cải thiện — table trên desktop,
+   card trên mobile (không kéo ngang) ---------- */
+.responsive-table-wrap { display: none; }
+.responsive-card-list { display: flex; flex-direction: column; gap: var(--space-3); }
+@media (min-width: 768px) {
+  .responsive-table-wrap { display: block; overflow-x: auto; }
+  .responsive-card-list { display: none; }
+}
+
+.feedback-card, .opportunity-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.feedback-card__head, .opportunity-card__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: baseline;
+}
+.feedback-card__title, .opportunity-card__title { overflow-wrap: anywhere; font-size: 0.95rem; }
+.feedback-card__rating {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.feedback-card__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.feedback-card__comment, .opportunity-card__row { margin: 0; overflow-wrap: anywhere; font-size: 0.9rem; }
+.feedback-card__comment--clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.feedback-card__footer, .opportunity-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.opportunity-card__priority { flex-shrink: 0; white-space: nowrap; }
+.opportunity-card__actions { display: flex; flex-wrap: wrap; gap: 6px; }
